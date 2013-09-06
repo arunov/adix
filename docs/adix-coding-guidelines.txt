@@ -1,0 +1,36 @@
+Doxygen style:
+http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html#cppblock
+
+Function header
+===============
+Function headers are needed only in header files. Sample:
+
+/**
+ * a normal member taking two arguments and returning an integer value.
+ * @param a an integer argument.
+ * @param s a constant character pointer.
+ * @see Test()
+ * @see testMeToo()
+ * @see publicVar()
+ * @return The test results
+ */
+int testMe(int a,const char *s);
+
+Global variables
+================
+Put in header files. Sample:
+
+/** 
+ * A global variable.
+ * Details.
+ */
+int publicVar;
+
+Other comments
+==============
+May be used for static functions, local variables and design clarifications. Use either /* comment */ or // comment
+
+Identifiers
+===========
+Use either camelCaseStyle or linux_style
+

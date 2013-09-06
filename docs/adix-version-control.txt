@@ -1,0 +1,30 @@
+Repository
+==========
+Central repository:
+/home/stufs1/aolappamanna/adix/cse506-git.git
+
+Getting started
+===============
+$ git clone /home/stufs1/aolappamanna/adix/cse506-git
+$ cd cse506-git
+$ git config global user.name "Yout Full Name"
+$ git config global user.email "user@domain.com"
+
+Updating local repo with latest code from central repo
+======================================================
+# Get all your changes committed in local repo
+$ git fetch origin
+$ git rebase origin
+# Resolve conflicts if any
+
+Pushing your modification to central repo
+=========================================
+# Update local repo with latest code from central repo
+$ git push origin master:master
+
+Committing changes to local repo
+================================
+$ git add file1 file2
+[or git rm file1 file2]
+$ git commit -m 'commit message'
+
