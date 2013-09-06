@@ -26,5 +26,44 @@ Committing changes to local repo
 ================================
 $ git add file1 file2
 [or git rm file1 file2]
-$ git commit -m 'commit message'
+$ git commit -m "commit message"
+[or 'git commit' and type message in vi editor that follows, save, and exit (:wq)
+
+Other useful commands
+=====================
+(1) git commit --amend
+# Re-modify files
+$ git add file1 file2
+[or git rm file1 file2]
+$ git commit --amend -m "new commit message"
+[or 'git commit --amend' and modify commit message in vi editor, save, and exit (:wq)
+
+(2) git revert
+# Find commit id of commit that needs to be reverted
+$ git log
+    :
+    :
+commit 0659e9ac303275af6d3db6a8e891fe8f06251074
+Author: Arun Olappamanna Vasudevan <aolappamanna@cs.stonybrook.edu>
+Date:   Fri Sep 6 00:57:21 2013 -0400
+
+    removed build output file 'kernel'
+    :
+    :
+$ git revert 0659e9ac303275af6d3db6a8e891fe8f06251074
+# Modify commit message (if required) in vi editor, save, and exit (:wq)
+
+(3) git log
+# See commit history in local branch
+$ git log
+$ git log -p # To see patches
+$ git log --stat # To see statistics
+# 'q' to exit
+
+(4) git diff
+# See uncommitted changes (local)
+$ git diff
+
+(5) git status
+# Status of local git repo
 
