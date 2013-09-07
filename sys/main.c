@@ -1,4 +1,5 @@
 #include <defs.h>
+#include "kstdio.h"
 
 void start(void* modulep, void* physbase, void* physfree)
 {
@@ -27,5 +28,15 @@ void boot(void)
 		*temp1;
 		temp1 += 1, temp2 += 2
 	) *temp2 = *temp1;
+	
+        /* for(
+                temp1 = "!!!!! end() returned !!!!!", temp2 = (char*)0xb8e00;
+                *temp1;
+                temp1 += 1, temp2 += 2
+        ) *temp2 = *temp1; */ 
+
+	clear_screen();
+	puts((char *)"Hello");
+
 	while(1);
 }
