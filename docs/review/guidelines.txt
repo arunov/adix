@@ -1,0 +1,9 @@
+(1) Review comments of a particular review session can be added in a file:
+    "review_yyyymmdd_A_reviewerName.txt" where
+    - yyyymmd is date of review
+    - A is a, b, c, ... z, aa, bb, ... - useful if multiple reviews are done on single day
+    - reviewerName is first name of reviewer
+(2) Review comments should be numbered
+(3) On addressing review comments, developer should
+    - add his/her comments such as "[developer name or initials] I think it's better the way it is..." or "[dev] done", etc.
+
