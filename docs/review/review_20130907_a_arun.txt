@@ -3,4 +3,7 @@
 (3) Mark kstdio.h inclusion with '_KSTDIO_H' instead of '_MY_STDIO_H'
 (4) Can we rename 'string.h' as 'kstring.h'?
 (5) Include header file in sys/string.c
+(6) screen.c: global_cursor_attribute, global_cursor_x, global_cursor_y can be
+static
+
 
