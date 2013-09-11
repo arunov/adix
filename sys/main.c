@@ -1,5 +1,6 @@
 #include <defs.h>
 #include "kstdio.h"
+#include <sys/gdt.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
@@ -14,10 +15,14 @@ extern char kernmem, physbase;
 void boot(void)
 {
 	// note: function changes rsp, local stack variables can't be practically used
-	volatile register char *rsp asm ("rsp");
-	volatile register char *temp1, *temp2;
-	loader_stack = (uint32_t*)rsp;
-	rsp = &stack[INITIAL_STACK_SIZE];
+	register char *temp1, *temp2;
+	__asm__(
+		"movq %%rsp, %0;"
+		"movq %1, %%rsp;"
+		:"=g"(loader_stack)
+		:"r"(&stack[INITIAL_STACK_SIZE])
+	);
+	reload_gdt();
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
 		&physbase,
