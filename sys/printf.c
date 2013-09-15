@@ -1,7 +1,7 @@
 #include "include/kstdarg.h"
 #include "kstdio.h"
 #include "include/sysconf.h"
-#include "string.h"
+#include "kstring.h"
 
 #define MAX_LENGTH_OF_STR_INT       12  // length of 32-bit uint max 4294967296 (10)
                                         // + '-' (1) + '\0' (1)
@@ -54,9 +54,37 @@ static int hex_to_string(const void *parg, int bytes) {
     return num_char;
 }
 
+static int long_long_int_to_string(long long int d) {
+    
+    int neg = 0;
+    char printf_string_buff[2*MAX_LENGTH_OF_STR_INT];
+    char *loc = printf_string_buff + sizeof(printf_string_buff);
+    *loc = '\0';
+
+    if(0 > d) {
+        neg = 1;
+        d *= -1;
+    }
+
+    do {
+        loc --;
+        *loc = (d % DECIMAL_BASE) + '0';
+        d /= DECIMAL_BASE;
+    } while(d > 0);
+
+    if(neg) {
+        loc --;
+        *loc = '-';
+    }
+
+    puts(loc);
+    return printf_string_buff + sizeof(printf_string_buff) - loc;
+}
+
 static int pointer_to_string(va_list *ap) {
     void *ptr = va_arg(*ap, void*);
-    return hex_to_string(ptr, POINTER_BYTES);
+    //return hex_to_string(ptr, POINTER_BYTES);
+    return long_long_int_to_string((long long int)ptr);
 }
 
 static int hexnum_to_string(va_list *ap) {
