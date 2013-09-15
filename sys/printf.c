@@ -54,7 +54,7 @@ static int hex_to_string(const void *parg, int bytes) {
     return num_char;
 }
 
-static int long_long_int_to_string(long long int d) {
+/*static int long_long_int_to_string(long long int d) {
     
     int neg = 0;
     char printf_string_buff[2*MAX_LENGTH_OF_STR_INT];
@@ -79,12 +79,13 @@ static int long_long_int_to_string(long long int d) {
 
     puts(loc);
     return printf_string_buff + sizeof(printf_string_buff) - loc;
-}
+}*/
 
 static int pointer_to_string(va_list *ap) {
     void *ptr = va_arg(*ap, void*);
     //return hex_to_string(ptr, POINTER_BYTES);
-    return long_long_int_to_string((long long int)ptr);
+    long long int t = (long long int)ptr;
+    return hex_to_string(&t, POINTER_BYTES);
 }
 
 static int hexnum_to_string(va_list *ap) {
