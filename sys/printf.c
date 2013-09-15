@@ -3,9 +3,8 @@
 #include "include/sysconf.h"
 #include "kstring.h"
 
-#define MAX_LENGTH_OF_STR_INT       12  // length of 32-bit uint max 4294967296 (10)
-                                        // + '-' (1) + '\0' (1)
-#define MAX_LENGTH_OF_STR_POINTER   17  // length of 64-bit hex (16) + '\0' (1)
+#define MAX_LENGTH_OF_STR_INT       12  // length of 32-bit uint max 4294967296
+                                        //  (10) + '-' (1) + '\0' (1)
 
 #define DECIMAL_BASE    10
 #define HEX_BASE        16
@@ -17,10 +16,19 @@ enum {
     PRINTF_ST_NUM_OF_STATES     // 3
 };
 
+/*
+ * Print 'bytes' bytes of value 'parg' in hexadecimal 
+ * @param bytes    Number of bytes to be printed
+ * @param parg     Pointer to data that needs to be printed
+ * @return         Number of characters printed
+ */
 static int hex_to_string(const void *parg, int bytes) {
     int nib_i, num_char = 0;
     unsigned char c;
-    int start_print = 0; // Used for ignoring trailing zeros
+    int start_print = 0; // Used for ignoring leading zeros
+
+    puts("0x");
+    num_char += 2;
 
 #ifdef __LITTLE_ENDIAN__
     for(nib_i = (bytes * 2) - 1; nib_i >= 0; nib_i --) {
@@ -42,57 +50,50 @@ static int hex_to_string(const void *parg, int bytes) {
         if(c < DECIMAL_BASE) {
             c += '0';
         } else {
-            c += 'A' - DECIMAL_BASE;
+            c += 'a' - DECIMAL_BASE;
         }
 
         if(start_print) {
             num_char++;
             putch(c);
         }
+
+        /* If hexadecimal value is 0, then it needs to be printed explicitly.
+           All leading zeros are ignored. */
+        if(2 == num_char) {
+            num_char++;
+            putch('0');
+        }
     }
 
     return num_char;
 }
 
-/*static int long_long_int_to_string(long long int d) {
-    
-    int neg = 0;
-    char printf_string_buff[2*MAX_LENGTH_OF_STR_INT];
-    char *loc = printf_string_buff + sizeof(printf_string_buff);
-    *loc = '\0';
-
-    if(0 > d) {
-        neg = 1;
-        d *= -1;
-    }
-
-    do {
-        loc --;
-        *loc = (d % DECIMAL_BASE) + '0';
-        d /= DECIMAL_BASE;
-    } while(d > 0);
-
-    if(neg) {
-        loc --;
-        *loc = '-';
-    }
-
-    puts(loc);
-    return printf_string_buff + sizeof(printf_string_buff) - loc;
-}*/
-
+/*
+ * Print pointer
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int pointer_to_string(va_list *ap) {
     void *ptr = va_arg(*ap, void*);
-    //return hex_to_string(ptr, POINTER_BYTES);
-    long long int t = (long long int)ptr;
-    return hex_to_string(&t, POINTER_BYTES);
+    return hex_to_string((void*)&ptr, sizeof(void*));
 }
 
+/*
+ * Print hexadecimal
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int hexnum_to_string(va_list *ap) {
     int d = va_arg(*ap, int);
-    return hex_to_string(&d, DECIMAL_BYTES);
+    return hex_to_string(&d, sizeof(int));
 }
 
+/*
+ * Print integer
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int int_to_string(va_list *ap) {
     int d = va_arg(*ap, int);
     int neg = 0;
@@ -120,27 +121,48 @@ static int int_to_string(va_list *ap) {
     return printf_string_buff + sizeof(printf_string_buff) - loc;
 }
 
+/*
+ * Print character
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int char_to_string(va_list *ap) {
     putch((char) va_arg(*ap, int));
     return 1;
 }
 
+/*
+ * Print string
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int string_to_string(va_list *ap) {
     char *s = va_arg(*ap, char*);
     puts(s);
     return strlen(s);
 }
 
+/*
+ * Print percent
+ * @param ap    Pointer to variable argument list
+ * @return      Number of characters printed
+ */
 static int percent_to_string(va_list *ap) {
     putch('%');
     return 1;
 }
 
+/* Structure for parsing format specifiers */
 typedef struct format_string_parse_helper {
+
+    /* Format specifier */
     const char conv_spec;
+
+    /* Function pointer to handle format specifier */
     int (*conv_to_string)(va_list*);
 } format_string_parser;
 
+/* Format specifiers and handlers */
 static format_string_parser format_str_conv[] = {
     {'d', int_to_string},       // decimal
     {'i', int_to_string},       // decimal
@@ -153,6 +175,7 @@ static format_string_parser format_str_conv[] = {
     {'\0', 0},                  // end of string
 };
 
+/* See kstdio.h */
 int printf(const char *format, ...) {
 
     va_list ap;
