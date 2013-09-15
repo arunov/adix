@@ -45,16 +45,20 @@ void boot(void)
     int z, a[10];
     z = printf("Testing string in printf: %s :and character: %c \n:-)\n", "hello guyz this is printf\n", 'x');
     printf("\nnum_char %d\n", z);
-    z = printf("%d, %%, %d, %", 12323, 0);
+    z = printf("Integer %d, %%, %d, %", 12323, 0);
     printf("\nnum_char %d\n", z);
-    z = printf("%d is a negative num :P", -10);
+    z = printf("Negative Integer %d is a negative num :P", -10);
     printf("\nnum_char %d\n", z);
     z = printf("\nHex value of %d is %x\n", 0x8234A678, 0x8234a678);
     printf("\nnum_char %d\n", z);
-    z = printf("\n\n%p %d\n", &(a[0]), sizeof(int*));
+    z = printf("\n\nPointer a[0] %p %d\n", &(a[0]), sizeof(int*));
     printf("\nnum_char %d\n", z);
-    z = printf("\n\n%p %d\n", &(a[1]), sizeof(int*));
-    printf("%d\n", &(a[1]) - &(a[0]));
+    z = printf("\n\nPointer a[1] %p %d\n", &(a[1]), sizeof(int*));
+    printf("\nnum_char %d\n", z);
+    z = printf("\n\nPointer a[2] %p %d\n", &(a[2]), sizeof(int*));
+    int *t1 = &a[0];
+    int *t2 = &a[1];
+    printf("Difference in address %d\n", (t2 - t1));
     printf("\nnum_char %d\n", z);
 	while(1) {
 //	    puts((char *)"Hello\n");

@@ -1,11 +1,11 @@
-#include "string.h"
+#include "kstring.h"
 
 #define VIDEO_MEMORY_ADDRESS 0xB8000;
 #define BUFFER_ADDRESS(CURSOR_X, CURSOR_Y) (unsigned int)(CURSOR_Y * 80 + CURSOR_X);
 #define GET_COLOUR(FG, BG) ((0x0F & FG) | ((0x0F & BG) << 4));
 
-unsigned int global_cursor_attribute = 0x0F;
-unsigned int global_cursor_x, global_cursor_y;
+static unsigned int global_cursor_attribute = 0x0F;
+static unsigned int global_cursor_x, global_cursor_y;
 
 unsigned char inportb (unsigned short _port)
 {

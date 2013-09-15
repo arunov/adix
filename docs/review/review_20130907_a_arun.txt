@@ -1,9 +1,9 @@
 (1) All header files in sys may be moved to sys/include
 (2) Add function headers in header files
-(3) Mark kstdio.h inclusion with '_KSTDIO_H' instead of '_MY_STDIO_H'
-(4) Can we rename 'string.h' as 'kstring.h'?
+(3) Mark kstdio.h inclusion with '_KSTDIO_H' instead of '_MY_STDIO_H' --done(DTM)
+(4) Can we rename 'string.h' as 'kstring.h'? -- done(DTM)
 (5) Include header file in sys/string.c
 (6) screen.c: global_cursor_attribute, global_cursor_x, global_cursor_y can be
-static
+static -- done(DTM)
 
 
