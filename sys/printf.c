@@ -57,13 +57,13 @@ static int hex_to_string(const void *parg, int bytes) {
             num_char++;
             putch(c);
         }
+    }
 
-        /* If hexadecimal value is 0, then it needs to be printed explicitly.
-           All leading zeros are ignored. */
-        if(2 == num_char) {
-            num_char++;
-            putch('0');
-        }
+    /* If hexadecimal value is 0, then it needs to be printed explicitly.
+       All leading zeros are ignored. */
+    if(2 == num_char) {
+        num_char++;
+        putch('0');
     }
 
     return num_char;
