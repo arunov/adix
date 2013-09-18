@@ -1,6 +1,7 @@
 #include <defs.h>
 #include "kstdio.h"
 #include <sys/gdt.h>
+#include <sys/idt.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
@@ -23,6 +24,8 @@ void boot(void)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
 	reload_gdt();
+	clear_screen();
+    reload_idt();
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
 		&physbase,
@@ -40,7 +43,7 @@ void boot(void)
                 temp1 += 1, temp2 += 2
         ) *temp2 = *temp1; */ 
 
-	clear_screen();
+    /*
 	puts((char *)"Hello\n");
     int z, a[10];
     z = printf("Testing string in printf: %s :and character: %c \n:-)\n", "hello guyz this is printf\n", 'x');
@@ -60,6 +63,9 @@ void boot(void)
     int *t2 = &a[1];
     printf("Difference in address %d\n", (t2 - t1));
     printf("\nnum_char %d\n", z);
+    volatile int qqq = 0;
+    printf("%d", 1/qqq);
+    */
 	while(1) {
 //	    puts((char *)"Hello\n");
 //      foo("s", "hello guyz this is foo");
