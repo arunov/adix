@@ -7,7 +7,7 @@
 struct regs
 {
     uint64_t gs, fs, es, ds;      /* pushed the segs last */
-    uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;  /* pushed by 'pusha' */
+    uint64_t rsi, rbp, rsp, rdx, rcx, rbx, rax, rdi;  /* pushed by 'pusha' */
     uint64_t int_no, err_code;    /* our 'push byte #' and ecodes do this */
     uint64_t rip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
 }__attribute__((packed));

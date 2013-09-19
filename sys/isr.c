@@ -6,9 +6,9 @@
 void idt_set_gate(int num, uint64_t isr_addr) {
 	idt[num].flags = IDT_P | IDT_DPL0 | TYPE_INTERRUPT_GATE;
 	idt[num].seg_sel = 0x08;
-	idt[num].offset_low =    ((isr_addr & 0x000000000000ffff)); 
-        idt[num].offset_middle = ((isr_addr & 0x00000000ffff0000) >> 16);
-	idt[num].offset_high =   ((isr_addr & 0xffffffff00000000) >> 32);
+	idt[num].offset_low    = ((isr_addr & 0x000000000000ffff)); 
+    idt[num].offset_middle = ((isr_addr & 0x00000000ffff0000) >> 16);
+	idt[num].offset_high   = ((isr_addr & 0xffffffff00000000) >> 32);
 #if DEBUG
     printf("idt entry %d: idt num: %p idt+num+64: %p\n", num, idt[num], *((char *)(&idt[num])+8));
     printf("%d - function addr: %p\n", num, isr_addr);
@@ -100,28 +100,15 @@ char *exception_messages[] =
 *  endless loop. All ISRs disable interrupts while they are being
 *  serviced as a 'locking' mechanism to prevent an IRQ from
 *  happening and messing up kernel data structures */
-void fault_handler(struct regs *r)
+void fault_handler(uint64_t *r)
 {
     /* Is this a fault whose number is from 0 to 31? */
-    clear_screen();
-#if DEBUG
-    uint64_t t = *((uint64_t *)r);
-    uint64_t u = *((uint64_t *)(((uint64_t *)r)+1));
-    uint64_t v = *((uint64_t *)(((uint64_t *)r)+2));
-    printf("%p, %p, %p\n", t, u, v);
-    /*printf("DS : %p\n", r->ds);
-    printf("ES : %p\n", r->es);
-    printf("FS : %p\n", r->fs);
-    printf("GS : %p\n", r->gs);
-    printf("Error Code : %p\n", r->err_code);
-    printf("Interrupt No: %p\n", r->int_no);*/
-#endif
-    if (r->int_no < 32)
+    if (*r < 32)
     {
         /* Display the description for the Exception that occurred.
         *  In this tutorial, we will simply halt the system using an
         *  infinite loop */
-        puts(exception_messages[r->int_no]);
+        puts(exception_messages[*r]);
         puts(" Exception. System Halted!\n");
         for (;;);
     }
