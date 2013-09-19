@@ -1,50 +1,57 @@
 #include "sys/idt.h"
 #include "sys/isr.h"
 #include "kstdio.h"
+#include "kstring.h"
 
-void idt_set_gate(int num, unsigned int isr_addr) {
-    idt[num] = P | DPL0 | D_GATE | 0x80000 | ((uint64_t)isr_addr & 0xffff) |
-        ((uint64_t)((uint64_t)isr_addr & 0xffff0000) << 32);
+void idt_set_gate(int num, uint64_t isr_addr) {
+	idt[num].flags = IDT_P | IDT_DPL0 | TYPE_INTERRUPT_GATE;
+	idt[num].seg_sel = 0x08;
+	idt[num].offset_low =    ((isr_addr & 0x000000000000ffff)); 
+        idt[num].offset_middle = ((isr_addr & 0x00000000ffff0000) >> 16);
+	idt[num].offset_high =   ((isr_addr & 0xffffffff00000000) >> 32);
 #if DEBUG
-    printf("idt entry %d: %p\n", num, idt[num]);
-    printf("31 - function addr: %p\n", isr31);
+    printf("idt entry %d: idt num: %p idt+num+64: %p\n", num, idt[num], *((char *)(&idt[num])+8));
+    printf("%d - function addr: %p\n", num, isr_addr);
 #endif
 }
 
 void isrs_install()
 {
-    idt_set_gate(0, (unsigned int)isr0);
-    idt_set_gate(1, (unsigned int)isr1);
-    idt_set_gate(2, (unsigned int)isr2);
-    idt_set_gate(3, (unsigned int)isr3);
-    idt_set_gate(4, (unsigned int)isr4);
-    idt_set_gate(5, (unsigned int)isr5);
-    idt_set_gate(6, (unsigned int)isr6);
-    idt_set_gate(7, (unsigned int)isr7);
-    idt_set_gate(8, (unsigned int)isr8);
-    idt_set_gate(9, (unsigned int)isr9);
-    idt_set_gate(10, (unsigned int)isr10);
-    idt_set_gate(11, (unsigned int)isr11);
-    idt_set_gate(12, (unsigned int)isr12);
-    idt_set_gate(13, (unsigned int)isr13);
-    idt_set_gate(14, (unsigned int)isr14);
-    idt_set_gate(15, (unsigned int)isr15);
-    idt_set_gate(16, (unsigned int)isr16);
-    idt_set_gate(17, (unsigned int)isr17);
-    idt_set_gate(18, (unsigned int)isr18);
-    idt_set_gate(19, (unsigned int)isr19);
-    idt_set_gate(20, (unsigned int)isr20);
-    idt_set_gate(21, (unsigned int)isr21);
-    idt_set_gate(22, (unsigned int)isr22);
-    idt_set_gate(23, (unsigned int)isr23);
-    idt_set_gate(24, (unsigned int)isr24);
-    idt_set_gate(25, (unsigned int)isr25);
-    idt_set_gate(26, (unsigned int)isr26);
-    idt_set_gate(27, (unsigned int)isr27);
-    idt_set_gate(28, (unsigned int)isr28);
-    idt_set_gate(29, (unsigned int)isr29);
-    idt_set_gate(30, (unsigned int)isr30);
-    idt_set_gate(31, (unsigned int)isr31);
+    /* Clear out the entire IDT, initializing it to zeros */
+    memset(&idt, 0, sizeof(struct idt_t) * 256);
+
+    idt_set_gate(0, (uint64_t)isr0);
+    idt_set_gate(1, (uint64_t)isr1);
+    idt_set_gate(2, (uint64_t)isr2);
+    idt_set_gate(3, (uint64_t)isr3);
+    idt_set_gate(4, (uint64_t)isr4);
+    idt_set_gate(5, (uint64_t)isr5);
+    idt_set_gate(6, (uint64_t)isr6);
+    idt_set_gate(7, (uint64_t)isr7);
+    idt_set_gate(8, (uint64_t)isr8);
+    idt_set_gate(9, (uint64_t)isr9);
+    idt_set_gate(10, (uint64_t)isr10);
+    idt_set_gate(11, (uint64_t)isr11);
+    idt_set_gate(12, (uint64_t)isr12);
+    idt_set_gate(13, (uint64_t)isr13);
+    idt_set_gate(14, (uint64_t)isr14);
+    idt_set_gate(15, (uint64_t)isr15);
+    idt_set_gate(16, (uint64_t)isr16);
+    idt_set_gate(17, (uint64_t)isr17);
+    idt_set_gate(18, (uint64_t)isr18);
+    idt_set_gate(19, (uint64_t)isr19);
+    idt_set_gate(20, (uint64_t)isr20);
+    idt_set_gate(21, (uint64_t)isr21);
+    idt_set_gate(22, (uint64_t)isr22);
+    idt_set_gate(23, (uint64_t)isr23);
+    idt_set_gate(24, (uint64_t)isr24);
+    idt_set_gate(25, (uint64_t)isr25);
+    idt_set_gate(26, (uint64_t)isr26);
+    idt_set_gate(27, (uint64_t)isr27);
+    idt_set_gate(28, (uint64_t)isr28);
+    idt_set_gate(29, (uint64_t)isr29);
+    idt_set_gate(30, (uint64_t)isr30);
+    idt_set_gate(31, (uint64_t)isr31);
 }
 
 /* This is a simple string array. It contains the message that
@@ -93,21 +100,31 @@ char *exception_messages[] =
 *  endless loop. All ISRs disable interrupts while they are being
 *  serviced as a 'locking' mechanism to prevent an IRQ from
 *  happening and messing up kernel data structures */
-void fault_handler(int *r)
+void fault_handler(struct regs *r)
 {
     /* Is this a fault whose number is from 0 to 31? */
+    clear_screen();
 #if DEBUG
-    printf("fault_handler: %d\n", *r);
+    uint64_t t = *((uint64_t *)r);
+    uint64_t u = *((uint64_t *)(((uint64_t *)r)+1));
+    uint64_t v = *((uint64_t *)(((uint64_t *)r)+2));
+    printf("%p, %p, %p\n", t, u, v);
+    /*printf("DS : %p\n", r->ds);
+    printf("ES : %p\n", r->es);
+    printf("FS : %p\n", r->fs);
+    printf("GS : %p\n", r->gs);
+    printf("Error Code : %p\n", r->err_code);
+    printf("Interrupt No: %p\n", r->int_no);*/
 #endif
-    for (;;);
-    if (*r < 32)
+    if (r->int_no < 32)
     {
         /* Display the description for the Exception that occurred.
         *  In this tutorial, we will simply halt the system using an
         *  infinite loop */
-        puts(exception_messages[*r]);
+        puts(exception_messages[r->int_no]);
         puts(" Exception. System Halted!\n");
         for (;;);
     }
+    for (;;);
 }
 

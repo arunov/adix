@@ -263,7 +263,8 @@ isr31:
 # up for kernel mode segments, calls the C-level fault handler,
 # and finally restores the stack frame.
 isr_common_stub:
-    movq %rsp, %rdi
+    #movq %rsp, %rdi
+
     pushq %rax
     pushq %rbx
     pushq %rcx
@@ -272,24 +273,36 @@ isr_common_stub:
     pushq %rbp
     pushq %rsi
     pushq %rdi
+    movq %ds, %rdx
+    movabsq $0x0, %rdx
+    pushq %rdx
     movq %es, %rdx
     pushq %rdx
     movq %fs, %rdx
     pushq %rdx
     movq %gs, %rdx
     pushq %rdx
-    movq %ds, %rdx
-    pushq %rdx
-    call reload_gdt
-    call fault_handler
-    popq %rdx
-    movq %rdx, %ds
+    movabsq $0x10, %rax
+    movq %rax, %ds
+    movq %rax, %es
+    movq %rax, %fs
+    movq %rax, %gs
+
+    movq %rsp, %rax
+    pushq %rax
+
+    movabsq $fault_handler, %rax
+    call %rax 
+    #call fault_handler
+
     popq %rdx
     movq %rdx, %gs
     popq %rdx
     movq %rdx, %fs
     popq %rdx
     movq %rdx, %es
+    popq %rdx
+    movq %rdx, %ds
     popq %rdi
     popq %rsi
     popq %rbp
@@ -298,6 +311,5 @@ isr_common_stub:
     popq %rcx
     popq %rbx
     popq %rax
-    add %esp, 8     # Cleans up the pushed error code and pushed ISR number
-    iret           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
-
+    addq 16, %rsp   # Cleans up the pushed error code and pushed ISR number
+    iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!

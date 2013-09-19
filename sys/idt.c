@@ -8,7 +8,7 @@ extern void isr0();
 
 #define MAX_IDT 256
 
-uint64_t idt[MAX_IDT];
+struct idt_t idt[MAX_IDT];
 
 struct idtr_t {
 	uint16_t size;
@@ -22,6 +22,6 @@ static struct idtr_t idtr = {
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
-    isrs_install();
+    	isrs_install();
 	_x86_64_asm_lidt(&idtr);
 }

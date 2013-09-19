@@ -1,6 +1,17 @@
 #ifndef _ISR_H
 #define _ISR_H
 
+#include <defs.h>
+
+/* This defines what the stack looks like after an ISR was running */
+struct regs
+{
+    uint64_t gs, fs, es, ds;      /* pushed the segs last */
+    uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;  /* pushed by 'pusha' */
+    uint64_t int_no, err_code;    /* our 'push byte #' and ecodes do this */
+    uint64_t rip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
+}__attribute__((packed));
+
 extern void isr0();
 extern void isr1();
 extern void isr2();
