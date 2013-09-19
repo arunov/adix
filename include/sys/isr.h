@@ -45,6 +45,7 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
+void idt_set_gate(int num, uint64_t isr_addr);
 void isrs_install();
 #endif
 
