@@ -2,6 +2,8 @@
 #include "kstdio.h"
 #include <sys/gdt.h>
 #include <sys/idt.h>
+#include <sys/irq.h>
+#include <sys/timer.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
@@ -26,6 +28,8 @@ void boot(void)
 	reload_gdt();
 	clear_screen();
     reload_idt();
+    timer_install();
+
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
 		&physbase,
@@ -62,10 +66,13 @@ void boot(void)
     int *t1 = &a[0];
     int *t2 = &a[1];
     printf("Difference in address %d\n", (t2 - t1));
-    printf("\nnum_char %d\n", z);*/ 
+    printf("\nnum_char %d\n", z);
     volatile int qqq = 0;
 
-    printf("%d", 1/qqq);
+    printf("%d", 1/qqq);*/
+
+
+
 
 	while(1) {
     };

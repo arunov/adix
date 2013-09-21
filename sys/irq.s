@@ -147,18 +147,12 @@ irq_common_stub:
     addq $0x8, %rdi
 
     #Save State
-    pushq %rax
-    pushq %rbx
-    pushq %rcx
     pushq %rdx
-    pushq %rsp
-    pushq %rbp
-    pushq %rsi
-    pushq %rdi
+    pushq %rax
 
     #Save Segment
     movq %ds, %rdx
-    movabsq $0x0, %rdx
+    #movabsq $0x0, %rdx
     pushq %rdx
     movq %es, %rdx
     pushq %rdx
@@ -185,14 +179,10 @@ irq_common_stub:
     movq %rdx, %es
     popq %rdx
     movq %rdx, %ds
-    popq %rdi
-    popq %rsi
-    popq %rbp
-    popq %rsp
-    popq %rdx
-    popq %rcx
-    popq %rbx
     popq %rax
+    popq %rdx
+    popq %rdi
 
-    addq 16, %rsp   # Cleans up the pushed error code and pushed ISR number
+    addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number
+    sti
     iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!

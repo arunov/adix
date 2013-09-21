@@ -19,5 +19,7 @@ extern void irq14();
 extern void irq15();
 
 void irq_install();
+void irq_install_handler(int irq, void (*handler)(void));
+void irq_uninstall_handler(int irq);
 
 #endif

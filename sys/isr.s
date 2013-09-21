@@ -317,6 +317,7 @@ isr_common_stub:
     popq %rax
     popq %rdi
 
-    addq $8, %rsp   # Cleans up the pushed error code and pushed ISR number
+    addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number
+    sti
     iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 

@@ -48,6 +48,7 @@ void irq_remap(void)
 
 void irq_install()
 {
+    irq_remap();
     idt_set_gate(32, (uint64_t)irq0);
     idt_set_gate(33, (uint64_t)irq1);
     idt_set_gate(34, (uint64_t)irq2);
@@ -132,9 +133,10 @@ void irq_handler(uint64_t *r)
         *  interrupt controller too */
         outportb(0x20, 0x20);
 
-        puts(" IRQ. System Halted!\n");
-        for (;;);
+        if(!handler) {
+            puts(" IRQ. System Halted!\n");
+            //for (;;);
+        }
     }
-    for (;;);
 }
 

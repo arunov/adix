@@ -23,8 +23,8 @@ static struct idtr_t idtr = {
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
-    	isrs_install();
-	irq_install();
+    isrs_install();
+    irq_install();
 	_x86_64_asm_lidt(&idtr);
 	asm volatile("sti");
 }

@@ -8,7 +8,7 @@
 /* and 64-ia-32-architectures-software-developer-vol-3a-part-1-manual */
 
 struct idt_t {
-        uint16_t offset_low;
+    uint16_t offset_low;
 	uint16_t seg_sel;
 	unsigned char always0_ist;
 	unsigned char flags;
