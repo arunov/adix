@@ -40,18 +40,18 @@ void scroll_screen(void)
 	blank = 0x20 | (global_cursor_attribute << 8);
 
 	/* Row 25 is the end, this means we need to scroll up */
- 	if(global_cursor_y >= 25)
+ 	if(global_cursor_y >= 24)
  	{
         	/* Move the current text chunk that makes up the screen
         	*  back in the buffer by a line */
-        	temp = global_cursor_y - 25 + 1;
+        	temp = global_cursor_y - 24 + 1;
 		mem_ptr = (unsigned short *)VIDEO_MEMORY_ADDRESS;
         	memcpy (mem_ptr, mem_ptr + temp * 80, (25 - temp) * 80 * 2);
 
         	/* Finally, we set the chunk of memory that occupies
         	*  the last line of text to our 'blank' character */
-        	memsetw (mem_ptr + (25 - temp) * 80, blank, 80);
-        	global_cursor_y = 25 - 1;
+        	memsetw (mem_ptr + (24 - temp) * 80, blank, 80);
+        	global_cursor_y = 24 - 1;
     	}
 }
 

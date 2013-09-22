@@ -73,8 +73,8 @@ void irq_install()
 *  exception_message[interrupt_number] */
 char *irq_messages[] =
 {
-    "Programmable Interval Timer",
-    "Keyboard",
+    "Programmable Interval Timer\n",
+    "Keyboard\n",
     "Future Use",
     "Future Use",
     "Future Use",
@@ -101,14 +101,15 @@ void irq_handler(uint64_t *r)
 {
     /* Is this a fault whose number is from 32 to 47? */
 #if DEBUG
-    printf("Interrupt No: %p\n", *r);
+    //printf("Interrupt No: %p\n", *r);
 #endif
     if (*r > 31 && *r < 48)
     {
         /* Display the description for the Exception that occurred.
         *  In this tutorial, we will simply halt the system using an
         *  infinite loop */
-        puts(irq_messages[*r-32]);
+
+        //puts(irq_messages[*r-32]); 
 
         /* This is a blank function pointer */
         void (*handler)(void);

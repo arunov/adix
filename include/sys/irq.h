@@ -1,6 +1,8 @@
 #ifndef _IRQ_H
 #define _IRQ_H
 
+#define PIT_CLOCK_HZ 18
+
 extern void irq0();
 extern void irq1();
 extern void irq2();

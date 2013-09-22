@@ -3,7 +3,6 @@
 #include <sys/gdt.h>
 #include <sys/idt.h>
 #include <sys/irq.h>
-#include <sys/timer.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
@@ -28,7 +27,6 @@ void boot(void)
 	reload_gdt();
 	clear_screen();
     reload_idt();
-    timer_install();
 
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,

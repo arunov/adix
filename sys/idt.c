@@ -2,6 +2,8 @@
 #include "kstring.h"
 #include "sys/isr.h"
 #include "sys/irq.h"
+#include "sys/timer.h"
+#include "sys/keyboard.h"
 
 extern void isr0();
 
@@ -25,6 +27,10 @@ void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
     isrs_install();
     irq_install();
-	_x86_64_asm_lidt(&idtr);
-	asm volatile("sti");
+
+    _x86_64_asm_lidt(&idtr);
+    asm volatile("sti");
+
+    timer_install();
+    keyboard_install();
 }
