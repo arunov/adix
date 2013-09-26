@@ -1,10 +1,6 @@
 #include <defs.h>
 #include <sys/gdt.h>
 
-#include <stdio.h>
-
-volatile uint64_t p;
-
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
 	struct smap_t {
