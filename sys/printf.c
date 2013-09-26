@@ -43,7 +43,7 @@ static int hex_to_string(const void *parg, int bytes) {
             c = ((*((char*)parg + nib_i/2)) & 0xF0) >> 4;
         }
 
-        if(0 != c && 0 == start_print) {
+        if(0 != c) {
             start_print = 1;
         }
 
@@ -178,6 +178,8 @@ static format_string_parser format_str_conv[] = {
 /* See kstdio.h */
 int printf(const char *format, ...) {
 
+    const char *l_format = format;
+
     va_list ap;
     char c;
     int conv_spec_i, num_char = 0;
@@ -186,8 +188,8 @@ int printf(const char *format, ...) {
 
     va_start(ap, format);
 
-    while (*format) {
-        c = *format++;
+    while (*l_format) {
+        c = *l_format++;
 
         if(PRINTF_ST_PERCENT == state) {
 

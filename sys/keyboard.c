@@ -4,6 +4,12 @@
 #include "kstdio.h"
 #include "sys/keyboard.h"
 
+struct kbkeypress {
+    uint64_t keys[2];
+} gKbKeyState = {{0, 0}};
+
+int kbCaps = 0;
+
 unsigned char kbdus[128] =
 {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
@@ -42,15 +48,24 @@ unsigned char kbdus[128] =
     0,	/* F11 Key */
     0,	/* F12 Key */
     0,	/* All other keys are undefined */
-};	
+};
+
+/*struct multiKeyMapAttr {
+    uint64_t key[2];
+    char *print;
+} multiKeyMap = {
+    { {0x00000000, 0x00000000}, "<CTRL+"},
+}*/
 
 void keyboard_handler()
 {
     unsigned char scancode;
     char *video_buf = (char *)(0xb8000 + 4000) ;
+    int key_scancode;
 
     /* Read from the keyboard's data buffer */
     scancode = inportb(0x60);
+    key_scancode = scancode & 0x7f;
 
     /* If the top bit of the byte we read from the keyboard is
     *  set, that means that a key has just been released */
@@ -58,6 +73,7 @@ void keyboard_handler()
     {
         /* You can use this one to see if the user released the
         *  shift, alt, or control keys... */
+        gKbKeyState.keys[key_scancode/64] &= (0xfffffffe << (key_scancode%64));
     }
     else
     {
@@ -74,7 +90,22 @@ void keyboard_handler()
         *  held. If shift is held using the larger lookup table,
         *  you would add 128 to the scancode when you look for it */
 
-        *(video_buf-18) = kbdus[scancode];
+        gKbKeyState.keys[key_scancode/64] |= (0x1 << (key_scancode%64));
+
+        uint64_t keyMap0 = gKbKeyState.keys[0], keyMap1 = gKbKeyState.keys[1];
+
+        int chkSingleKey0 = ((keyMap0 == keyMap0) & (-keyMap0)),
+            chkSingleKey1 = ((keyMap1 == keyMap1) & (-keyMap1));
+
+        if( (chkSingleKey0 && !keyMap1) ||
+            (chkSingleKey1 && !keyMap0)) {
+            // Single key pressed
+            *(video_buf-18) = kbdus[scancode];
+        } else {
+            /*for(int i = 0; i < sizeof(); i ++) {
+
+            }*/
+        }
     }
 }
 
