@@ -14,6 +14,15 @@ char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
 
+void test_print()
+{
+    char *str="Hello World\n";
+    char c='A';
+    int a=10;
+
+    printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str); 
+}
+
 void boot(void)
 {
 	// note: function changes rsp, local stack variables can't be practically used
@@ -25,8 +34,7 @@ void boot(void)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
 	reload_gdt();
-	clear_screen();
-    reload_idt();
+	reload_idt();
 
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
@@ -60,7 +68,7 @@ void boot(void)
     printf("\nnum_char %d\n", z);
     z = printf("\n\nPointer a[1] %p %d\n", &(a[1]), sizeof(int*));
     printf("\nnum_char %d\n", z);
-    z = printf("\n\nPointer a[2] %p %d\n", &(a[2]), sizeof(int*));
+    z = printf("\n\nPointer z %p %d\n", &z, sizeof(int*));
     int *t1 = &a[0];
     int *t2 = &a[1];
     printf("Difference in address %d\n", (t2 - t1));
@@ -69,8 +77,11 @@ void boot(void)
 
     printf("%d", 1/qqq);*/
 
+    //int a=10;
+    //printf("Address of a:%p\n", &a);
 
-
+    clear_screen();
+    test_print();
 
 	while(1) {
     };
