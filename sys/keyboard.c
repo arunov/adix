@@ -3,6 +3,7 @@
 #include "kstring.h"
 #include "kstdio.h"
 #include "sys/keyboard.h"
+#include <sys/utils.h>
 
 struct kbkeypress {
     uint64_t keys[2];
@@ -50,6 +51,46 @@ unsigned char kbdus[128] =
     0,	/* All other keys are undefined */
 };
 
+unsigned char shift_kbdus[128] =
+{
+    0,  27, '!', '@', '#', '$', '%', '^', '&', '*',     /* 9 */
+  '(', ')', '_', '+', '\b',     /* Backspace */
+  '\t',                 /* Tab */
+  'Q', 'W', 'E', 'R',   /* 19 */
+  'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', /* Enter key */
+    0,                  /* 29   - Control */
+  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':',     /* 39 */
+ '\"', '~',   0,                /* Left shift */
+ '|', 'Z', 'X', 'C', 'V', 'B', 'N',                    /* 49 */
+  'M', '<', '>', '?',   0,                              /* Right shift */
+  '*',
+    0,  /* Alt */
+  ' ',  /* Space bar */
+    0,  /* Caps lock */
+    0,  /* 59 - F1 key ... > */
+    0,   0,   0,   0,   0,   0,   0,   0,
+    0,  /* < ... F10 */
+    0,  /* 69 - Num lock*/
+    0,  /* Scroll Lock */
+    0,  /* Home key */
+    0,  /* Up Arrow */
+    0,  /* Page Up */
+  '-',
+    0,  /* Left Arrow */
+    0,
+    0,  /* Right Arrow */
+  '+',
+    0,  /* 79 - End key*/
+    0,  /* Down Arrow */
+    0,  /* Page Down */
+    0,  /* Insert Key */
+    0,  /* Delete Key */
+    0,   0,   0,
+    0,  /* F11 Key */
+    0,  /* F12 Key */
+    0,  /* All other keys are undefined */
+};
+
 /*struct multiKeyMapAttr {
     uint64_t key[2];
     char *print;
@@ -73,7 +114,7 @@ void keyboard_handler()
     {
         /* You can use this one to see if the user released the
         *  shift, alt, or control keys... */
-        gKbKeyState.keys[key_scancode/64] &= (0xfffffffe << (key_scancode%64));
+        gKbKeyState.keys[key_scancode/64] &= (0xfffffffffffffffeUL << (key_scancode%64));
     }
     else
     {
@@ -90,21 +131,43 @@ void keyboard_handler()
         *  held. If shift is held using the larger lookup table,
         *  you would add 128 to the scancode when you look for it */
 
-        gKbKeyState.keys[key_scancode/64] |= (0x1 << (key_scancode%64));
+        gKbKeyState.keys[key_scancode/64] |= (0x1UL << (key_scancode%64));
 
-        uint64_t keyMap0 = gKbKeyState.keys[0], keyMap1 = gKbKeyState.keys[1];
-
-        int chkSingleKey0 = ((keyMap0 == keyMap0) & (-keyMap0)),
-            chkSingleKey1 = ((keyMap1 == keyMap1) & (-keyMap1));
-
-        if( (chkSingleKey0 && !keyMap1) ||
-            (chkSingleKey1 && !keyMap0)) {
+        int bitsSet = numOfBitsSet(&gKbKeyState, 16);
+        
+        #if DEBUG
+            printf("Bits Set: %d\n", bitsSet);
+            printf("Scan Code : %d\n", (int)scancode);
+        #endif
+   
+        char c1 = ' ';
+        char c2 = ' ';
+        if(bitsSet == 1)
+        {
             // Single key pressed
-            *(video_buf-18) = kbdus[scancode];
+            c2 = kbdus[scancode];
         } else {
-            /*for(int i = 0; i < sizeof(); i ++) {
+            uint64_t shift_pressed = ((gKbKeyState.keys[key_scancode/64] >> 42) & 0x1UL);
+            uint64_t control_pressed = ((gKbKeyState.keys[key_scancode/64] >> 29) & 0x1UL);
+            
+            #if DEBUG
+                printf("Shift: %d, Control: %d\n",shift_pressed, control_pressed);
+            #endif
 
-            }*/
+            if(shift_pressed == 0x1UL)
+            {
+                c2 = shift_kbdus[scancode];
+            }
+            else if(control_pressed == 0x1UL)
+            {
+                c1 = '^';
+                c2 = shift_kbdus[scancode];
+            }
+        }
+        if(c2 != '\n' && c2 != '\t')
+        {
+            *(video_buf-20) = c1;
+            *(video_buf-18) = c2;
         }
     }
 }
