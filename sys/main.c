@@ -4,9 +4,20 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 
-void start(void* modulep, void* physbase, void* physfree)
+void start(uint32_t* modulep, void* physbase, void* physfree)
 {
+	struct smap_t {
+		uint64_t base, length;
+		uint32_t type;
+	}__attribute__((packed)) *smap;
+	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
+	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
+		if (smap->type == 1 /* memory */ && smap->length != 0) {
+			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+		}
+	}
 	// kernel starts here
+	while(1);
 }
 
 #define INITIAL_STACK_SIZE 4096
@@ -33,11 +44,10 @@ void boot(void)
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
-	reload_gdt();
 	reload_idt();
-
+	setup_tss();
 	start(
-		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
+		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
 		&physbase,
 		(void*)(uint64_t)loader_stack[4]
 	);
