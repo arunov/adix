@@ -60,38 +60,38 @@ void isrs_install()
 *  exception_message[interrupt_number] */
 char *exception_messages[] =
 {
-    "Division By Zero Exception",
-    "Debug Exception",
-    "Non Maskable Interrupt Exception",
-    "Breakpoint Exception",
-    "Into Detected Overflow Exception",
-    "Out of Bounds Exception",
-    "Invalid Opcode Exception",
-    "No Coprocessor Exception",
-    "Double Fault Exception",
-    "Coprocessor Segment Overrun Exception",
-    "Bad TSS Exception",
-    "Segment Not Present Exception",
-    "Stack Fault Exception",
-    "General Protection Fault Exception",
-    "Page Fault Exception",
-    "Unknown Interrupt Exception",
-    "Coprocessor Fault Exception",
-    "Alignment Check Exception (486+)",
-    "Machine Check Exception (Pentium/586+)",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions",
-    "Reserved Exceptions"
+    "Division By Zero Exception",               //  0
+    "Debug Exception",                          //  1
+    "Non Maskable Interrupt Exception",         //  2
+    "Breakpoint Exception",                     //  3
+    "Into Detected Overflow Exception",         //  4
+    "Out of Bounds Exception",                  //  5
+    "Invalid Opcode Exception",                 //  6
+    "No Coprocessor Exception",                 //  7
+    "Double Fault Exception",                   //  8
+    "Coprocessor Segment Overrun Exception",    //  9
+    "Bad TSS Exception",                        // 10
+    "Segment Not Present Exception",            // 11
+    "Stack Fault Exception",                    // 12
+    "General Protection Fault Exception",       // 13
+    "Page Fault Exception",                     // 14
+    "Unknown Interrupt Exception",              // 15
+    "Coprocessor Fault Exception",              // 16
+    "Alignment Check Exception (486+)",         // 17
+    "Machine Check Exception (Pentium/586+)",   // 18
+    "Reserved Exceptions",                      // 19
+    "Reserved Exceptions",                      // 20
+    "Reserved Exceptions",                      // 21
+    "Reserved Exceptions",                      // 22
+    "Reserved Exceptions",                      // 23
+    "Reserved Exceptions",                      // 24
+    "Reserved Exceptions",                      // 25
+    "Reserved Exceptions",                      // 26
+    "Reserved Exceptions",                      // 27
+    "Reserved Exceptions",                      // 28
+    "Reserved Exceptions",                      // 29
+    "Reserved Exceptions",                      // 30
+    "Reserved Exceptions"                       // 31
 };
 
 /* All of our Exception handling Interrupt Service Routines will
