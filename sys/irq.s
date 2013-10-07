@@ -1,5 +1,45 @@
 # Ref: http://www.osdever.net/bkerndev/Docs/irqs.htm
 
+# Macro pushAllReg
+.macro pushAllReg
+pushq %rax
+pushq %rbx
+pushq %rcx
+pushq %rdx
+pushq %rdi
+pushq %rsi
+pushq %rsp
+pushq %rbp
+pushq %r8
+pushq %r9
+pushq %r10
+pushq %r11
+pushq %r12
+pushq %r13
+pushq %r14
+pushq %r15
+.endm
+
+# Macro popAllReg
+.macro popAllReg
+popq %r15
+popq %r14
+popq %r13
+popq %r12
+popq %r11
+popq %r10
+popq %r9
+popq %r8
+popq %rbp
+popq %rsp
+popq %rsi
+popq %rdi
+popq %rdx
+popq %rcx
+popq %rbx
+popq %rax
+.endm
+
 # Service Routines (IRQs)
 .global irq0
 .global irq1
@@ -147,12 +187,10 @@ irq_common_stub:
     addq $0x8, %rdi
 
     #Save State
-    pushq %rdx
-    pushq %rax
+    pushAllReg
 
     #Save Segment
     movq %ds, %rdx
-    #movabsq $0x0, %rdx
     pushq %rdx
     movq %es, %rdx
     pushq %rdx
@@ -170,7 +208,7 @@ irq_common_stub:
 
     call irq_handler
 
-    #Pop Stack
+    #Retrieve Segment
     popq %rdx
     movq %rdx, %gs
     popq %rdx
@@ -179,10 +217,12 @@ irq_common_stub:
     movq %rdx, %es
     popq %rdx
     movq %rdx, %ds
-    popq %rax
-    popq %rdx
+
+    #Retrieve State
+    popAllReg
     popq %rdi
 
     addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number
     sti
     iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+
