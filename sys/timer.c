@@ -76,11 +76,11 @@ void timer_handler()
 *  into IRQ0 */
 void timer_install()
 {
-    /* Configure timer to 100 Hz */
-    //timer_phase(PIT_CLOCK_HZ); /* Sys clock is 1193190 Hz */
-
     /* Installs 'timer_handler' to IRQ0 */
     irq_install_handler(0, timer_handler);
+
+    /* Configure timer to 100 Hz */
+    timer_phase(PIT_CLOCK_HZ); /* Sys clock is 1193190 Hz */
 }
 
 /* This will continuously loop until the given time has

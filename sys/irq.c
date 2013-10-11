@@ -135,7 +135,8 @@ void irq_handler(uint64_t *r)
         outportb(0x20, 0x20);
 
         if(!handler) {
-            puts(" IRQ. System Halted!\n");
+	    printf("IRQ Received: %d\n",*r);
+            //puts(" IRQ. System Halted!\n");
             //for (;;);
         }
     }

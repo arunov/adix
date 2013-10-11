@@ -7,7 +7,7 @@ void idt_set_gate(int num, uint64_t isr_addr) {
 	idt[num].flags = IDT_P | IDT_DPL0 | TYPE_INTERRUPT_GATE;
 	idt[num].seg_sel = 0x08;
 	idt[num].offset_low    = ((isr_addr & 0x000000000000ffff)); 
-    idt[num].offset_middle = ((isr_addr & 0x00000000ffff0000) >> 16);
+	idt[num].offset_middle = ((isr_addr & 0x00000000ffff0000) >> 16);
 	idt[num].offset_high   = ((isr_addr & 0xffffffff00000000) >> 32);
 #if DEBUG
     printf("idt entry %d: idt num: %p idt+num+64: %p\n", num, idt[num], *((char *)(&idt[num])+8));

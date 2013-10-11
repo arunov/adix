@@ -4,6 +4,18 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 
+#define PG_SZ (0x1000)
+
+void test_print()
+{
+    char *str="Hello World\n";
+    char c='A';
+    int a=10;
+
+    //printf("~~Character: %c, Hex: %x, String: %s Address of String: %p\n", c,a,str,str);
+    printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
+}
+
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
 	struct smap_t {
@@ -14,8 +26,11 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
 			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+			printf("No of pages: %d\n", (smap->length/PG_SZ));
 		}
 	}
+printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
+	test_print();
 	// kernel starts here
 	while(1);
 }
@@ -25,14 +40,6 @@ char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
 
-void test_print()
-{
-    char *str="Hello World\n";
-    char c='A';
-    int a=10;
-
-    printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str); 
-}
 
 void boot(void)
 {
@@ -44,6 +51,7 @@ void boot(void)
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
+	reload_gdt();
 	reload_idt();
 	setup_tss();
 	start(
@@ -56,7 +64,9 @@ void boot(void)
 		*temp1;
 		temp1 += 1, temp2 += 2
 	) *temp2 = *temp1;
-	
+
+	test_print();	
+
         /* for(
                 temp1 = "!!!!! end() returned !!!!!", temp2 = (char*)0xb8e00;
                 *temp1;
@@ -90,7 +100,7 @@ void boot(void)
     //int a=10;
     //printf("Address of a:%p\n", &a);
 
-    clear_screen();
+    //clear_screen();
     test_print();
 
 	while(1) {

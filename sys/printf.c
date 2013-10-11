@@ -3,8 +3,8 @@
 #include "include/sysconf.h"
 #include "kstring.h"
 
-#define MAX_LENGTH_OF_STR_INT       12  // length of 32-bit uint max 4294967296
-                                        //  (10) + '-' (1) + '\0' (1)
+#define MAX_LENGTH_OF_STR_INT       11  // length of 32-bit uint max 4294967296
+                                        //  (10) + '-' (1)
 
 #define DECIMAL_BASE    10
 #define HEX_BASE        16
@@ -97,8 +97,8 @@ static int hexnum_to_string(va_list *ap) {
 static int int_to_string(va_list *ap) {
     int d = va_arg(*ap, int);
     int neg = 0;
-    char printf_string_buff[MAX_LENGTH_OF_STR_INT];
-    char *loc = printf_string_buff + sizeof(printf_string_buff);
+    char printf_string_buff[MAX_LENGTH_OF_STR_INT+1];    //to accommodate '\0' 
+    char *loc = printf_string_buff + sizeof(printf_string_buff)-1;
     *loc = '\0';
 
     if(0 > d) {

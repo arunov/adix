@@ -134,7 +134,7 @@ void keyboard_handler()
         gKbKeyState.keys[key_scancode/64] |= (0x1UL << (key_scancode%64));
 
         int bitsSet = numOfBitsSet(&gKbKeyState, 16);
-        
+
         #if DEBUG
             printf("Bits Set: %d\n", bitsSet);
             printf("Scan Code : %d\n", (int)scancode);
