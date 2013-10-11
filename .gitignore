@@ -5,3 +5,6 @@ ld.so
 libc.a
 libc.so
 obj/
+rootfs/bin/hello
+rootfs/lib/*.o
+
