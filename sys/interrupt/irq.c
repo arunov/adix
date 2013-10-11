@@ -1,8 +1,8 @@
-#include "sys/idt.h"
-#include "sys/isr.h"
-#include "sys/irq.h"
-#include "kstdio.h"
-#include "kstring.h"
+#include <sys/idt.h>
+#include <sys/isr.h>
+#include <sys/irq.h>
+#include <sys/kstdio.h>
+#include <sys/kstring.h>
 
 /* This array is actually an array of function pointers. We use
 *  this to handle custom IRQ handlers for a given IRQ */

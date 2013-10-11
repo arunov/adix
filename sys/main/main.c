@@ -1,5 +1,5 @@
 #include <defs.h>
-#include "kstdio.h"
+#include <sys/kstdio.h>
 #include <sys/gdt.h>
 #include <sys/idt.h>
 #include <sys/irq.h>

@@ -1,7 +1,7 @@
-#include "include/kstdarg.h"
-#include "kstdio.h"
-#include "include/sysconf.h"
-#include "kstring.h"
+#include <sys/kstdarg.h>
+#include <sys/kstdio.h>
+#include <sys/sysconf.h>
+#include <sys/kstring.h>
 
 #define MAX_LENGTH_OF_STR_INT       11  // length of 32-bit uint max 4294967296
                                         //  (10) + '-' (1)

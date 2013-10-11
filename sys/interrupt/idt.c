@@ -1,9 +1,9 @@
 #include <sys/idt.h>
-#include "kstring.h"
-#include "sys/isr.h"
-#include "sys/irq.h"
-#include "sys/timer.h"
-#include "sys/keyboard.h"
+#include <sys/kstring.h>
+#include <sys/isr.h>
+#include <sys/irq.h>
+#include <sys/timer.h>
+#include <sys/keyboard.h>
 
 extern void isr0();
 

@@ -1,7 +1,7 @@
 #include <defs.h>
 #include <sys/irq.h>
-#include "kstring.h"
-#include "kstdio.h"
+#include <sys/kstring.h>
+#include <sys/kstdio.h>
 
 /* This will keep track of how many ticks that the system
 *  has been running for */

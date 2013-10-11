@@ -1,8 +1,8 @@
 #include <defs.h>
 #include <sys/irq.h>
-#include "kstring.h"
-#include "kstdio.h"
-#include "sys/keyboard.h"
+#include <sys/kstring.h>
+#include <sys/kstdio.h>
+#include <sys/keyboard.h>
 #include <sys/utils.h>
 
 struct kbkeypress {

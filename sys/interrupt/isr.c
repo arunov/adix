@@ -1,7 +1,7 @@
-#include "sys/idt.h"
-#include "sys/isr.h"
-#include "kstdio.h"
-#include "kstring.h"
+#include <sys/idt.h>
+#include <sys/isr.h>
+#include <sys/kstdio.h>
+#include <sys/kstring.h>
 
 void idt_set_gate(int num, uint64_t isr_addr) {
 	idt[num].flags = IDT_P | IDT_DPL0 | TYPE_INTERRUPT_GATE;
