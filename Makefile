@@ -53,7 +53,7 @@ $(BINS): $(ROOTLIB)/crt1.o $(ROOTLIB)/libc.a $(ROOTLIB)/libc.so $(shell find bin
 binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c))
 	$(LD) $(LDLAGS) -o $(BIN) $(ROOTLIB)/crt1.o $^ $(ROOTLIB)/libc.a
 
-obj/%.o: %.c $(wildcard include/*.h include/*/*.h)
+obj/%.o: %.c $(wildcard include/*.h include/*/*.h include/*/*/*.h)
 	@mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
