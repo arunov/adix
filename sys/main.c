@@ -4,6 +4,14 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 #include <sys/memory/phys_page_manager.h>
+#include <sys/memory/handle_cr2_cr3.h>
+
+#define PG_SZ (0x1000)
+
+#define INITIAL_STACK_SIZE 4096
+char stack[INITIAL_STACK_SIZE];
+uint32_t* loader_stack;
+extern char kernmem, physbase;
 
 void test_print()
 {
@@ -13,6 +21,11 @@ void test_print()
 
     //printf("~~Character: %c, Hex: %x, String: %s Address of String: %p\n", c,a,str,str);
     printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
+    printf("Address of kernmem: %p\n", &kernmem);
+    printf("Offset od str: %x\n", ((uint64_t)str)-((uint64_t)&kernmem));
+    printf("Content of cr2: %p\n",get_cr2());
+    struct str_cr3 cr3= get_cr3();
+    printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
 }
 
 struct phys_page_manager phys_page_mngr_obj;
@@ -35,19 +48,16 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 			printf("No of pages: %d\n", (smap->length/PG_SZ));
 		}
 	}
-printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
-printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
+	printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
+
+	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
+	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
 
 	test_print();
+
 	// kernel starts here
 	while(1);
 }
-
-#define INITIAL_STACK_SIZE 4096
-char stack[INITIAL_STACK_SIZE];
-uint32_t* loader_stack;
-extern char kernmem, physbase;
-
 
 void boot(void)
 {
