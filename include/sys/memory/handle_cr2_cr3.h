@@ -1,0 +1,20 @@
+#ifndef _HANDLE_CR2_CR3_H
+#define _HANDLE_CR2_CR3_H
+
+struct str_cr3 {
+    uint64_t reserved:3,
+        PWT:1,
+        PCD:1,
+        reserved:7,
+        p_PML4E_4Kb:40,
+        reserved_MBZ:12;
+}
+
+void* get_cr2();            // Returns virtual address
+struct str_cr3 get_cr3();   // Returns cr3 containing physical address
+void set_cr3(struct str_cr3 page_trans);
+
+void* vir_to_phy_addr(void*);
+
+#endif
+
