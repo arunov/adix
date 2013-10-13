@@ -3,8 +3,7 @@
 #include <sys/gdt.h>
 #include <sys/idt.h>
 #include <sys/irq.h>
-
-#define PG_SZ (0x1000)
+#include <sys/memory/phys_page_manager.h>
 
 void test_print()
 {
@@ -16,20 +15,29 @@ void test_print()
     printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
 }
 
+struct phys_page_manager phys_page_mngr_obj;
+
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
 	struct smap_t {
 		uint64_t base, length;
 		uint32_t type;
 	}__attribute__((packed)) *smap;
+
+    phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase,
+                            physfree);
+    finish_scan(&phys_page_mngr_obj);
+
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
-		if (smap->type == 1 /* memory */ && smap->length != 0) {
+		if (smap->type == 1 && smap->length != 0) {
 			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
 			printf("No of pages: %d\n", (smap->length/PG_SZ));
 		}
 	}
 printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
+printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
+
 	test_print();
 	// kernel starts here
 	while(1);
