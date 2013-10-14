@@ -36,10 +36,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		uint32_t type;
 	}__attribute__((packed)) *smap;
 
-    phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase,
-                            physfree);
-    finish_scan(&phys_page_mngr_obj);
-
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 && smap->length != 0) {
@@ -48,13 +44,16 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		}
 	}
 	printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
-
 	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
 	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
 
-	test_print();
-
+        /* Free list and Page Tables */
+	phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
+        finish_scan(&phys_page_mngr_obj);
 	setup_kernel_pgtbl(&kernmem, physbase, physfree);
+
+	printf("Page tables successfully setup\n");
+	test_print();
 
 	// kernel starts here
 	while(1);
@@ -70,6 +69,9 @@ void boot(void)
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
+
+	global_video_vaddr = (void *)VIDEO_MEMORY_ADDRESS;
+
 	reload_gdt();
 	reload_idt();
 	setup_tss();

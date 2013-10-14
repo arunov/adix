@@ -101,7 +101,7 @@ unsigned char shift_kbdus[128] =
 void keyboard_handler()
 {
     unsigned char scancode;
-    char *video_buf = (char *)(0xb8000 + 4000) ;
+    char *video_buf = (char *)(((uint64_t)global_video_vaddr) + 4000) ;
     int key_scancode;
 
     /* Read from the keyboard's data buffer */

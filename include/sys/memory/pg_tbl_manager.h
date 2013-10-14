@@ -1,10 +1,7 @@
 #ifndef __PG_TBL_MANAGER_H
 #define __PG_TBL_MANAGER_H
 
-#define PML4_OFFSET (0xff80000000000000UL >> 16)
-#define PDP_OFFSET (0xff80000000000000UL >> 25)
-#define PD_OFFSET (0xff80000000000000UL >> 34)
-#define PT_OFFSET (0xff80000000000000UL >> 43)
+#define ENTRY_OFFSET 0x1ffUL
 
 struct page_trans_4Kb get_default_kernel_PML4E_PDPE_PDE();
 struct page_trans_4Kb get_default_kernel_PTE();

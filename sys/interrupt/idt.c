@@ -28,8 +28,8 @@ void reload_idt() {
     isrs_install();
     irq_install();
 
-    //timer_install();
-    //keyboard_install();
+    timer_install();
+    keyboard_install();
 
     _x86_64_asm_lidt(&idtr);
     asm volatile("sti");

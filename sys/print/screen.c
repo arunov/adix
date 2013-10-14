@@ -1,6 +1,6 @@
 #include <sys/kstring.h>
+#include <sys/kstdio.h>
 
-#define VIDEO_MEMORY_ADDRESS 0xB8000;
 #define BUFFER_ADDRESS(CURSOR_X, CURSOR_Y) (unsigned int)(CURSOR_Y * 80 + CURSOR_X);
 #define GET_COLOUR(FG, BG) ((0x0F & FG) | ((0x0F & BG) << 4));
 
@@ -45,7 +45,7 @@ void scroll_screen(void)
         	/* Move the current text chunk that makes up the screen
         	*  back in the buffer by a line */
         	temp = global_cursor_y - 24 + 1;
-		mem_ptr = (unsigned short *)VIDEO_MEMORY_ADDRESS;
+		mem_ptr = (unsigned short *)global_video_vaddr;
         	memcpy (mem_ptr, mem_ptr + temp * 80, (25 - temp) * 80 * 2);
 
         	/* Finally, we set the chunk of memory that occupies
@@ -66,7 +66,7 @@ void move_cursor(void)
 void clear_screen()
 {
     	unsigned int blank;
-	unsigned short *mem_ptr = (unsigned short *)VIDEO_MEMORY_ADDRESS;
+	unsigned short *mem_ptr = (unsigned short *)global_video_vaddr;
     	int i;
 
     	/* Again, we need the 'short' that will be used to
@@ -89,7 +89,7 @@ void clear_screen()
 void putch(unsigned char c)
 {
     	unsigned short *where;
-	unsigned short *textmemptr = (unsigned short *)VIDEO_MEMORY_ADDRESS;
+	unsigned short *textmemptr = (unsigned short *)global_video_vaddr;
     	unsigned att = global_cursor_attribute << 8;
 
     	/* Handle a backspace, by moving the cursor back one space */

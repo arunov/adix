@@ -29,11 +29,11 @@ void timer_handler()
     static int once = 0;
     static char *video_buf = NULL;
 
-    if(once == 0)
+    if(once == 0 || (uint64_t)video_buf != (((uint64_t)global_video_vaddr) + 4000))
     {
 	once = 1;
 
-	video_buf = (char*)(0xb8000 + 4000);     /* end of video memory */
+	video_buf = (char*)(((uint64_t)global_video_vaddr) + 4000);     /* end of video memory */
 	*(video_buf-2) = *(video_buf-4) = '0';
 	*(video_buf-8) = *(video_buf-10) = '0';
 	*(video_buf-14) = *(video_buf-16) = '0';

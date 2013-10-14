@@ -26,8 +26,8 @@ struct str_cr3 get_cr3()
 void set_cr3(struct str_cr3 page_trans)
 {
         uint64_t cr3_value=*((uint64_t *)(&page_trans));
-        __asm__(
-                "movq %%rax, %0;"
+        __asm__ volatile( 
+                "movq %0, %%rax;"
                 "movq %%rax, %%cr3;"
 		:
 		:"g"(cr3_value)
