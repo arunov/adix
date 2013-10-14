@@ -28,7 +28,7 @@ void set_cr3(struct str_cr3 page_trans)
         uint64_t cr3_value=*((uint64_t *)(&page_trans));
         __asm__(
                 "movq %%rax, %0;"
-                "movq %%cr3, %%rax;"
+                "movq %%rax, %%cr3;"
 		:
 		:"g"(cr3_value)
                 );

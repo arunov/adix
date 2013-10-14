@@ -5,8 +5,7 @@
 #include <sys/irq.h>
 #include <sys/memory/phys_page_manager.h>
 #include <sys/memory/handle_cr2_cr3.h>
-
-#define PG_SZ (0x1000)
+#include <sys/memory/setup_kernel_pgtbl.h>
 
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
@@ -54,6 +53,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
 
 	test_print();
+
+	setup_kernel_pgtbl(&kernmem, physbase, physfree);
 
 	// kernel starts here
 	while(1);
