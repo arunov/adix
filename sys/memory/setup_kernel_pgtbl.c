@@ -1,6 +1,7 @@
 #include <sys/kstdio.h>
 #include <sys/memory/pg_tbl_manager.h>
 #include <sys/memory/phys_page_manager.h>
+#include <sys/memory/page_table_helper.h>
 #include <sys/memory/handle_cr2_cr3.h>
 
 extern struct phys_page_manager phys_page_mngr_obj;
@@ -17,6 +18,8 @@ struct str_cr3 get_default_cr3()
 	return cr3;
 }
 
+struct page_table_helper kern_page_table_mgr;
+
 void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 {
 	//int total_pages = (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ;
@@ -26,7 +29,9 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 
 	//printf("Total no of kernel pages calculated: %d\n", total_pages);	
 
-	void *pml4_page = get_new_pg_tbl_page();
+	//void *pml4_page = get_new_pg_tbl_page();
+    init_page_table_helper(&kern_page_table_mgr, &phys_page_mngr_obj);
+    void *pml4_page = (void*)get_selfref_PML4(&kern_page_table_mgr);
 	uint64_t paddr = (uint64_t)physbase;
 	uint64_t vaddr = (uint64_t)kernmem;
 	//int count = 0;
@@ -40,8 +45,8 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 	}
 
 	uint64_t video_vaddr = ((uint64_t)kernmem) + ((uint64_t)physfree) + VIDEO_MEMORY_ADDRESS;
-	update_pg_table((void *)(video_vaddr), pml4_page, (void *)((uint64_t)VIDEO_MEMORY_ADDRESS));
-
+	//update_pg_table((void *)(video_vaddr), pml4_page, (void *)((uint64_t)VIDEO_MEMORY_ADDRESS));
+    update_page_table(&kern_page_table_mgr, (uint64_t)pml4_page, (uint64_t)VIDEO_MEMORY_ADDRESS, video_vaddr, PAGE_TRANS_READ_WRITE);
 	//printf("Total no of kernel pages added: %d\n", count);
 	
 	struct str_cr3 cr3 = get_default_cr3();
@@ -51,6 +56,7 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 
 	global_video_vaddr = (void *)video_vaddr;
 	set_cr3(cr3);
+    //update_curr_page_table(&kern_page_table_mgr, (uint64_t)VIDEO_MEMORY_ADDRESS, video_vaddr, PAGE_TRANS_READ_WRITE);
 }
 
 
