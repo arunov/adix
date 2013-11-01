@@ -6,6 +6,7 @@
 #include <sys/memory/phys_page_manager.h>
 #include <sys/memory/handle_cr2_cr3.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
+#include <sys/list.h>
 
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
@@ -25,7 +26,69 @@ void test_print()
     printf("Content of cr2: %p\n",get_cr2());
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
+
+
+printf("helloooooooo");
+
+mystruct myFirst = {
+         .data = 10,
+         .myList = LIST_HEAD_INIT(myFirst.myList)
+};
+
+mystruct mySecond = {
+         .data = 20,
+	 .myList = LIST_HEAD_INIT(mySecond.myList)
+};
+
+LIST_HEAD(mylinkedlist);
+
+list_add( &myFirst.myList , &mylinkedlist ) ;
+list_add( &mySecond.myList , &mylinkedlist ) ;
+
+struct list_head* position;
+list_for_each( position , &mylinkedlist )
+{
+        printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
 }
+
+mystruct  *datastructureptr = NULL ; 
+list_for_each_entry ( datastructureptr , &mylinkedlist, myList ){ 
+	printf ("data  =  %d\n" , datastructureptr->data ); 
+}
+
+list_del(&myFirst.myList);
+int empty = list_empty(&mylinkedlist);
+if(empty==1){
+	printf("deleted myFirst:  List is empty");
+}	
+
+list_del(&mySecond.myList);
+empty = list_empty(&mylinkedlist);
+if(empty==1){
+	printf("deleted myFirst and mySecond:  List is empty");
+}	
+
+list_add_tail( &myFirst.myList , &mylinkedlist);
+list_add_tail( &mySecond.myList , &mylinkedlist ) ;
+list_for_each( position , &mylinkedlist )
+{
+        printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
 
 struct phys_page_manager phys_page_mngr_obj;
 
