@@ -62,5 +62,7 @@ uint32_t create_free_phys_pages(struct phys_page_manager *this,
 void phys_page_scan(struct phys_page_manager *this, int mode,
                     void *p_node);
 
+struct phys_page_manager *getPhysPageManager();
+
 #endif
 

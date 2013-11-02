@@ -8,16 +8,20 @@
 #include <sys/memory/setup_kernel_pgtbl.h>
 
 #define INITIAL_STACK_SIZE 4096
+
+
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
 
+void cooperative_schedule();
 void test_print()
 {
     char *str="Hello World\n";
     char c='A';
     int a=10;
-
+	
+    clear_screen();		
     //printf("~~Character: %c, Hex: %x, String: %s Address of String: %p\n", c,a,str,str);
     printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
     printf("Address of kernmem: %p\n", &kernmem);
@@ -25,6 +29,8 @@ void test_print()
     printf("Content of cr2: %p\n",get_cr2());
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
+    cooperative_schedule();
+
 }
 
 struct phys_page_manager phys_page_mngr_obj;

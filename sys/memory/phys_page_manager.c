@@ -1,5 +1,7 @@
 #include <sys/memory/phys_page_manager.h>
 
+struct phys_page_manager *g_phys_page_manager;
+
 void phys_page_manager_init(struct phys_page_manager *this,
                             uint32_t *a_modulep, void *a_physbase,
                             void *a_physfree) {
@@ -25,6 +27,7 @@ void phys_page_manager_init(struct phys_page_manager *this,
     }
 
     phys_page_scan(this, MODE_INIT, a_physfree);
+    g_phys_page_manager = this;
 
     /*this->scan_state = SCAN_OFF;
 
@@ -235,3 +238,6 @@ uint32_t create_free_phys_pages(struct phys_page_manager *this,
     return n_nodes;
 }
 
+struct phys_page_manager *getPhysPageManager(){
+	return g_phys_page_manager;
+}
