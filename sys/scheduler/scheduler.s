@@ -35,18 +35,20 @@ popq %rax
 
 .global switchTo
 .global saveReturnAddress
+.extern cleanupTerminated
+
 switchTo:
-	pushq %rsi #push rip
 	pushReg
 	movq %rsp,%rax
 	andq $0xfffffffffffff000,%rax #Get base of the stack
 	movq %rsp,0x08(%rax) #save current rsp reg value onto the stack[1]
 	movq 0x08(%rdi),%rsp #get sp of new process onto rsp reg
+	#If the previous task was terminated remove it from the run queue
+	call cleanupTerminated 
 	popReg
 	#Get IP for the next task and return
 	retq
 
 saveReturnAddress:
-	movq 0x10(%rsp),%rax
+	movq 0x20(%rsp),%rax
 	retq
-
