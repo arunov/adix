@@ -10,13 +10,13 @@ static unsigned int global_cursor_x, global_cursor_y;
 unsigned char inportb (unsigned short _port)
 {
 	unsigned char rv;
-	asm volatile("inb %1, %0" : "=a" (rv) : "dN" (_port));
+	__asm volatile("inb %1, %0" : "=a" (rv) : "dN" (_port));
 	return rv;
 }
 
 void outportb (unsigned short _port, unsigned char _data)
 {
-	asm volatile ("outb %1, %0" : : "dN" (_port), "a" (_data));
+	__asm volatile ("outb %1, %0" : : "dN" (_port), "a" (_data));
 }
 
 void blink_cursor(unsigned int pos_x, unsigned int pos_y)

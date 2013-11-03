@@ -32,5 +32,5 @@ void reload_idt() {
     keyboard_install();
 
     _x86_64_asm_lidt(&idtr);
-    asm volatile("sti");
+    __asm volatile("sti");
 }
