@@ -31,8 +31,6 @@ void test_print()
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
 	
-	int parseresult = parsetar();
-	printf(" parseresult %d", parseresult);
 }
 
 
@@ -65,6 +63,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	test_print();
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+	int parseresult = parsetar();
+	printf("number of files: %d\n", parseresult);
+
 	// kernel starts here
 	while(1);
 }
