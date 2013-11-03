@@ -8,11 +8,14 @@
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/list.h>
 #include <sys/parsetarfs.h>
+#include <sys/tarfs.h>
 
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
+struct tss_t tss;
+
 
 void test_print()
 {
@@ -61,6 +64,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Page tables successfully setup\n");
 	test_print();
 
+	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	// kernel starts here
 	while(1);
 }
