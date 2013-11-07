@@ -7,8 +7,8 @@
 #include <sys/memory/handle_cr2_cr3.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/list.h>
-#include <sys/parsetarfs.h>
-#include <sys/tarfs.h>
+#include <sys/parser/parsetarfs.h>
+#include <sys/parser/tarfs.h>
 
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
@@ -63,9 +63,21 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	test_print();
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+	//check for parsetar
 	int parseresult = parsetar();
 	printf("number of files: %d\n", parseresult);
-
+	//check for read_tarfs
+	char *filename;
+	char buffer[20];
+	filename = "etc/hellonew.c";
+	uint64_t offset = 2, numbytes = 10;
+	int found =read_tarfs(filename, offset, numbytes, buffer);
+	if(found == -1)
+		printf("file not found\n");
+	else{
+		printf("number of characters copied: %d\n", found);
+		printf("buffer: %s", buffer);
+	}
 	// kernel starts here
 	while(1);
 }
