@@ -1,10 +1,12 @@
 #include <sys/memory/page_table_helper.h>
 
+static struct page_table_helper *g_pg_table_helper;
 void init_page_table_helper(struct page_table_helper *this,
                                     struct phys_page_manager *a_phys_page_mgr) {
 
     this->phys_mgr = a_phys_page_mgr;
     this->phys_mem_virt_map_base = 0;
+    g_pg_table_helper = this;
 }
 
 void set_phys_mem_virt_map_base(struct page_table_helper *this,
@@ -151,3 +153,6 @@ void update_curr_page_table(struct page_table_helper *this, uint64_t phys,
 
 }
 
+struct page_table_helper *getPageTableHelper() {
+	return g_pg_table_helper;
+}

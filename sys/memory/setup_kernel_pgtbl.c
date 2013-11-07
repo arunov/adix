@@ -44,6 +44,14 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 		//count++;
 	}
 
+	paddr = (uint64_t)physfree;
+	vaddr = (uint64_t)physfree;
+	while(paddr < (uint64_t)physfree + SIZEOF_PAGE * 300) {
+		update_pg_table((void*)vaddr, pml4_page, (void*)paddr);
+		paddr += PG_SZ;
+		vaddr += PG_SZ;
+	}
+
 	uint64_t video_vaddr = ((uint64_t)kernmem) + ((uint64_t)physfree) + VIDEO_MEMORY_ADDRESS;
 	//update_pg_table((void *)(video_vaddr), pml4_page, (void *)((uint64_t)VIDEO_MEMORY_ADDRESS));
     update_page_table(&kern_page_table_mgr, (uint64_t)pml4_page, (uint64_t)VIDEO_MEMORY_ADDRESS, video_vaddr, PAGE_TRANS_READ_WRITE);

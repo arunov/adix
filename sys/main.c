@@ -11,18 +11,22 @@
 #include <sys/parser/tarfs.h>
 
 #define INITIAL_STACK_SIZE 4096
+
+
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
 struct tss_t tss;
 
 
+void cooperative_schedule();
 void test_print()
 {
     char *str="Hello World\n";
     char c='A';
     int a=10;
-
+	
+    clear_screen();		
     //printf("~~Character: %c, Hex: %x, String: %s Address of String: %p\n", c,a,str,str);
     printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
     printf("Address of kernmem: %p\n", &kernmem);
@@ -31,6 +35,53 @@ void test_print()
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
 	
+    cooperative_schedule();
+/*
+	mystruct myFirst = {
+        	 .data = 10,
+	         .myList = LIST_HEAD_INIT(myFirst.myList)
+	};
+
+	mystruct mySecond = {
+        	 .data = 20,
+		 .myList = LIST_HEAD_INIT(mySecond.myList)
+	};
+
+	LIST_HEAD(mylinkedlist);
+
+	list_add( &myFirst.myList , &mylinkedlist ) ;
+	list_add( &mySecond.myList , &mylinkedlist ) ;
+
+	struct list_head* position;
+	list_for_each( position , &mylinkedlist )
+	{	
+        	printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
+	}	
+
+	mystruct  *datastructureptr = NULL ; 
+	list_for_each_entry ( datastructureptr , &mylinkedlist, myList ){ 
+		printf ("data  =  %d\n" , datastructureptr->data ); 
+	}
+
+	list_del(&myFirst.myList);
+	int empty = list_empty(&mylinkedlist);
+	if(empty==1){
+		printf("deleted myFirst:  List is empty");
+	}	
+
+	list_del(&mySecond.myList);
+	empty = list_empty(&mylinkedlist);
+	if(empty==1){
+		printf("deleted myFirst and mySecond:  List is empty");
+	}	
+
+	list_add_tail( &myFirst.myList , &mylinkedlist);
+	list_add_tail( &mySecond.myList , &mylinkedlist ) ;
+	list_for_each( position , &mylinkedlist )
+	{
+        	printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
+	}
+*/	
 }
 
 

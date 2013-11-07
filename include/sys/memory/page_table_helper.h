@@ -10,6 +10,9 @@
 #include <sys/kstdio.h> // TODO: Replace with logger
 #include <sys/kstring.h>
 
+// Size of page
+#define SIZEOF_PAGE 4096
+
 // Number of entries in page translation objects
 #define NUM_PAGE_TRANS_ENTRIES 512
 
@@ -229,6 +232,8 @@ void update_page_table(struct page_table_helper *this, uint64_t pml4,
  */
 void update_curr_page_table(struct page_table_helper *this, uint64_t phys,
                                         uint64_t virt, uint64_t access_perm);
+
+struct page_table_helper *getPageTableHelper();
 
 #endif
 

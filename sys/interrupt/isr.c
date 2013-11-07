@@ -2,6 +2,7 @@
 #include <sys/isr.h>
 #include <sys/kstdio.h>
 #include <sys/kstring.h>
+#include <sys/memory/handle_cr2_cr3.h>
 
 void idt_set_gate(int num, uint64_t isr_addr) {
 	idt[num].flags = IDT_P | IDT_DPL0 | TYPE_INTERRUPT_GATE;
@@ -110,6 +111,9 @@ void fault_handler(uint64_t *r)
         *  infinite loop */
         puts(exception_messages[*r]);
         puts(" Exception. System Halted!\n");
+
+    	printf("Content of cr2: %p\n",get_cr2());
+
         for (;;);
     }
     for (;;);
