@@ -1,5 +1,6 @@
 #include<sys/kstdio.h>
 #include<sys/scheduler/scheduler.h>
+#include<sys/syscall/syscall.h>
 
 static int counter_world = 4;
 
@@ -7,7 +8,7 @@ static int counter_world = 4;
 void invokeWorld(){
 	while(counter_world--){
 		printf("World..");
-		schedule();
+		yield();
 		printf("\nContinuing in world..");
 	}
 	printf("\n.....................");

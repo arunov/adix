@@ -6,11 +6,7 @@
 
 /* This array is actually an array of function pointers. We use
 *  this to handle custom IRQ handlers for a given IRQ */
-void *irq_routines[16] =
-{
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0
-};
+void *irq_routines[17] = {0};
 
 /* This installs a custom IRQ handler for the given IRQ */
 void irq_install_handler(int irq, void (*handler)(void))
@@ -65,6 +61,7 @@ void irq_install()
     idt_set_gate(45, (uint64_t)irq13);
     idt_set_gate(46, (uint64_t)irq14);
     idt_set_gate(47, (uint64_t)irq15);
+    idt_set_gate(48, (uint64_t)irq16);//System calls
 }
 
 /* This is a simple string array. It contains the message that
@@ -89,6 +86,7 @@ char *irq_messages[] =
     "Future Use",
     "Future Use",
     "Future Use",
+    "System calls",
 };
 
 /* All of our Exception handling Interrupt Service Routines will
@@ -97,12 +95,18 @@ char *irq_messages[] =
 *  endless loop. All ISRs disable interrupts while they are being
 *  serviced as a 'locking' mechanism to prevent an IRQ from
 *  happening and messing up kernel data structures */
-void irq_handler(uint64_t *r)
+void irq_handler(uint64_t *r, uint64_t *num)
 {
     /* Is this a fault whose number is from 32 to 47? */
 #if DEBUG
     //printf("Interrupt No: %p\n", *r);
 #endif
+        /* This is a blank function pointer */
+    void (*handler)(void);
+
+    /* Find out if we have a custom handler to run for this
+    *  IRQ, and then finally, run it */
+    handler = irq_routines[*r - 32];
     if (*r > 31 && *r < 48)
     {
         /* Display the description for the Exception that occurred.
@@ -111,14 +115,9 @@ void irq_handler(uint64_t *r)
 
         //puts(irq_messages[*r-32]); 
 
-        /* This is a blank function pointer */
-        void (*handler)(void);
-
-        /* Find out if we have a custom handler to run for this
-        *  IRQ, and then finally, run it */
-        handler = irq_routines[*r - 32];
         if (handler)
         {
+//		printf("Calling handler:%d",*r);
             handler();
         }
 
@@ -139,6 +138,8 @@ void irq_handler(uint64_t *r)
             //puts(" IRQ. System Halted!\n");
             //for (;;);
         }
+    } else if( *r == 48){
+	((void (*)(uint64_t))handler)(*num);
     }
 }
 

@@ -2,6 +2,7 @@
 #include<sys/scheduler/scheduler.h>
 #include<sys/kstdio.h>
 #include<sys/list.h>
+#include<sys/syscall/syscall.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 
@@ -36,7 +37,7 @@ void exit(){
 	list_del(&current_task->lister);//delete from run queue
 	//add to terminated queue
 	list_add(&current_task->lister,&pcb_terminated_queue);
-	schedule();//schedule next job
+	yield();//schedule next job
 }
 
 /* Clear PCB and related information when a process is terminated. 

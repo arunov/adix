@@ -1,12 +1,13 @@
 #include<sys/kstdio.h>
 #include<sys/scheduler/scheduler.h>
+#include<sys/syscall/syscall.h>
 static int counter_hello=4;
 
 /* A Helo method that yields to next process in run queue*/
 void invokeHello(){
 	while(counter_hello--){	
 		printf("Hello...");
-		schedule();
+		yield();
 		printf("\nContinuing in hello...");
 	}
 	printf("\n......................");
