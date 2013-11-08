@@ -7,6 +7,8 @@
 #include <sys/memory/handle_cr2_cr3.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/list.h>
+#include <sys/parser/parsetarfs.h>
+#include <sys/parser/tarfs.h>
 
 #define INITIAL_STACK_SIZE 4096
 
@@ -14,6 +16,8 @@
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
+struct tss_t tss;
+
 
 void cooperative_schedule();
 void test_print()
@@ -30,6 +34,7 @@ void test_print()
     printf("Content of cr2: %p\n",get_cr2());
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
+	
     cooperative_schedule();
 /*
 	mystruct myFirst = {
@@ -108,6 +113,22 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Page tables successfully setup\n");
 	test_print();
 
+	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+	//check for parsetar
+	int parseresult = parsetar();
+	printf("number of files: %d\n", parseresult);
+	//check for read_tarfs
+	char *filename;
+	char buffer[20];
+	filename = "etc/hellonew.c";
+	uint64_t offset = 2, numbytes = 10;
+	int found =read_tarfs(filename, offset, numbytes, buffer);
+	if(found == -1)
+		printf("file not found\n");
+	else{
+		printf("number of characters copied: %d\n", found);
+		printf("buffer: %s", buffer);
+	}
 	// kernel starts here
 	while(1);
 }

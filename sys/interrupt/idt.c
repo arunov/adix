@@ -34,5 +34,5 @@ void reload_idt() {
     syscallInstall();//TODO:Hw about all s/w interrupts together?
 
     _x86_64_asm_lidt(&idtr);
-    asm volatile("sti");
+    __asm volatile("sti");
 }

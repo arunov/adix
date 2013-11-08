@@ -4,7 +4,7 @@ The provided Makefile:
 	3) creates an ISO CD image with the rootfs/ contents
 
 To boot the system in QEMU, run:
-	qemu-system-x86_64 -curses -cdrom $USER.iso -hda $USER.img -gdb tcp::NNNN
+	qemu-system-x86_64 -curses -cdrom $USER.iso -drive id=disk,file=$USER.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 -gdb tcp::NNNN
 
 	Explanation of parameters:
 	-curses         use a text console (omit this to use default SDL/VNC console)
