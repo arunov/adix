@@ -22,7 +22,7 @@ struct tss_t tss;
 void cooperative_schedule();
 void test_print()
 {
-    char *str="Hello World\n";
+    /*char *str="Hello World\n";
     char c='A';
     int a=10;
 	
@@ -63,25 +63,66 @@ void test_print()
 		printf ("data  =  %d\n" , datastructureptr->data ); 
 	}
 
-	list_del(&myFirst.myList);
-	int empty = list_empty(&mylinkedlist);
-	if(empty==1){
-		printf("deleted myFirst:  List is empty");
-	}	
+printf("helloooooooo");*/
 
-	list_del(&mySecond.myList);
-	empty = list_empty(&mylinkedlist);
-	if(empty==1){
-		printf("deleted myFirst and mySecond:  List is empty");
-	}	
+mystruct myFirst = {
+         .data = 10,
+         .myList = LIST_HEAD_INIT(myFirst.myList)
+};
 
-	list_add_tail( &myFirst.myList , &mylinkedlist);
-	list_add_tail( &mySecond.myList , &mylinkedlist ) ;
-	list_for_each( position , &mylinkedlist )
-	{
-        	printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
-	}
-*/	
+mystruct mySecond = {
+         .data = 20,
+	 .myList = LIST_HEAD_INIT(mySecond.myList)
+};
+
+LIST_HEAD(mylinkedlist);
+
+list_add( &myFirst.myList , &mylinkedlist ) ;
+list_add( &mySecond.myList , &mylinkedlist ) ;
+
+/*
+struct list_head* position;
+list_for_each( position , &mylinkedlist )
+{
+        printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
+}
+
+mystruct  *datastructureptr = NULL ; 
+list_for_each_entry ( datastructureptr , &mylinkedlist, myList ){ 
+	printf ("data  =  %d\n" , datastructureptr->data ); 
+}
+
+list_del(&myFirst.myList);
+int empty = list_empty(&mylinkedlist);
+if(empty==1){
+	printf("deleted myFirst:  List is empty");
+}	
+
+list_del(&mySecond.myList);
+empty = list_empty(&mylinkedlist);
+if(empty==1){
+	printf("deleted myFirst and mySecond:  List is empty");
+}	
+
+list_add_tail( &myFirst.myList , &mylinkedlist);
+list_add_tail( &mySecond.myList , &mylinkedlist ) ;
+list_for_each( position , &mylinkedlist )
+{
+        printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

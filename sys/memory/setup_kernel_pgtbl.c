@@ -3,6 +3,7 @@
 #include <sys/memory/phys_page_manager.h>
 #include <sys/memory/page_table_helper.h>
 #include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/mm_struct.h>
 
 extern struct phys_page_manager phys_page_mngr_obj;
 
@@ -34,6 +35,17 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
     void *pml4_page = (void*)get_selfref_PML4(&kern_page_table_mgr);
 	uint64_t paddr = (uint64_t)physbase;
 	uint64_t vaddr = (uint64_t)kernmem;
+
+    struct mm_struct *kmm = new_kernel_mm(0);
+
+    init_code_vma(kmm, (uint64_t) kernmem + (uint64_t) physbase,
+                                (uint64_t) kernmem + (uint64_t) physfree, 0);
+
+    init_data_vma(kmm, (uint64_t) kernmem + (uint64_t) physbase,
+                                (uint64_t) kernmem + (uint64_t) physfree, 0);
+
+    print_vmas(kmm);
+
 	//int count = 0;
 	printf("vaddr: %p, paddr: %p, physfree: %p\n", kernmem, physbase, physfree);
 	while(paddr < (uint64_t)physfree) {
