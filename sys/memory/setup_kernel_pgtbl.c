@@ -80,6 +80,15 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 	global_video_vaddr = (void *)video_vaddr;
 	set_cr3(cr3);
     //update_curr_page_table(&kern_page_table_mgr, (uint64_t)VIDEO_MEMORY_ADDRESS, video_vaddr, PAGE_TRANS_READ_WRITE);
+
+    char *x = kmalloc(100);
+    memcpy(x, "I am x :)", 10);
+    printf("*x: %s x: %p\n", x, x);
+    char *y = kmalloc_align(100, KM_ALIGN_PAGE);
+    memcpy(y, "I am y :)", 10);
+    printf("*y: %s y: %p\n", y, y);
+    kfree(x);
+    kfree(y);
 }
 
 
