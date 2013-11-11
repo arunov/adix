@@ -34,8 +34,8 @@ void test_print()
     printf("Content of cr2: %p\n",get_cr2());
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
-	
-    cooperative_schedule();
+*/	
+    //cooperative_schedule();
 /*
 	mystruct myFirst = {
         	 .data = 10,
@@ -63,7 +63,7 @@ void test_print()
 		printf ("data  =  %d\n" , datastructureptr->data ); 
 	}
 
-printf("helloooooooo");*/
+printf("helloooooooo");
 
 mystruct myFirst = {
          .data = 10,
@@ -80,7 +80,7 @@ LIST_HEAD(mylinkedlist);
 list_add( &myFirst.myList , &mylinkedlist ) ;
 list_add( &mySecond.myList , &mylinkedlist ) ;
 
-/*
+
 struct list_head* position;
 list_for_each( position , &mylinkedlist )
 {

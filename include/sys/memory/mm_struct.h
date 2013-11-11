@@ -38,6 +38,9 @@ struct mm_struct {
     /* Starting virtual address of user stack section */
     uint64_t start_stack;
 
+    /* Ending virtual address of user stack section */
+    uint64_t end_stack;
+
     /* List of mm_struct */
     struct list_head mm_list;
 

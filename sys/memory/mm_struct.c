@@ -103,8 +103,23 @@ static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
 
     if(add_after && (add_after->vm_end == start_addr_a) &&
                                     (add_after->vm_page_prot == page_prot_a)) {
-        add_after->vm_end = end_addr_a;
-        extend_vma = 1;
+        if(extend_vma == 1) {
+
+            // Merge with add_before and remove add_after node
+            add_before->vm_start = add_after->vm_start;
+
+            struct vm_area_struct *node_before = list_entry(
+                    (add_after->vm_list).prev, struct vm_area_struct, vm_list);
+
+            (node_before->vm_list).next = &(add_before->vm_list);
+            (add_before->vm_list).prev = &(node_before->vm_list);
+
+            // TODO: Free add_after
+
+        } else {
+            add_after->vm_end = end_addr_a;
+            extend_vma = 1;
+        }
     }
 
     if(extend_vma) {
@@ -126,12 +141,14 @@ static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
 
         (p_vma->vm_list).prev = (add_before->vm_list).prev;
         (p_vma->vm_list).next = &(add_before->vm_list);
+        ((add_before->vm_list).prev)->next = &(p_vma->vm_list);
         (add_before->vm_list).prev = &(p_vma->vm_list);
 
     } else if(add_after) {
 
         (p_vma->vm_list).next = (add_after->vm_list).next;
         (p_vma->vm_list).prev = &(add_after->vm_list);
+        ((add_after->vm_list).next)->prev = &(p_vma->vm_list);
         (add_after->vm_list).next = &(p_vma->vm_list);
 
     }
@@ -223,8 +240,8 @@ int init_code_vma(struct mm_struct *this, uint64_t start_code_a,
         return -1;
     }
 
-    this->start_data = start_code_a;
-    this->end_data = end_code_a;
+    this->start_code = start_code_a;
+    this->end_code = end_code_a;
 
     return 0;
 }
@@ -236,8 +253,8 @@ int init_heap_vma(struct mm_struct *this, uint64_t start_heap_a,
         return -1;
     }
 
-    this->start_data = start_heap_a;
-    this->end_data = end_heap_a;
+    this->start_heap = start_heap_a;
+    this->end_heap = end_heap_a;
 
     return 0;
 }
@@ -249,8 +266,8 @@ int init_stack_vma(struct mm_struct *this, uint64_t start_stack_a,
         return -1;
     }
 
-    this->start_data = start_stack_a;
-    this->end_data = end_stack_a;
+    this->start_stack = start_stack_a;
+    this->end_stack = end_stack_a;
 
     return 0;
 }
@@ -315,8 +332,9 @@ void print_vmas(struct mm_struct *this) {
     printf("->start_data: %p,", this->start_data);
     printf("->end_data: %p,", this->end_data);
     printf("->start_heap: %p,", this->start_heap);
-    printf("->end_data: %p,", this->end_heap);
+    printf("->end_heap: %p,", this->end_heap);
     printf("->start_stack: %p,", this->start_stack);
+    printf("->end_stack: %p,", this->end_stack);
     printf("( ->mm_list).next: %p,", (this->mm_list).next);
     printf("( ->mm_list).prev: %p,", (this->mm_list).prev);
     printf("#");
