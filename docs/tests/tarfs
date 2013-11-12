@@ -1,0 +1,54 @@
+//check for parsetar
+	int parseresult = parsetar();
+	printf("number of files: %d\n", parseresult);
+
+
+
+//check file operations
+	char *filename;
+	char buffer[20];
+	filename = "lib/libc.a";
+	uint64_t numbytes = 2;
+	
+	int fd = open(filename, 0);
+	if(fd ==-1)
+		printf("open not successful");
+	close(fd);
+	fd = open("hellonew.c", 0);
+	if(fd ==-1)
+		printf("open not successful");
+	else{
+		printf("fd: %d\n", fd);
+		int num_bytes = read(fd, buffer, numbytes);
+		if(num_bytes == -1)
+			printf("error in reading\n");
+		else{
+			printf("number of characters copied: %d\n", num_bytes);
+			printf("buffer: %s\n",buffer);
+		}
+	}
+	fd = open("lib/crt1.o", 0);
+
+	printf("fd: %d", fd);	
+	close(fd);
+	fd = open("lib/underlib/", 0);
+	printf("fd: %d", fd);	
+	int num_bytes =read(fd, buffer, numbytes);
+	printf(" read count%d",num_bytes);
+
+
+//checking dir operations
+	int fd = opendir("etc/");
+	printf("fd: %d", fd);
+	struct posix_header_ustar *readdir_return;
+	while((readdir_return= readdir(fd))!=0){
+		printf("element: %s\n", readdir_return->name);
+	}
+	int close_return = close(fd);
+	printf("close_return= %d", close_return);
+	fd = opendir("etc/underetc/");
+	printf("fd: %d", fd);
+	while((readdir_return= readdir(fd))!=0){
+		printf("element: %s\n", readdir_return->name);
+	}
+	close_return = close(fd);

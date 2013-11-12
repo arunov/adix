@@ -46,7 +46,7 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
 
 	paddr = (uint64_t)physfree;
 	vaddr = (uint64_t)physfree;
-	while(paddr < (uint64_t)physfree + SIZEOF_PAGE * 300) {
+	while(paddr < (uint64_t)physfree + SIZEOF_PAGE * 500) {
 		update_pg_table((void*)vaddr, pml4_page, (void*)paddr);
 		paddr += PG_SZ;
 		vaddr += PG_SZ;

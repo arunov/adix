@@ -35,53 +35,7 @@ void test_print()
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
 	
-    cooperative_schedule();
-/*
-	mystruct myFirst = {
-        	 .data = 10,
-	         .myList = LIST_HEAD_INIT(myFirst.myList)
-	};
-
-	mystruct mySecond = {
-        	 .data = 20,
-		 .myList = LIST_HEAD_INIT(mySecond.myList)
-	};
-
-	LIST_HEAD(mylinkedlist);
-
-	list_add( &myFirst.myList , &mylinkedlist ) ;
-	list_add( &mySecond.myList , &mylinkedlist ) ;
-
-	struct list_head* position;
-	list_for_each( position , &mylinkedlist )
-	{	
-        	printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
-	}	
-
-	mystruct  *datastructureptr = NULL ; 
-	list_for_each_entry ( datastructureptr , &mylinkedlist, myList ){ 
-		printf ("data  =  %d\n" , datastructureptr->data ); 
-	}
-
-	list_del(&myFirst.myList);
-	int empty = list_empty(&mylinkedlist);
-	if(empty==1){
-		printf("deleted myFirst:  List is empty");
-	}	
-
-	list_del(&mySecond.myList);
-	empty = list_empty(&mylinkedlist);
-	if(empty==1){
-		printf("deleted myFirst and mySecond:  List is empty");
-	}	
-
-	list_add_tail( &myFirst.myList , &mylinkedlist);
-	list_add_tail( &mySecond.myList , &mylinkedlist ) ;
-	list_for_each( position , &mylinkedlist )
-	{
-        	printf ("surfing the linked list next = %p and prev = %p\n" ,position->next, position->prev );
-	}
-*/	
+   // cooperative_schedule();
 }
 
 
@@ -114,21 +68,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	test_print();
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-	//check for parsetar
-	int parseresult = parsetar();
-	printf("number of files: %d\n", parseresult);
-	//check for read_tarfs
-	char *filename;
-	char buffer[20];
-	filename = "etc/hellonew.c";
-	uint64_t offset = 2, numbytes = 10;
-	int found =read_tarfs(filename, offset, numbytes, buffer);
-	if(found == -1)
-		printf("file not found\n");
-	else{
-		printf("number of characters copied: %d\n", found);
-		printf("buffer: %s", buffer);
-	}
+
 	// kernel starts here
 	while(1);
 }
