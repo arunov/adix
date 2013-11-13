@@ -48,7 +48,7 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
 	uint64_t paddr = (uint64_t)physbase;
 	uint64_t vaddr = (uint64_t)kernmem;
 
-    struct mm_struct *kmm = new_kernel_mm(0);
+    /*struct mm_struct *kmm = new_kernel_mm(0);
 
     init_code_vma(kmm, (uint64_t) kernmem + (uint64_t) physbase,
                                 (uint64_t) kernmem + (uint64_t) physfree, 0);
@@ -56,7 +56,7 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
     init_data_vma(kmm, (uint64_t) kernmem + (uint64_t) physfree + SIZEOF_PAGE * 100,
             (uint64_t) physfree + (uint64_t) kernmem + SIZEOF_PAGE * 300, 0);
     init_data_vma(kmm, (uint64_t) kernmem + (uint64_t) physfree,
-            (uint64_t) physfree + (uint64_t) kernmem + SIZEOF_PAGE * 100, 0);
+            (uint64_t) physfree + (uint64_t) kernmem + SIZEOF_PAGE * 100, 0);*/
 
     //print_vmas(kmm);
 
