@@ -84,7 +84,7 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree)
     char *x = kmalloc(100);
     memcpy(x, "I am x :)", 10);
     printf("*x: %s x: %p\n", x, x);
-    char *y = kmalloc_align(100, KM_ALIGN_PAGE);
+    char *y = kmalloc(100);
     memcpy(y, "I am y :)", 10);
     printf("*y: %s y: %p\n", y, y);
     kfree(x);
