@@ -78,6 +78,7 @@ void update_page_table(struct page_table_helper *this, uint64_t pml4,
     }
 
     pd_vaddr = (uint64_t*) VIRTUAL_ADDR(pd);
+    //printf("\nVIDEO MEM ADDRESS:%p",pd_vaddr);
 
     // Check PT present
     if(!(pd_vaddr[INDEX_PDE(virt)] & PAGE_TRANS_PRESENT)) {

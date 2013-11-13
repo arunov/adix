@@ -46,6 +46,7 @@ extern void isr30();
 extern void isr31();
 
 void idt_set_gate(int num, uint64_t isr_addr);
+void idt_set_gate_with_privilege(int num, uint64_t isr_addr, unsigned char dpl);
 void isrs_install();
 #endif
 

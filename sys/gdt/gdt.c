@@ -55,3 +55,7 @@ void setup_tss() {
 	sd->sd_gran = 0;
 	sd->sd_hibase = ((uint64_t)&tss) >> 24;
 }
+
+void set_tss_rsp(uint64_t rsp){
+	tss.rsp0 = rsp;
+}

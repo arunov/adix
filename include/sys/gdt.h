@@ -29,5 +29,6 @@ extern uint64_t gdt[];
 
 void reload_gdt();
 void setup_tss();
+void set_tss_rsp(uint64_t rsp);
 
 #endif

@@ -19,7 +19,7 @@ extern char kernmem, physbase;
 struct tss_t tss;
 
 
-void cooperative_schedule();
+void cooperative_schedule(void *, void *);
 void test_print()
 {
     char *str="Hello World\n";
@@ -35,7 +35,6 @@ void test_print()
     struct str_cr3 cr3= get_cr3();
     printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
 	
-    cooperative_schedule();
 /*
 	mystruct myFirst = {
         	 .data = 10,
@@ -111,6 +110,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	setup_kernel_pgtbl(&kernmem, physbase, physfree);
 
 	printf("Page tables successfully setup\n");
+    	cooperative_schedule(&kernmem,physfree);
 	test_print();
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
@@ -196,8 +196,6 @@ void boot(void)
     //printf("Address of a:%p\n", &a);
 
     //clear_screen();
-    test_print();
-
 	while(1) {
     };
 }
