@@ -105,17 +105,3 @@ void update_pg_table(void *vaddr, void *pml4_pg, void *new_page)
 		printf("Page already mapped!!!\n");
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -9,12 +9,9 @@ void syscallHandler(uint64_t num){
 	__asm__("movq %%rax,%0;"
 		: "=r"(syscall)
 		:);
-//	printf("\nSyscall num: %d",syscall);
 	if(num == SYS_YIELD){
 		schedule();
 	}
-		
-
 }
 
 void syscallInstall(){

@@ -34,7 +34,6 @@ popq %rax
 .endm
 
 .global switchTo
-.global saveReturnAddress
 .extern cleanupTerminated
 
 switchTo:
@@ -47,8 +46,4 @@ switchTo:
 	call cleanupTerminated 
 	popReg
 	#Get IP for the next task and return
-	retq
-
-saveReturnAddress:
-	movq 0x20(%rsp),%rax
 	retq

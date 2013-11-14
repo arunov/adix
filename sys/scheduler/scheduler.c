@@ -3,11 +3,12 @@
 #include<sys/kstdio.h>
 #include<sys/list.h>
 #include<sys/syscall/syscall.h>
+#include<sys/memory/handle_cr2_cr3.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 
 /* Get next task that is ready to be run*/
-struct pcb_t* getNextTask(){
+static struct pcb_t* getNextTask(){
 	return list_entry(pcb_run_queue.next,struct pcb_t,lister);
 }
 
@@ -22,15 +23,14 @@ struct pcb_t* getTerminatedTask(){
 	return list_entry(pcb_terminated_queue.next,struct pcb_t,lister);
 }
 
-/*Schedule a process/task*/
 void schedule(){
 	struct pcb_t *nextTask = getNextTask();
 	list_del(&nextTask->lister);//remove from head
 	list_add_tail(&nextTask->lister,&pcb_run_queue); //add to tail
+	set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
 	switchTo(nextTask->stack_base);
 }
 
-/* Exits from a process. Moves the task from run queue to terminated queue */
 void exit(){
 	struct pcb_t *current_task = getCurrentTask();
 	updateState(current_task, P_TERMINATED);
@@ -40,8 +40,6 @@ void exit(){
 	yield();//schedule next job
 }
 
-/* Clear PCB and related information when a process is terminated. 
-   This methods is called after the context is switched to a new process.*/
 void cleanupTerminated(){
 	struct pcb_t *terminated_task = getTerminatedTask();	
 	if(terminated_task != NULL){
@@ -51,12 +49,10 @@ void cleanupTerminated(){
 	}
 }
 
-/* Add a task to the pcb run queue*/
 void addToTaskList(struct pcb_t *pcb){
 	list_add_tail(&pcb->lister,&pcb_run_queue);
 }
 
-/* Print entries on the run queue*/
 void printPcbRunQueue(){
 	struct pcb_t *the_pcb = NULL;
 	printf("\nPCB READY QUEUE: ");
@@ -64,4 +60,3 @@ void printPcbRunQueue(){
 		printPcb(the_pcb);
 	}
 }
-

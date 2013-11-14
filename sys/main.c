@@ -19,25 +19,7 @@ extern char kernmem, physbase;
 struct tss_t tss;
 
 
-void cooperative_schedule();
-void test_print()
-{
-    char *str="Hello World\n";
-    char c='A';
-    int a=10;
-	
-    clear_screen();		
-    //printf("~~Character: %c, Hex: %x, String: %s Address of String: %p\n", c,a,str,str);
-    printf("~~Character: %c, Integer: %d, Hex: %x, String: %s Address of String: %p\n", c,a,a,str,str);
-    printf("Address of kernmem: %p\n", &kernmem);
-    printf("Offset od str: %x\n", ((uint64_t)str)-((uint64_t)&kernmem));
-    printf("Content of cr2: %p\n",get_cr2());
-    struct str_cr3 cr3= get_cr3();
-    printf("Content of cr3: %x\n", *((uint64_t *)(&cr3)));
-	
-   // cooperative_schedule();
-}
-
+void cooperative_schedule(void *, void *);
 
 struct phys_page_manager phys_page_mngr_obj;
 
@@ -65,6 +47,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	setup_kernel_pgtbl(&kernmem, physbase, physfree);
 
 	printf("Page tables successfully setup\n");
+    	cooperative_schedule(&kernmem,physfree);
 	test_print();
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
@@ -100,43 +83,6 @@ void boot(void)
 		temp1 += 1, temp2 += 2
 	) *temp2 = *temp1;
 
-	test_print();	
-
-        /* for(
-                temp1 = "!!!!! end() returned !!!!!", temp2 = (char*)0xb8e00;
-                *temp1;
-                temp1 += 1, temp2 += 2
-        ) *temp2 = *temp1; */ 
-
-    /*
-	puts((char *)"Hello\n");
-    int z, a[10];
-    z = printf("Testing string in printf: %s :and character: %c \n:-)\n", "hello guyz this is printf\n", 'x');
-    printf("\nnum_char %d\n", z);
-    z = printf("Integer %d, %%, %d, %", 12323, 0);
-    printf("\nnum_char %d\n", z);
-    z = printf("Negative Integer %d is a negative num :P", -10);
-    printf("\nnum_char %d\n", z);
-    z = printf("\nHex value of %d is %x\n", 0x8234A678, 0x8234a678);
-    printf("\nnum_char %d\n", z);
-    z = printf("\n\nPointer a[0] %p %d\n", &(a[0]), sizeof(int*));
-    printf("\nnum_char %d\n", z);
-    z = printf("\n\nPointer a[1] %p %d\n", &(a[1]), sizeof(int*));
-    printf("\nnum_char %d\n", z);
-    z = printf("\n\nPointer z %p %d\n", &z, sizeof(int*));
-    int *t1 = &a[0];
-    int *t2 = &a[1];
-    printf("Difference in address %d\n", (t2 - t1));
-    printf("\nnum_char %d\n", z);
-    volatile int qqq = 0;
-
-    printf("%d", 1/qqq);*/
-
-    //int a=10;
-    //printf("Address of a:%p\n", &a);
-
-    //clear_screen();
-    test_print();
 
 	while(1) {
     };

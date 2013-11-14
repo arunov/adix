@@ -22,7 +22,7 @@ void outportb (unsigned short _port, unsigned char _data)
 void blink_cursor(unsigned int pos_x, unsigned int pos_y)
 {
 	unsigned int pos_memory = BUFFER_ADDRESS(pos_x, pos_y);
-
+	
 	outportb(0x3D4, 14);
 	outportb(0x3D5, pos_memory >> 8);
 	outportb(0x3D4, 15);
@@ -59,7 +59,7 @@ void scroll_screen(void)
 *  on the screen under the last character pressed! */
 void move_cursor(void)
 {
-	 blink_cursor(global_cursor_x, global_cursor_y);
+	 //blink_cursor(global_cursor_x, global_cursor_y);
 }
 
 /* Clears the screen */
@@ -82,7 +82,7 @@ void clear_screen()
     	*  hardware cursor */
     	global_cursor_x = 0;
     	global_cursor_y = 0;
-    	blink_cursor(global_cursor_x, global_cursor_y);
+    	//blink_cursor(global_cursor_x, global_cursor_y);
 }
 
 /* Puts a single character on the screen */

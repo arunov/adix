@@ -4,7 +4,6 @@
 void trap(uint64_t syscall_num){
 	__asm__("movq %0,%%rax;"
 		"int $48;"
-		"sti;"
 		:
 		:"r"(syscall_num)
 		:

@@ -8,10 +8,11 @@ void invokeDaemon();
 
 /* Test method used to initialize a system that does a co-operative
 scheduling.*/
-void cooperative_schedule(){
-	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeHello));
-	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeWorld));
-	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeDaemon));
+void cooperative_schedule(void *kernmem, void *physfree){
+	//replace createTask with exec
+	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeHello,kernmem,  physfree));
+	addToTaskList(createTask(UPROC,(uint64_t)&invokeWorld, kernmem, physfree));
+	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeDaemon, kernmem, physfree));
 	printPcbRunQueue();
 	yield(); 
 }

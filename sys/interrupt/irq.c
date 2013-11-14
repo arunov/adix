@@ -61,7 +61,7 @@ void irq_install()
     idt_set_gate(45, (uint64_t)irq13);
     idt_set_gate(46, (uint64_t)irq14);
     idt_set_gate(47, (uint64_t)irq15);
-    idt_set_gate(48, (uint64_t)irq16);//System calls
+    idt_set_gate_with_privilege(48, (uint64_t)irq16, IDT_DPL3);//System calls
 }
 
 /* This is a simple string array. It contains the message that
