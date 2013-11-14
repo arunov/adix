@@ -133,6 +133,7 @@ void kfree(void *ptr) {
         node = node->free_addr;
     }
 
+    // TODO: fp could be within an existing chunk
     if(fp == cp) {
         return;
     }
