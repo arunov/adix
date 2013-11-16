@@ -59,6 +59,7 @@ void update_page_table(struct page_table_helper *this, uint64_t pml4,
     if(!(pml4_vaddr[INDEX_PML4E(virt)] & PAGE_TRANS_PRESENT)) {
         pdp = get_zeroed_page_trans_obj(this);
         pml4_vaddr[INDEX_PML4E(virt)] = PAGE_TRANS_NEXT_LEVEL_ADDR(pdp)
+                            | PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR
                                                         | PAGE_TRANS_PRESENT;
     } else {
         pdp = PAGE_TRANS_NEXT_LEVEL_ADDR(pml4_vaddr[INDEX_PML4E(virt)])
@@ -71,6 +72,7 @@ void update_page_table(struct page_table_helper *this, uint64_t pml4,
     if(!(pdp_vaddr[INDEX_PDPE(virt)] & PAGE_TRANS_PRESENT)) {
         pd = get_zeroed_page_trans_obj(this);
         pdp_vaddr[INDEX_PDPE(virt)] = PAGE_TRANS_NEXT_LEVEL_ADDR(pd)
+                            | PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR
                                                         | PAGE_TRANS_PRESENT;
     } else {
         pd = PAGE_TRANS_NEXT_LEVEL_ADDR(pdp_vaddr[INDEX_PDPE(virt)])
@@ -84,6 +86,7 @@ void update_page_table(struct page_table_helper *this, uint64_t pml4,
     if(!(pd_vaddr[INDEX_PDE(virt)] & PAGE_TRANS_PRESENT)) {
         pt = get_zeroed_page_trans_obj(this);
         pd_vaddr[INDEX_PDE(virt)] = PAGE_TRANS_NEXT_LEVEL_ADDR(pt)
+                            | PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR
                                                         | PAGE_TRANS_PRESENT;
     } else {
         pt = PAGE_TRANS_NEXT_LEVEL_ADDR(pd_vaddr[INDEX_PDE(virt)])
