@@ -253,3 +253,27 @@ int closedir(int fd){
 	int i = close(fd);
 	return i;
 }
+
+int lseek(int fd, off64_t offset, int whence) {
+
+    if(!process_open_files_table[fd].header) {
+        // No such file!
+        return -1;
+    }
+
+    switch(whence) {
+    case SEEK_SET:
+        process_open_files_table[fd].offset = offset;
+        break;
+    case SEEK_CUR:
+        process_open_files_table[fd].offset += offset;
+        break;
+    case SEEK_END:
+        // TODO: Seek from end of file
+        process_open_files_table[fd].offset = offset;
+        break;
+    }
+
+    return 0;
+}
+

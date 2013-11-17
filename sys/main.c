@@ -9,6 +9,7 @@
 #include <sys/list.h>
 #include <sys/parser/parsetarfs.h>
 #include <sys/parser/tarfs.h>
+#include <sys/memory/mm_struct.h>
 
 #define INITIAL_STACK_SIZE 4096
 
@@ -47,10 +48,13 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	setup_kernel_pgtbl(&kernmem, physbase, physfree);
 
 	printf("Page tables successfully setup\n");
+    /* Check do_mmap */
+    int fd = open("aladdin.txt");
+    struct mm_struct *mm = new_mm();
+    do_mmap(mm, fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+    printf("Contents of mmapped file: %s", 0x1000UL);
+
     	cooperative_schedule(&kernmem,physfree);
-
-	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-
 	// kernel starts here
 	while(1);
 }

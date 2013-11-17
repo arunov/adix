@@ -5,6 +5,9 @@
 
 typedef unsigned long __uint64_t;
 typedef __uint64_t uint64_t;
+typedef long __int64_t;
+typedef __int64_t int64_t;
+typedef __int64_t off64_t;
 typedef unsigned int __uint32_t;
 typedef __uint32_t uint32_t;
 typedef int __int32_t;

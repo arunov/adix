@@ -1,4 +1,5 @@
 #include <sys/memory/mm_struct.h>
+#include <sys/parser/parsetarfs.h>
 
 /**
  * Pool of mm_struct objects for kernel
@@ -351,5 +352,40 @@ void print_vmas(struct mm_struct *this) {
         printf("#");
 
     }
+}
+
+extern struct phys_page_manager phys_page_mngr_obj;
+
+int do_mmap(struct mm_struct *this, int file, uint64_t offset, uint64_t addr,
+                                                uint64_t len, uint64_t prot) {
+
+    // Number of physical pages
+    int num_pages = len/PG_SZ + 1;
+
+    // Virtual address
+    uint64_t v_addr = addr;
+
+    // Remaining bytes
+    uint64_t bytes = len;
+
+    for(int i = 0; i < num_pages; i++) {
+
+        // Get free physical page
+        uint64_t phys = (uint64_t) get_free_phys_page(getPhysPageManager());
+
+        // Add to page table
+        update_curr_page_table(getPageTableHelper(), phys, v_addr, prot);
+
+        // Load page with file contents
+        lseek(file, offset, SEEK_SET);
+        uint64_t bytes_read = read(file, (void*)v_addr, (bytes > PG_SZ)? PG_SZ : bytes);
+
+        bytes -= bytes_read;
+        v_addr += PG_SZ;
+
+    }
+
+    return 0;
+
 }
 
