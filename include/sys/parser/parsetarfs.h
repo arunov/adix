@@ -22,7 +22,7 @@ int read_tarfs( char *filename, uint64_t offset, uint64_t numbytes, char * buffe
 
 int open(const char* pathname);
 
-int read(int fd, void *buf, uint64_t count);
+int64_t read(int fd, void *buf, uint64_t count);
 
 int close(int fd);
 

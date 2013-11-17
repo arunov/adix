@@ -9,6 +9,8 @@
 #include <sys/list.h>
 #include <sys/parser/parsetarfs.h>
 #include <sys/parser/tarfs.h>
+#include <sys/parser/parseelf.h>
+#include <sys/parser/exec.h>
 
 #define INITIAL_STACK_SIZE 4096
 
@@ -47,10 +49,13 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	setup_kernel_pgtbl(&kernmem, physbase, physfree);
 
 	printf("Page tables successfully setup\n");
-    	cooperative_schedule(&kernmem,physfree);
-	test_print();
+ //   	cooperative_schedule(&kernmem,physfree);
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+	//elf test
+//	char* filename = "lib/crt1.o";
+	char *filename= "bin/hello";
+	exec(filename);
 
 	// kernel starts here
 	while(1);

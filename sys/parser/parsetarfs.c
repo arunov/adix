@@ -108,13 +108,12 @@ int open(const char* pathname){
 	return fd;
 }
 
-int read(int fd, void *buf, uint64_t count){
+int64_t read(int fd, void *buf, uint64_t count){
 	int i = -1;
 	if(process_open_files_table[fd].header == 0)
 		return i;
 	char *filetype = "0";
 	char *dirtype = "5";
-	printf("type: %s\n",process_open_files_table[fd].header->typeflag);
 	if(strcmp(process_open_files_table[fd].header->typeflag,dirtype)==0){
 		printf("Reading a directory");
 	}
@@ -122,7 +121,7 @@ int read(int fd, void *buf, uint64_t count){
 		uint64_t header_address = (uint64_t)process_open_files_table[fd].header;
 		uint64_t size_of_file = getsize(process_open_files_table[fd].header->size);
 		uint64_t readptr = header_address + 512 + process_open_files_table[fd].offset;
-		char *temp = buf;
+		char *temp = (char *)buf;
 		for(i =0;i<count;i++){
 			if(size_of_file==process_open_files_table[fd].offset){
 				*temp = *(char *)readptr;

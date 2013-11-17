@@ -3,6 +3,8 @@
 
 #define NULL 0
 
+typedef long __int64_t;
+typedef __int64_t int64_t;
 typedef unsigned long __uint64_t;
 typedef __uint64_t uint64_t;
 typedef unsigned int __uint32_t;
