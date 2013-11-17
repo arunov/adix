@@ -37,6 +37,7 @@ popq %rax
 .extern cleanupTerminated
 
 switchTo:
+	cli
 	pushReg
 	movq %rsp,%rax
 	andq $0xfffffffffffff000,%rax #Get base of the stack
@@ -46,4 +47,5 @@ switchTo:
 	call cleanupTerminated 
 	popReg
 	#Get IP for the next task and return
+	sti
 	retq
