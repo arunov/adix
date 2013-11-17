@@ -136,7 +136,7 @@
                             (MASK_BITS_47_39(a) >> 18) | \
                             (MASK_BITS_38_30(a) >> 18) )
 
-// Self referenced virtual address for PDP entry corresponding to address 'a'
+// Self referenced virtual address for PD entry corresponding to address 'a'
 #define SELF_REF_PDE(a) ( SELF_REF_PD(a) | \
                             (MASK_BITS_29_21(a) >> 18) )
 
@@ -148,7 +148,7 @@
                             (MASK_BITS_38_30(a) >> 9) | \
                             (MASK_BITS_29_21(a) >> 9) )
 
-// Self referenced virtual address for PDP entry corresponding to address 'a'
+// Self referenced virtual address for PT entry corresponding to address 'a'
 #define SELF_REF_PTE(a) ( SELF_REF_PT(a) | \
                             (MASK_BITS_20_12(a) >> 9) )
 /******************************************************************************/
