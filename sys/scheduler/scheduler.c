@@ -2,7 +2,6 @@
 #include<sys/scheduler/scheduler.h>
 #include<sys/kstdio.h>
 #include<sys/list.h>
-#include<sys/syscall/syscall.h>
 #include<sys/memory/handle_cr2_cr3.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
@@ -23,7 +22,7 @@ struct pcb_t* getTerminatedTask(){
 	return list_entry(pcb_terminated_queue.next,struct pcb_t,lister);
 }
 
-void schedule(){
+void sys_yield(){
 	struct pcb_t *nextTask = getNextTask();
 	list_del(&nextTask->lister);//remove from head
 	list_add_tail(&nextTask->lister,&pcb_run_queue); //add to tail
@@ -31,13 +30,13 @@ void schedule(){
 	switchTo(nextTask->stack_base);
 }
 
-void exit(){
+void sys_exit(int status){ 
 	struct pcb_t *current_task = getCurrentTask();
 	updateState(current_task, P_TERMINATED);
 	list_del(&current_task->lister);//delete from run queue
 	//add to terminated queue
 	list_add(&current_task->lister,&pcb_terminated_queue);
-	yield();//schedule next job
+	sys_yield();//schedule next job
 }
 
 void cleanupTerminated(){

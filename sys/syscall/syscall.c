@@ -1,15 +1,10 @@
-#include<sys/syscall/syscall.h>
 #include<defs.h>
-
-void trap(uint64_t syscall_num){
-	__asm__("movq %0,%%rax;"
-		"int $48;"
-		:
-		:"r"(syscall_num)
-		:
-		);
-}
+#include<syscall.h>
 
 void yield(){
-	trap(SYS_YIELD);	
+	__syscall0(YIELD);
+}
+
+void exit(int status){
+	__syscall1(EXIT,status);
 }

@@ -1,6 +1,5 @@
 #include<sys/kstdio.h>
 #include<sys/scheduler/scheduler.h>
-#include<sys/syscall/syscall.h>
 #include<sys/memory/handle_cr2_cr3.h>
 static int counter_hello=4;
 
@@ -9,11 +8,11 @@ void invokeHello(){
 	while(counter_hello--){	
 		printf("Hello...");
 		printf(" CR3 is:%p",get_cr3());
-		yield();
+		sys_yield();
 		printf("\nContinuing in hello...");
 	}
 	printf("\n......................");
 	printf("Exiting hello..");
 	//Exit this process. Sets up cleaning up of PCBs as of now.
-	exit();
+	sys_exit(0);
 }

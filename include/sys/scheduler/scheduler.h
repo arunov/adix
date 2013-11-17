@@ -5,9 +5,9 @@
 /* Method used to switch to another kernel thread*/
 void switchTo(void*);
 /*Schedule a process/task*/
-void schedule();
+void sys_yield();
 /* Exits from a process. Moves the task from run queue to terminated queue */
-void exit();
+void sys_exit(int status);
 /* Add a task to the pcb run queue*/
 void addToTaskList(struct pcb_t*);
 /* Print entries on the run queue*/

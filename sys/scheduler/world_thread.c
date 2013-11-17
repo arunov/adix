@@ -1,8 +1,8 @@
-#include<sys/kstdio.h>
-#include<sys/scheduler/scheduler.h>
-#include<sys/syscall/syscall.h>
-#include<sys/memory/handle_cr2_cr3.h>
-#include<sys/memory/pg_tbl_manager.h>
+#include <syscall.h>
+#include <sys/kstdio.h>
+#include <sys/scheduler/scheduler.h>
+#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/pg_tbl_manager.h>
 
 static int counter_world = 4;
 
@@ -21,5 +21,5 @@ void invokeWorld(){
 	printf("\n.....................");
 	printf("Exiting world..");
 	//Exit this process. Sets up cleaning up of PCBs as of now.
-	exit();
+	exit(0);
 }

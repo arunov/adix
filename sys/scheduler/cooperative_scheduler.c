@@ -1,6 +1,5 @@
 #include<sys/scheduler/pcb.h>
 #include<sys/scheduler/scheduler.h>
-#include<sys/syscall/syscall.h>
 
 void invokeHello();
 void invokeWorld();
@@ -14,5 +13,5 @@ void cooperative_schedule(void *kernmem, void *physfree){
 	addToTaskList(createTask(UPROC,(uint64_t)&invokeWorld, kernmem, physfree));
 	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeDaemon, kernmem, physfree));
 	printPcbRunQueue();
-	yield(); 
+	sys_yield(); 
 }
