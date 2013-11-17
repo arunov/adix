@@ -5,6 +5,8 @@
 */
 #define ULIMIT 1024
 
+#include <defs.h>
+
 int ulimit; 
 
 struct process_files_table{
@@ -23,6 +25,19 @@ int read_tarfs( char *filename, uint64_t offset, uint64_t numbytes, char * buffe
 int open(const char* pathname);
 
 int read(int fd, void *buf, uint64_t count);
+
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+/**
+ * Seek to new position at an offset 'offset' relative to 'whence'
+ * @param fd     file descriptor
+ * @param offset offset in bytes
+ * @param whence SEEK_SET for start of file, SEEK_CUR for current seek location, SEEK_END for end of file
+ * @return       OK or ERROR
+ */
+int lseek(int fd, off64_t offset, int whence);
 
 int close(int fd);
 
