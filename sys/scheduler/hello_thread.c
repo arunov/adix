@@ -1,15 +1,20 @@
-#include<sys/kstdio.h>
-#include<sys/scheduler/scheduler.h>
-#include<sys/memory/handle_cr2_cr3.h>
-static int counter_hello=4;
-
+#include <syscall.h>
+#include <sys/kstdio.h>
+#include <sys/scheduler/scheduler.h>
+#include <sys/memory/handle_cr2_cr3.h>
+int counter_hello=0;
+int sleep_count = 0;
 /* A Helo method that yields to next process in run queue*/
 void invokeHello(){
-	while(counter_hello--){	
-		printf("Hello...");
-		printf(" CR3 is:%p",get_cr3());
-		sys_yield();
-		printf("\nContinuing in hello...");
+	while(1){
+		if(counter_hello % 3000000 == 0){
+			counter_hello = 0;
+			printf("\nHello...");
+			sleep(1);
+		}
+		counter_hello++;
+
+		//printf(" CR3 is:%p",get_cr3());
 	}
 	printf("\n......................");
 	printf("Exiting hello..");

@@ -2,6 +2,7 @@
 #include <sys/irq.h>
 #include <sys/kstring.h>
 #include <sys/kstdio.h>
+#include <sys/scheduler/scheduler.h>
 
 /* This will keep track of how many ticks that the system
 *  has been running for */
@@ -11,12 +12,22 @@ uint32_t time_sec = 0;
 uint32_t time_min = 0;
 uint32_t time_hour = 0;
 
+int wakeup_count = 0;
+
 void timer_phase(int hz)
 {
     int divisor = 1193180 / hz;       /* Calculate our divisor */
     outportb(0x43, 0x36);             /* Set our command byte 0x36 */
     outportb(0x40, divisor & 0xFF);   /* Set low byte of divisor */
     outportb(0x40, divisor >> 8);     /* Set high byte of divisor */
+}
+
+/* Time to switch context preemtively!*/
+void switch_context(){
+	/* Acknowledge master PIC */
+	outportb(0x20, 0x20);
+	/* Yield to next process */
+        sys_yield();
 }
 
 /* Handles the timer. In this case, it's very simple: We
@@ -28,6 +39,7 @@ void timer_handler()
 {
     static int once = 0;
     static char *video_buf = NULL;
+    //printf("Timer interrupt");
 
     if(once == 0 || (uint64_t)video_buf != (((uint64_t)global_video_vaddr) + 4000))
     {
@@ -47,13 +59,21 @@ void timer_handler()
     *  display a message on the screen */
     if (timer_ticks % PIT_CLOCK_HZ == 0)
     {
-        timer_ticks = 0;
+    	/* Wakeup sleeping processes once for every 6 context switch: TODO: Remove later*/
+	if(++wakeup_count % 6 == 0){
+		sys_wakeup(1);
+	}
+    	/* And yes, that's a 60 pointer CS506 project! :) Preemption! */
+   	switch_context();
+        
+	timer_ticks = 0;
 
 	if(++time_sec == 60)
         {
             time_sec = 0;
 	    if(++time_min == 60)
             {
+
                  time_min = 0;
                  ++time_hour;
 

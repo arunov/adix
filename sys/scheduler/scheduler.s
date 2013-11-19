@@ -46,4 +46,5 @@ switchTo:
 	call cleanupTerminated 
 	popReg
 	#Get IP for the next task and return
+	sti
 	retq

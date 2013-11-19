@@ -13,5 +13,6 @@ void _sys_close();
 void _sys_opendir();
 void _sys_readdir();
 void _sys_closedir();
+void _sys_sleep();
 void sys_call_handler();
 #endif

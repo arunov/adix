@@ -10,6 +10,7 @@ void exit(int status){
 	__syscall1(EXIT,status);
 }
 
+<<<<<<< HEAD
 int open(const char* pathname){
 	int ret = __syscall1(OPEN, (uint64_t)pathname);
 	return ret;
@@ -46,3 +47,8 @@ int closedir(int fd){
 }
 
 
+=======
+void sleep(int sleep_interval){ //TODO
+	__syscall1(SLEEP, sleep_interval);
+}
+>>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4
