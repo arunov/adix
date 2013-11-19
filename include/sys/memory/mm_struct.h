@@ -6,6 +6,7 @@
 #include <sys/kstdio.h>
 #include <sys/memory/vm_area_struct.h>
 #include <sys/memory/phys_page_manager.h>
+#include <sys/memory/page_table_helper.h>
 
 #define KERNEL_MM_COUNT 1
 
@@ -149,6 +150,21 @@ uint64_t get_unmapped_area(struct mm_struct *this, uint64_t start_addr,
  * @param this pointer to mm_struct
  */
 void print_vmas(struct mm_struct *this);
+
+/**
+ * Create memory region
+ * @param this   pointer to mm_struct
+ * @param file   file descriptor of file
+ * @param offset offset in file for start of memory region
+ * @param addr   virtual address of memory region
+ * @param len    length of memory
+ * @param prot   page protection. E.g. PAGE_TRANS_READ_WRITE |
+ *               PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_NX
+ *               (@see include/sys/memory/page_table_helper.h).
+ * @retrun       OK or ERROR
+ */
+int do_mmap(struct mm_struct *this, int file, uint64_t offset, uint64_t addr,
+                                                uint64_t len, uint64_t prot);
 
 #endif
 

@@ -73,7 +73,7 @@ int strcmp(const char *s1,const char *s2){
 	return *s1-*s2;
 }
 
-int open(const char* pathname){
+int sys_open(const char* pathname){
 	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
@@ -108,8 +108,8 @@ int open(const char* pathname){
 	return fd;
 }
 
-int64_t read(int fd, void *buf, uint64_t count){
-	int i = -1;
+int64_t sys_read(int fd, void *buf, uint64_t count){
+	int64_t i = -1;
 	if(process_open_files_table[fd].header == 0)
 		return i;
 	char *filetype = "0";
@@ -134,7 +134,7 @@ int64_t read(int fd, void *buf, uint64_t count){
 	return i;
 }
 
-int close(int fd){
+int sys_close(int fd){
 	if(process_open_files_table[fd].header != 0){
 		process_open_files_table[fd].header = 0;
 		process_open_files_table[fd].offset = 0;
@@ -144,7 +144,7 @@ int close(int fd){
 		return -1;
 }
 
-int opendir(const char *pathname){
+int sys_opendir(const char *pathname){
 	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
@@ -207,7 +207,8 @@ int check_in_dir(const char* file, const char* dir){
 	}
 }
 
-struct posix_header_ustar* readdir(int fd){
+struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
+	struct posix_header_ustar* to_ret = (struct posix_header_ustar*)ret;
 	if(process_open_files_table[fd].header == 0)
 		return 0;
 	char *dirtype = "5";
@@ -232,7 +233,8 @@ struct posix_header_ustar* readdir(int fd){
 			else{
 				if(j==process_open_files_table[fd].offset){
 					process_open_files_table[fd].offset++;
-					return return_header;
+					to_ret = return_header;
+					return to_ret;
 
 				}
 				else
@@ -248,7 +250,31 @@ struct posix_header_ustar* readdir(int fd){
 }
 
 
-int closedir(int fd){
-	int i = close(fd);
+int sys_closedir(int fd){
+	int i = sys_close(fd);
 	return i;
 }
+
+int sys_lseek(int fd, off64_t offset, int whence) {
+
+    if(!process_open_files_table[fd].header) {
+        // No such file!
+        return -1;
+    }
+
+    switch(whence) {
+    case SEEK_SET:
+        process_open_files_table[fd].offset = offset;
+        break;
+    case SEEK_CUR:
+        process_open_files_table[fd].offset += offset;
+        break;
+    case SEEK_END:
+        // TODO: Seek from end of file
+        process_open_files_table[fd].offset = offset;
+        break;
+    }
+
+    return 0;
+}
+

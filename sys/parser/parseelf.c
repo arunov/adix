@@ -2,10 +2,10 @@
 #include <sys/parser/parsetarfs.h>
 #include <sys/parser/parseelf.h>
 #include <sys/kstdio.h>
-
+#include <sys/memory/mm_struct.h>
+#include <syscall.h>
 
 void read_elf_header(int fd, Elf64_Ehdr *elf_header){
-	printf("%d",sizeof(Elf64_Ehdr));
 	read(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
 }
 
@@ -53,3 +53,43 @@ void print_prgm_header(Elf64_Phdr prgm_header){
 	printf("p_memsz: %p\n",prgm_header.p_memsz);
 	printf("p_align: %p\n",prgm_header.p_align);
 }
+
+
+uint64_t load_elf(struct mm_struct *this, char* filename){
+
+	Elf64_Ehdr elf_header ;
+	int fd = open(filename);
+	printf("fd: %d",fd);
+	uint64_t entry = -1;
+	read_elf_header(fd, &elf_header);
+	print_elf_header(elf_header);
+	if(is_elf(elf_header)==0){
+		print_elf_header(elf_header);
+		uint16_t num_ph = elf_header.e_phnum;
+		entry = elf_header.e_entry;
+		Elf64_Phdr prgm_header[num_ph];
+		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
+			read_prgm_header(fd, &(prgm_header[num_phdr]));
+			print_prgm_header(prgm_header[num_phdr]);
+		}
+		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
+			if(prgm_header[num_phdr].p_type==0x1){
+				uint64_t offset = prgm_header[num_phdr].p_offset;
+				uint64_t size = prgm_header[num_phdr].p_filesz;
+				uint64_t vir_addr = prgm_header[num_phdr].p_vaddr;
+				// do an mmap and do a read
+				printf("prgm head loadable %d size%p vir_addr%p offser %p\n", num_phdr, size, vir_addr, offset );
+				int mmap_return = do_mmap(this, fd, 0, vir_addr, size, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+				if(mmap_return != 0){
+					close(fd);
+					return -1;
+				}	
+
+			}
+		}
+
+	}
+	close(fd);
+	return entry; 
+
+}	

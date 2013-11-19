@@ -4,7 +4,6 @@
 #include <sys/irq.h>
 #include <sys/timer.h>
 #include <sys/keyboard.h>
-#include <sys/syscall/syscall.h>
 
 extern void isr0();
 
@@ -28,11 +27,8 @@ void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
     isrs_install();
     irq_install();
-
     timer_install();
     keyboard_install();
-    syscallInstall();//TODO:Hw about all s/w interrupts together?
 
     _x86_64_asm_lidt(&idtr);
-    __asm volatile("sti");
 }

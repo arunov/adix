@@ -1,6 +1,8 @@
 #ifndef _PARSEELF_H
 #define _PARSEELF_H
 
+#include <sys/memory/mm_struct.h>
+
 #define EI_NIDENT 16
 typedef struct {
 	unsigned char e_ident[EI_NIDENT];
@@ -48,4 +50,5 @@ void print_elf_header(Elf64_Ehdr elf_header);
 int is_elf(Elf64_Ehdr elf_header);
 void read_prgm_header(int fd, Elf64_Phdr *prgm_header);
 void print_prgm_header(Elf64_Phdr prgm_header);
+uint64_t load_elf(struct mm_struct *this, char* filename);
 #endif
