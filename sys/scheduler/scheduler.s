@@ -37,7 +37,6 @@ popq %rax
 .extern cleanupTerminated
 
 switchTo:
-	cli
 	pushReg
 	movq %rsp,%rax
 	andq $0xfffffffffffff000,%rax #Get base of the stack

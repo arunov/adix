@@ -3,18 +3,16 @@
 #include <sys/scheduler/scheduler.h>
 #include <sys/memory/handle_cr2_cr3.h>
 
-static int counter_world = 4;
+int counter_world = 0;
 
 /* A World method that yields to next process in run queue*/
 void invokeWorld(){
-	while(counter_world--){
-
-		printf("World..");
-//		if(counter_world == 3 ){
-//			printf(" CR3 is:%p",get_cr3());
-//		}
-		yield();
-		printf("\nContinuing in world..");
+	while(1){
+		if(counter_world % 3000000 == 0){
+			counter_world = 0;
+			printf("\nWorld..");
+		}
+		counter_world++;
 	}
 	printf("\n.....................");
 	printf("Exiting world..");

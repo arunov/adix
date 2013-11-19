@@ -23,6 +23,7 @@ struct pcb_t* getTerminatedTask(){
 }
 
 void sys_yield(){
+	printf("\n#####Yielding to next process######");
 	struct pcb_t *nextTask = getNextTask();
 	list_del(&nextTask->lister);//remove from head
 	list_add_tail(&nextTask->lister,&pcb_run_queue); //add to tail
