@@ -9,5 +9,6 @@ typedef void* (sys_call_t)(void*) ;
 sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[YIELD] = (sys_call_t*)_sys_yield,
 	[PRINTF] = (sys_call_t*)_sys_printf,
-	[EXIT] = (sys_call_t*)_sys_exit
+	[EXIT] = (sys_call_t*)_sys_exit,
+	[SLEEP] = (sys_call_t*)_sys_sleep
 };

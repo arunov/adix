@@ -3,10 +3,12 @@
 .global _sys_yield
 .global _sys_printf 
 .global _sys_exit
+.global _sys_sleep
 
 .extern sys_call_table
 .extern sys_yield
 .extern sys_exit
+.extern sys_sleep
 
 sys_call_handler:
 	pushAllReg
@@ -25,4 +27,8 @@ _sys_printf:
 
 _sys_exit:
 	call sys_exit
+	retq
+
+_sys_sleep:
+	call sys_sleep
 	retq

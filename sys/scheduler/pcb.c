@@ -3,14 +3,9 @@
 #include<sys/memory/virtual_page_manager.h>
 #include<sys/memory/setup_kernel_pgtbl.h> //TODO:Remove after 
 #include<sys/scheduler/ring_switch.h> //TODO:Remove after 
-
-//TODO:Remove after allocator
-#define NUM_TASKS 3
+#include <sys/memory/kmalloc.h>
 extern char physbase;
 static uint64_t next_pid = 1;
-/* Todo: Temporary */
-struct pcb_t pcb_a[NUM_TASKS];
-int counter = 0;
 
 /* Get next available value for process id. This method should be used
    within this class only.*/
@@ -31,8 +26,7 @@ uint64_t get_u_rip(struct pcb_t *this){
 
 /* Allocate memory for a PCB. */
 struct pcb_t* newPcb(){
-	//TODO:Change once memory allocator is implemented
-	return &(pcb_a[counter++%NUM_TASKS]);
+	return (struct pcb_t*)kmalloc(sizeof(struct pcb_t));
 }
 
 /* Scheduler expects that each process stack contain information for its 
@@ -76,6 +70,10 @@ struct pcb_t* createTask(enum ptype proc_type,
 /* Update task state for the PCB passed as an argument*/
 void updateState(struct pcb_t *this, enum pstate state){
 	this->state = state;
+}
+
+void update_wait_descriptor(struct pcb_t *this, uint64_t wait_desc){
+	this->wait_desc = wait_desc;
 }
 
 /* Print contents of the PCB passed as an argument.*/

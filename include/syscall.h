@@ -5,6 +5,7 @@
 #define YIELD 0
 #define PRINTF 1
 #define EXIT 2
+#define SLEEP 3
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
@@ -53,5 +54,5 @@ SYSCALL_PROTO(4)(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4)
 
 void exit(int status);
 void yield();
-
+void sleep(int sleep_interval);
 #endif
