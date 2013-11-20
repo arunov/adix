@@ -9,7 +9,7 @@ void invokeHello(){
 	while(1){
 		if(counter_hello % 3000000 == 0){
 			counter_hello = 0;
-			printf("\nHello...");
+			uprintf("\nHello...");
 			sleep(1);
 		}
 		counter_hello++;

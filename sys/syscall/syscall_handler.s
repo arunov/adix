@@ -23,6 +23,7 @@
 .extern sys_readdir
 .extern sys_closedir
 .extern sys_sleep
+.extern printf
 
 sys_call_handler:
 	pushAllSysReg
@@ -37,6 +38,7 @@ _sys_yield:
 	retq
 
 _sys_printf:
+	call printf
 	retq
 
 _sys_exit:

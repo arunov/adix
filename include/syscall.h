@@ -19,6 +19,20 @@
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
+void yield();
+void exit(int status);
+void sleep(int sleep_interval);
+uint64_t uprintf(const char *format_string);
+
+/* FIle system operations */
+int open(const char* filename);
+int64_t read(int fd, void *buf, uint64_t count);
+int lseek(int fd, off64_t offset, int whence);
+int close(int fd);
+int opendir(const char *pathname);
+struct posix_header_ustar* readdir(int fd);
+int closedir(int fd);
+
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {
 	uint64_t ret;
@@ -124,14 +138,4 @@ SYSCALL_PROTO(4)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3, ui
 	return ret;
 }
 
-void exit(int status);
-void yield();
-int open(const char* filename);
-int64_t read(int fd, void *buf, uint64_t count);
-int lseek(int fd, off64_t offset, int whence);
-int close(int fd);
-int opendir(const char *pathname);
-struct posix_header_ustar* readdir(int fd);
-int closedir(int fd);
-void sleep(int sleep_interval);
 #endif
