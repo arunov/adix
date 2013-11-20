@@ -3,7 +3,6 @@
 .global _sys_yield
 .global _sys_printf 
 .global _sys_exit
-<<<<<<< HEAD
 .global _sys_open
 .global _sys_read
 .global _sys_lseek
@@ -11,14 +10,11 @@
 .global _sys_opendir
 .global _sys_readdir
 .global _sys_closedir
-=======
 .global _sys_sleep
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4
 
 .extern sys_call_table
 .extern sys_yield
 .extern sys_exit
-<<<<<<< HEAD
 .extern sys_open
 .extern sys_read
 .extern sys_lseek
@@ -26,9 +22,7 @@
 .extern sys_opendir
 .extern sys_readdir
 .extern sys_closedir
-=======
 .extern sys_sleep
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4
 
 sys_call_handler:
 	pushAllSysReg
@@ -49,7 +43,6 @@ _sys_exit:
 	call sys_exit
 	retq
 
-<<<<<<< HEAD
 _sys_open:
 	call sys_open
 	retq
@@ -78,8 +71,6 @@ _sys_closedir:
 	call sys_closedir
 	retq
 	
-=======
 _sys_sleep:
 	call sys_sleep
 	retq
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4

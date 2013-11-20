@@ -105,6 +105,7 @@ int sys_open(const char* pathname){
 		printf(" Number of open files exceeds ULIMIT");
 		return -1;
 	}
+	printf("\nFd returned from sys_open:%d",fd);
 	return fd;
 }
 
@@ -114,6 +115,8 @@ int64_t sys_read(int fd, void *buf, uint64_t count){
 		return i;
 	char *filetype = "0";
 	char *dirtype = "5";
+
+	printf("\n Recieved and reading fd %d, buf:%p count:%d",fd,buf,count);
 	if(strcmp(process_open_files_table[fd].header->typeflag,dirtype)==0){
 		printf("Reading a directory");
 	}

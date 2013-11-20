@@ -1,5 +1,6 @@
 #include<defs.h>
 #include<syscall.h>
+#include<sys/kstdio.h>
 #include<sys/parser/tarfs.h>
 struct posix_header_ustar ret = {};
 void yield(){
@@ -10,9 +11,9 @@ void exit(int status){
 	__syscall1(EXIT,status);
 }
 
-<<<<<<< HEAD
 int open(const char* pathname){
 	int ret = __syscall1(OPEN, (uint64_t)pathname);
+//	printf("\nFd returned to syscall %d",ret);
 	return ret;
 }
 
@@ -47,8 +48,6 @@ int closedir(int fd){
 }
 
 
-=======
 void sleep(int sleep_interval){ //TODO
 	__syscall1(SLEEP, sleep_interval);
 }
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4

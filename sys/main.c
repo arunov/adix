@@ -54,11 +54,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	
 	int fd = open("aladdin.txt");
+	printf("\nFd returned after syscall %d",fd);
 	//int fd1 = open("bin/");
 	char *filename= "bin/hello";
 	int succ =exec(filename);
-	printf("succ: %d", succ);
-	printf("aladdin %d bin/ ",fd);
+	printf("\nexec return status: %d", succ);
+	printf("\naladdin fd in the end: %d ",fd);
 	
 /*    
     // Check do_mmap 

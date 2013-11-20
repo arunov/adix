@@ -2,10 +2,13 @@
 #define _SYSCALL_H
 
 #include <defs.h>
+
 #define YIELD 0
 #define PRINTF 1
 #define EXIT 2
-<<<<<<< HEAD
+#define SLEEP 10
+
+/* File system system calls */
 #define OPEN 3
 #define READ 4
 #define LSEEK 5
@@ -13,17 +16,13 @@
 #define OPENDIR 7
 #define READDIR 8
 #define CLOSEDIR 9
-=======
-#define SLEEP 3
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {
 	uint64_t ret;
-	__asm("pushq %%rax;"
-		"movq %1,%%rax;"
+	__asm(	"movq %1,%%rax;"
 		"int $48;"
 		"movq %%rax,%0;"
 		"popq %%rax;"
@@ -38,14 +37,13 @@ SYSCALL_PROTO(0)(uint64_t syscall_num) {
 /* User space system call stub for all system calls with 'one' argument. */
 SYSCALL_PROTO(1)(uint64_t syscall_num, uint64_t a1) {
 	uint64_t ret;
-	__asm("pushq %%rax;"
-		"pushq %%rdi;"
-		"movq %1,%%rax;"
+	/* There is a problem with backing up of registers - rax cannot br popped
+	in the end since its used for returning the same return value. I suppose
+	this is some kind of a compiler optimization! */
+	__asm("movq %1,%%rax;"
 		"movq %2, %%rdi;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"popq %%rdi;"
-		"popq %%rax;"
 		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num),"r"(a1)
@@ -128,7 +126,6 @@ SYSCALL_PROTO(4)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3, ui
 
 void exit(int status);
 void yield();
-<<<<<<< HEAD
 int open(const char* filename);
 int64_t read(int fd, void *buf, uint64_t count);
 int lseek(int fd, off64_t offset, int whence);
@@ -136,9 +133,5 @@ int close(int fd);
 int opendir(const char *pathname);
 struct posix_header_ustar* readdir(int fd);
 int closedir(int fd);
-
-
-=======
 void sleep(int sleep_interval);
->>>>>>> d2f11f461ca50a6e199f87394b4d5ebcdd09e2e4
 #endif
