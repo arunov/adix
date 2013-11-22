@@ -10,7 +10,7 @@ uint64_t getVirtualAddress(uint64_t phys){
 void* getFreeVirtualPage(){
 	uint64_t phys = (uint64_t)get_free_phys_page(getPhysPageManager());
 	uint64_t virt = getVirtualAddress(phys);
-	printf("Getting a free virtual page at address:%x\n",virt); //TODO:DEBUG
+//	printf("Getting a free virtual page at address:%x\n",virt); //TODO:DEBUG
 	update_curr_page_table(getPageTableHelper(), 
 			       phys, 
 			       virt, 

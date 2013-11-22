@@ -1,4 +1,3 @@
-#include <syscall.h>
 #include <sys/kstdio.h>
 #include <sys/scheduler/scheduler.h>
 #include <sys/memory/handle_cr2_cr3.h>
@@ -9,8 +8,8 @@ void invokeHello(){
 	while(1){
 		if(counter_hello % 3000000 == 0){
 			counter_hello = 0;
-			uprintf("\nHello...");
-			sleep(1);
+			printf("\nHello...");
+			sys_sleep(1);
 		}
 		counter_hello++;
 

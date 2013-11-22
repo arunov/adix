@@ -21,8 +21,9 @@ struct pcb_t{
 	uint64_t pid;
 	enum pstate state;
 	enum ptype type;
-	uint64_t cr3_content
-	/* Indicates which descriptor the process is sleeping on */;
+	uint64_t cr3_content;
+	struct tss_t *tss;
+	/* Indicates which descriptor the process is sleeping on */
 	uint64_t wait_desc; 
 	struct list_head lister; 
 };
@@ -30,6 +31,7 @@ struct pcb_t{
 /* Create a new Task(PCB) and initialize its values.*/
 struct pcb_t* createTask(enum ptype proc_type,
 			uint64_t instruction, 
+			char *program,
 			void *kernmem,
 			void *physfree);
 /* Update process state */			

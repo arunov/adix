@@ -234,6 +234,5 @@ void update_curr_page_table(struct page_table_helper *this, uint64_t phys,
                                         uint64_t virt, uint64_t access_perm);
 
 struct page_table_helper *getPageTableHelper();
-
 #endif
 

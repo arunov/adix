@@ -1,6 +1,6 @@
 
 .global _jump_to_ring3
-.extern set_tss_rsp
+.extern set_tss
 
 _jump_to_ring3:
 	#RPL (3)| DS_segment_selector(32 - 0x20)
@@ -12,13 +12,17 @@ _jump_to_ring3:
 	movq %rax, %gs
 	#Prepare TSS
 	pushq %rdi
+	pushq %rsi
+
 	movq %rsp, %rdi
 	addq $0x08, %rdi
-	call set_tss_rsp
+	call set_tss
 	
-	movq $0x28, %rdi
-	ltr %di #Load ltr with offset
+	movq $0x28, %rax
+	ltr %ax #Load ltr with offset
+	popq %rsi
 	popq %rdi
+	
 	pushq $0x23 #Push SS
 	pushq %rdi #Push rsp
 	sti

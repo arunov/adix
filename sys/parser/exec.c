@@ -5,8 +5,7 @@
 #include <sys/memory/mm_struct.h>
 
 
-int exec(char *filename){
+uint64_t exec(char *filename){
 	struct mm_struct *mm = new_mm();
-	uint64_t load_succ = load_elf(mm, filename);
-	return (load_succ==-1)?-1:0;
+	return load_elf(mm, filename);
 }	

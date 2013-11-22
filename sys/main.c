@@ -12,7 +12,6 @@
 #include <sys/parser/parseelf.h>
 #include <sys/parser/exec.h>
 #include <sys/memory/mm_struct.h>
-#include <syscall.h>
 #define INITIAL_STACK_SIZE 4096
 
 
@@ -53,13 +52,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	
-	int fd = open("aladdin.txt");
+	int fd = sys_open("aladdin.txt");
 	printf("\nFd returned after syscall %d",fd);
-	//int fd1 = open("bin/");
-	char *filename= "bin/hello";
-	int succ =exec(filename);
-	printf("\nexec return status: %d", succ);
-	printf("\naladdin fd in the end: %d ",fd);
 	
 /*    
     // Check do_mmap 
@@ -67,7 +61,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     struct mm_struct *mm = new_mm();
     do_mmap(mm, fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
-*/
+*/	
     	cooperative_schedule(&kernmem,physfree);
 	// kernel starts here
 	while(1);

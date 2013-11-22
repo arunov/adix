@@ -36,11 +36,9 @@ int closedir(int fd);
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {
 	uint64_t ret;
-	__asm(	"movq %1,%%rax;"
+	__asm volatile(	"movq %1,%%rax;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"popq %%rax;"
-		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num)
 		:"rax"
@@ -54,11 +52,10 @@ SYSCALL_PROTO(1)(uint64_t syscall_num, uint64_t a1) {
 	/* There is a problem with backing up of registers - rax cannot br popped
 	in the end since its used for returning the same return value. I suppose
 	this is some kind of a compiler optimization! */
-	__asm("movq %1,%%rax;"
+	__asm volatile("movq %1,%%rax;"
 		"movq %2, %%rdi;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num),"r"(a1)
 		:"rax","rdi"//Clobberred registers
@@ -68,18 +65,12 @@ SYSCALL_PROTO(1)(uint64_t syscall_num, uint64_t a1) {
 
 SYSCALL_PROTO(2)(uint64_t syscall_num, uint64_t a1, uint64_t a2) {
 	uint64_t ret;
-	__asm("pushq %%rax;"
-		"pushq %%rdi;"
-		"pushq %%rsi;"
+	__asm volatile(
 		"movq %1,%%rax;"
 		"movq %2, %%rdi;"
 		"movq %3, %%rsi;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"popq %%rsi;"
-		"popq %%rdi;"
-		"popq %%rax;"
-		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num),"r"(a1),"r"(a2)
 		:"rax","rdi","rsi" //Clobberred registers
@@ -89,21 +80,13 @@ SYSCALL_PROTO(2)(uint64_t syscall_num, uint64_t a1, uint64_t a2) {
 
 SYSCALL_PROTO(3)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3) {
 	uint64_t ret;
-	__asm("pushq %%rax;"
-		"pushq %%rdi;"
-		"pushq %%rsi;"
-		"pushq %%rdx;"
+	__asm volatile(
 		"movq %1,%%rax;"
 		"movq %2, %%rdi;"
 		"movq %3, %%rsi;"
 		"movq %4, %%rdx;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"popq %%rdx;"
-		"popq %%rsi;"
-		"popq %%rdi;"
-		"popq %%rax;"
-		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num),"r"(a1),"r"(a2),"r"(a3)
 		:"rax","rdi","rsi","rdx" //Clobberred registers
@@ -113,11 +96,7 @@ SYSCALL_PROTO(3)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3) {
 
 SYSCALL_PROTO(4)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4) {
 	uint64_t ret;
-	__asm("pushq %%rax;"
-		"pushq %%rdi;"
-		"pushq %%rsi;"
-		"pushq %%rdx;"
-		"pushq %%rcx;"
+	__asm volatile(
 		"movq %1,%%rax;"
 		"movq %2, %%rdi;"
 		"movq %3, %%rsi;"
@@ -125,12 +104,6 @@ SYSCALL_PROTO(4)(uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3, ui
 		"movq %5, %%rcx;"
 		"int $48;"
 		"movq %%rax,%0;"
-		"popq %%rcx;"
-		"popq %%rdx;"
-		"popq %%rsi;"
-		"popq %%rdi;"
-		"popq %%rax;"
-		"retq;"
 		:"=r"(ret)
 		:"r"(syscall_num),"r"(a1),"r"(a2),"r"(a3),"r"(a4)
 		:"rax","rdi","rsi","rdx","rcx" //Clobberred registers

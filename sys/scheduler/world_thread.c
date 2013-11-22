@@ -1,4 +1,3 @@
-#include <syscall.h>
 #include <sys/kstdio.h>
 #include <sys/scheduler/scheduler.h>
 #include <sys/memory/handle_cr2_cr3.h>
@@ -17,5 +16,5 @@ void invokeWorld(){
 	printf("\n.....................");
 	printf("Exiting world..");
 	//Exit this process. Sets up cleaning up of PCBs as of now.
-	exit(0);
+	sys_exit(0);
 }

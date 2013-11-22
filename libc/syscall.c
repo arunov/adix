@@ -1,6 +1,5 @@
 #include<defs.h>
 #include<syscall.h>
-#include<sys/kstdio.h>
 #include<sys/parser/tarfs.h>
 struct posix_header_ustar ret = {};
 void yield(){

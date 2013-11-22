@@ -57,7 +57,7 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
 			(uint64_t)pml4_page, 
 			(uint64_t)paddr, 
 			(uint64_t)vaddr, 
-			PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+			PAGE_TRANS_READ_WRITE);
 		paddr += PG_SZ;
 		vaddr += PG_SZ;
 	}
@@ -69,7 +69,7 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
 			(uint64_t)pml4_page, 
 			(uint64_t)paddr, 
 			(uint64_t)vaddr, 
-			PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+			PAGE_TRANS_READ_WRITE);
 		paddr += PG_SZ;
 		vaddr += PG_SZ;
 	}
@@ -80,7 +80,7 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
 			(uint64_t)pml4_page, 
 			(uint64_t)VIDEO_MEMORY_ADDRESS, 
 			video_vaddr, 
-			PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+			PAGE_TRANS_READ_WRITE);
 	
 	struct str_cr3 cr3 = get_default_cr3();
 	cr3.p_PML4E_4Kb = ((uint64_t)pml4_page) >> 12;	//higher order 40 bits of the physical address
@@ -98,3 +98,4 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
     kfree(x);
     kfree(y);
 }
+

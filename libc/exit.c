@@ -1,2 +1,1 @@
-void exit(int status) {
-}
+//TODO: The content has been moved to syscall_h

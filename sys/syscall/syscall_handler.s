@@ -24,17 +24,25 @@
 .extern sys_closedir
 .extern sys_sleep
 .extern printf
+.extern set_tss
 
 sys_call_handler:
 	pushAllSysReg
 	movq $0x00,%rbx
 	movq sys_call_table(%rbx,%rax,0x8),%rbx
-	call *%rbx  
+	call *%rbx 
 	popAllSysReg
 	iretq
 
 _sys_yield:
 	call sys_yield
+	#Setup TSS
+	movq %rsp,%rdi
+	addq $0xB0,%rdi
+	call set_tss
+	#Load new valure for tss
+	movq $0x28, %rdi
+	ltr %di
 	retq
 
 _sys_printf:

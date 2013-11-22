@@ -3,12 +3,11 @@
 #include <sys/parser/parseelf.h>
 #include <sys/kstdio.h>
 #include <sys/memory/mm_struct.h>
-#include <syscall.h>
 
 void read_elf_header(int fd, Elf64_Ehdr *elf_header){
 	
 	printf("\n Reading and sending fd %d, buf:%p count:%d",fd,elf_header,sizeof(Elf64_Ehdr));
-	read(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
+	sys_read(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
 }
 
 int is_elf(Elf64_Ehdr elf_header){
@@ -42,7 +41,7 @@ void print_elf_header(Elf64_Ehdr elf_header){
 void read_prgm_header(int fd, Elf64_Phdr *prgm_header){
 	printf("%d",sizeof(Elf64_Phdr));
 	printf("\n Reading and sending fd %d, buf:%p count:%d",fd,prgm_header,sizeof(Elf64_Ehdr));
-	read(fd, (void *)prgm_header, sizeof(Elf64_Phdr));
+	sys_read(fd, (void *)prgm_header, sizeof(Elf64_Phdr));
 	
 }
 
@@ -61,7 +60,7 @@ void print_prgm_header(Elf64_Phdr prgm_header){
 uint64_t load_elf(struct mm_struct *this, char* filename){
 
 	Elf64_Ehdr elf_header ;
-	int fd = open(filename);
+	int fd = sys_open(filename);
 	printf("\nfd opened in loadelf: %d",fd);
 	uint64_t entry = -1;
 	read_elf_header(fd, &elf_header);
@@ -84,7 +83,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				printf("prgm head loadable %d size%p vir_addr%p offser %p\n", num_phdr, size, vir_addr, offset );
 				int mmap_return = do_mmap(this, fd, 0, vir_addr, size, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
 				if(mmap_return != 0){
-					close(fd);
+					sys_close(fd);
 					return -1;
 				}	
 
@@ -92,7 +91,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 		}
 
 	}
-	close(fd);
+	sys_close(fd);
 	return entry; 
 
 }	

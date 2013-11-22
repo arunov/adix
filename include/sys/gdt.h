@@ -29,6 +29,7 @@ extern uint64_t gdt[];
 
 void reload_gdt();
 void setup_tss();
-void set_tss_rsp(uint64_t rsp);
+/* Sets up tss (entry 6 and 7 in gdt ) for every ring switch */
+void configure_tss_in_gdt(struct tss_t *tss, uint64_t rsp);
 
 #endif

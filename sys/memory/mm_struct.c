@@ -378,8 +378,8 @@ int do_mmap(struct mm_struct *this, int file, uint64_t offset, uint64_t addr,
         update_curr_page_table(getPageTableHelper(), phys, v_addr, prot);
 
         // Load page with file contents
-        lseek(file, offset, SEEK_SET);
-        uint64_t bytes_read = read(file, (void*)v_addr, (bytes > PG_SZ)? PG_SZ : bytes);
+        sys_lseek(file, offset, SEEK_SET);
+        uint64_t bytes_read = sys_read(file, (void*)v_addr, (bytes > PG_SZ)? PG_SZ : bytes);
 
         bytes -= bytes_read;
         v_addr += PG_SZ;

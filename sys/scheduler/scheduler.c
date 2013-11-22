@@ -24,11 +24,13 @@ struct pcb_t* getTerminatedTask(){
 }
 
 void sys_yield(){
-	printf("\n#####Yielding to next process######");
+//	printf("\n#####Yielding to next process######");
 	struct pcb_t *nextTask = getNextTask();
 	list_del(&nextTask->lister);//remove from head
 	list_add_tail(&nextTask->lister,&pcb_run_queue); //add to tail
-	set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
+	if(nextTask->cr3_content != NULL){
+		set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
+	}
 	switchTo(nextTask->stack_base);
 }
 
@@ -65,7 +67,7 @@ void sys_wakeup(uint64_t wait_desc){
 			wakeup_proc(proc);
 		}
 	}
-	printPcbRunQueue();
+//	printPcbRunQueue();
 }
 
 void cleanupTerminated(){

@@ -64,7 +64,7 @@ void timer_handler()
 		sys_wakeup(1);
 	}
     	/* And yes, that's a 60 pointer CS506 project! :) Preemption! */
-   	switch_context();
+   	//switch_context();
         
 	timer_ticks = 0;
 
