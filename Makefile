@@ -66,7 +66,7 @@ obj/%.asm.o: %.s
 SUBMITTO:=~mferdman/cse506-submit/
 
 submit: clean
-	tar -czvf $(USER).tgz --exclude=$(ROOTLIB) --exclude=$(ROOTBIN) --exclude=.empty --exclude=.*.sw? --exclude=*~ LICENSE Makefile linker.script sys bin libc ld include $(ROOTFS)
+	tar -czvf $(USER).tgz --exclude=$(ROOTLIB) --exclude=$(ROOTBIN) --exclude=.empty --exclude=.*.sw? --exclude=*~ LICENSE Makefile linker.script sys bin libc ld include $(ROOTFS) $(USER).img
 	@gpg --quiet --import cse506-pubkey.txt
 	gpg --yes --encrypt --recipient 'CSE506' $(USER).tgz
 	rm -fv $(SUBMITTO)$(USER)=*.tgz.gpg
