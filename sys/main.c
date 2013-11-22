@@ -12,6 +12,9 @@
 #include <sys/parser/parseelf.h>
 #include <sys/parser/exec.h>
 #include <sys/memory/mm_struct.h>
+#include <sys/memory/setup_kernel_memory.h>
+#include <sys/memory/free_phys_pages.h>
+
 #define INITIAL_STACK_SIZE 4096
 
 
@@ -44,9 +47,21 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
 
         /* Free list and Page Tables */
-	phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
-        finish_scan(&phys_page_mngr_obj);
-	setup_kernel_pgtbl(&kernmem, physbase, physfree);
+	//phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
+    //    finish_scan(&phys_page_mngr_obj);
+        setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
+	//setup_kernel_pgtbl(&kernmem, physbase, physfree);
+
+    uint64_t phys;
+    char *x = (char*)v_alloc_page_get_phys(&phys, PAGE_TRANS_READ_WRITE);
+    *x = 'a';
+    *(x+1) = 'b';
+    *(x+2) = 'c';
+    *(x+3) = '\0';
+    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p\n\n", phys, x, x, virt2phys_selfref((uint64_t)x));
+
+    v_free_page((uint64_t) x);
+    printf("physical address of kernmem %p is %p\n", &kernmem, virt2phys_selfref((uint64_t)&kernmem));
 
 	printf("Page tables successfully setup\n");
 
@@ -59,7 +74,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     // Check do_mmap 
     int fd = open("aladdin.txt");
     struct mm_struct *mm = new_mm();
-    do_mmap(mm, fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+    do_mmap(&(mm->mmap), fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
 */	
     	cooperative_schedule(&kernmem,physfree);
