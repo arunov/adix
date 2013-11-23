@@ -88,7 +88,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 
 				// do an mmap and do a read
 				printf("prgm head loadable %d size%p vir_addr%p offser %p flag %p prot %p\n", num_phdr, size, vir_addr, offset, flag, prot );
-				int mmap_return = do_mmap(this, fd, offset, vir_addr, size, prot);
+				int mmap_return = do_mmap(&(this->mmap), fd, offset, vir_addr, size, prot);
 				printf("after mmap_return");
 				if(mmap_return != 0){
 					sys_close(fd);
