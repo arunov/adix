@@ -6,7 +6,6 @@
 
 void read_elf_header(int fd, Elf64_Ehdr *elf_header){
 	
-	printf("\n Reading and sending fd %d, buf:%p count:%d",fd,elf_header,sizeof(Elf64_Ehdr));
 	sys_read(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
 }
 
@@ -40,7 +39,6 @@ void print_elf_header(Elf64_Ehdr elf_header){
 
 void read_prgm_header(int fd, Elf64_Phdr *prgm_header){
 	printf("%d",sizeof(Elf64_Phdr));
-	printf("\n Reading and sending fd %d, buf:%p count:%d",fd,prgm_header,sizeof(Elf64_Ehdr));
 	sys_read(fd, (void *)prgm_header, sizeof(Elf64_Phdr));
 	
 }
@@ -60,9 +58,11 @@ void print_prgm_header(Elf64_Phdr prgm_header){
 uint64_t load_elf(struct mm_struct *this, char* filename){
 
 	Elf64_Ehdr elf_header ;
+	uint64_t entry = -1;
 	int fd = sys_open(filename);
 	printf("\nfd opened in loadelf: %d",fd);
-	uint64_t entry = -1;
+	if(fd==-1)
+		return entry;
 	read_elf_header(fd, &elf_header);
 	print_elf_header(elf_header);
 	if(is_elf(elf_header)==0){
@@ -79,9 +79,17 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				uint64_t offset = prgm_header[num_phdr].p_offset;
 				uint64_t size = prgm_header[num_phdr].p_filesz;
 				uint64_t vir_addr = prgm_header[num_phdr].p_vaddr;
+				uint64_t flag =  prgm_header[num_phdr].p_flags;
+				uint64_t prot = PAGE_TRANS_USER_SUPERVISOR;
+			//	if(!(flag & PT_E))
+			//		prot = prot | PAGE_TRANS_NX;
+				if(flag & PT_W)
+					prot = prot | PAGE_TRANS_READ_WRITE;
+
 				// do an mmap and do a read
-				printf("prgm head loadable %d size%p vir_addr%p offser %p\n", num_phdr, size, vir_addr, offset );
-				int mmap_return = do_mmap(&(this->mmap), fd, 0, vir_addr, size, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+				printf("prgm head loadable %d size%p vir_addr%p offser %p flag %p prot %p\n", num_phdr, size, vir_addr, offset, flag, prot );
+				int mmap_return = do_mmap(this, fd, offset, vir_addr, size, prot);
+				printf("after mmap_return");
 				if(mmap_return != 0){
 					sys_close(fd);
 					return -1;

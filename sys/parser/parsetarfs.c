@@ -7,6 +7,8 @@ int getsize(char *);
 int strcmp(const char *,const char *);
 int check_element_of_dir(const char* file, const char* dir);
 int check_in_dir(const char* file, const char* dir);
+int closefd(int fd);
+
 int parsetar(){
 	printf("inside parsetar tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
@@ -116,7 +118,6 @@ int64_t sys_read(int fd, void *buf, uint64_t count){
 	char *filetype = "0";
 	char *dirtype = "5";
 
-	printf("\n Recieved and reading fd %d, buf:%p count:%d",fd,buf,count);
 	if(strcmp(process_open_files_table[fd].header->typeflag,dirtype)==0){
 		printf("Reading a directory");
 	}
@@ -138,13 +139,8 @@ int64_t sys_read(int fd, void *buf, uint64_t count){
 }
 
 int sys_close(int fd){
-	if(process_open_files_table[fd].header != 0){
-		process_open_files_table[fd].header = 0;
-		process_open_files_table[fd].offset = 0;
-		return 0;
-	}
-	else
-		return -1;
+	int i = closefd(fd);
+	return i;
 }
 
 int sys_opendir(const char *pathname){
@@ -254,8 +250,19 @@ struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
 
 
 int sys_closedir(int fd){
-	int i = sys_close(fd);
+	int i = closefd(fd);
 	return i;
+}
+
+int closefd(int fd){
+	if(process_open_files_table[fd].header != 0){
+		process_open_files_table[fd].header = 0;
+		process_open_files_table[fd].offset = 0;
+		return 0;
+	}
+	else
+		return -1;
+	
 }
 
 int sys_lseek(int fd, off64_t offset, int whence) {

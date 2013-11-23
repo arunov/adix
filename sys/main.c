@@ -16,7 +16,7 @@
 #include <sys/memory/free_phys_pages.h>
 
 #define INITIAL_STACK_SIZE 4096
-
+#define SET_NXE 0x800ULL
 
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
@@ -72,6 +72,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("\nFd returned after syscall %d",fd);
 #endif
 
+	uint64_t execret = exec("bin/hello");
+	printf("execret %p", execret);
+	
 /*    
     // Check do_mmap 
     int fd = open("aladdin.txt");
@@ -86,6 +89,21 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
 void boot(void)
 {
+	/*
+	uint64_t efer; 
+	__asm__ volatile(
+		"movq %%EFER, %0;"
+		:"=g"(efer)
+		:
+	);
+	efer = efer | SET_NXE;
+	__asm__ volatile(
+		"movq %0, %%efer;"
+		:
+		:"g"(efer)
+	);
+	*/
+
 	// note: function changes rsp, local stack variables can't be practically used
 	register char *temp1, *temp2;
 	__asm__(
