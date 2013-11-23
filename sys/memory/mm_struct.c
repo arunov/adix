@@ -132,11 +132,13 @@ int add_vma(struct list_head *mmap, uint64_t start_addr_a,
         return -1;
     }
 
+#if 0
     // Page aligned addresses
     if(((uint64_t)start_addr_a & PG_ALN_CHK_MASK) ||
                                     ((uint64_t)end_addr_a & PG_ALN_CHK_MASK)) {
         return -1;
     }
+#endif
 
     // List is empty
     if(list_empty(mmap)) {
@@ -327,14 +329,18 @@ void print_vmas(struct mm_struct *this) {
 
 extern struct phys_page_manager phys_page_mngr_obj;
 
-int do_mmap(struct list_head *mmap, int file, uint64_t offset, uint64_t addr,
+int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
                                                 uint64_t len, uint64_t prot) {
 
     // Number of physical pages
     int num_pages = len/PG_SZ + 1;
 
     // Virtual address
-    uint64_t v_addr = addr;
+    uint64_t v_addr = mmap(map, addr, len, prot, 0, file, offset);
+
+    if(v_addr != addr) {
+        printf("Cannot load file at %p!\n", addr);
+    }
 
     // Remaining bytes
     uint64_t bytes = len;
@@ -342,12 +348,15 @@ int do_mmap(struct list_head *mmap, int file, uint64_t offset, uint64_t addr,
     for(int i = 0; i < num_pages; i++) {
 
         // Get free physical page
-        v_alloc_pages_at_virt(1, prot, v_addr);
+        uint64_t phys = alloc_phys_pages(1);
+
+        // Add to page table
+        update_curr_page_table(phys, v_addr, prot);
 
         // Load page with file contents
         sys_lseek(file, offset, SEEK_SET);
-        uint64_t bytes_read = sys_read(file, (void*)v_addr, (bytes > PG_SZ)?
-                                                                PG_SZ : bytes);
+        uint64_t bytes_read = sys_read(file, (void*)v_addr,
+                                    (bytes > SIZEOF_PAGE)? SIZEOF_PAGE : bytes);
 
         bytes -= bytes_read;
         v_addr += SIZEOF_PAGE;

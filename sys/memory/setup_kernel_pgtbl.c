@@ -5,6 +5,7 @@
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/kmalloc.h>
+#include <sys/memory/phys_page_manager2.h>
 
 extern struct phys_page_manager phys_page_mngr_obj;
 
@@ -14,7 +15,6 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree){
 	set_cr3(cr3);
     printf("physical address of kernmem %p is %p\n", kernmem, virt2phys_selfref((uint64_t)kernmem));
     kmDeviceMemorySetUpDone();
-    ptDeviceMemorySetUpDone();
 }
 
 
@@ -23,42 +23,33 @@ struct str_cr3 create_kernel_pgtbl(void *kernmem,
 				void *physfree 
 				)
 {
-    void *pml4_page = (void*)get_selfref_PML4(NULL);
+    uint64_t pml4_page;
+    get_selfref_PML4(&pml4_page);
 	uint64_t paddr = (uint64_t)physbase;
 	uint64_t vaddr = (uint64_t)kernmem;
 
 	while(paddr < (uint64_t)physfree) {
 	    update_page_table_idmap( 
-			(uint64_t)pml4_page, 
-			(uint64_t)paddr, 
-			(uint64_t)vaddr, 
+			pml4_page, 
+			paddr, 
+			vaddr, 
 			PAGE_TRANS_READ_WRITE);
 		paddr += PG_SZ;
 		vaddr += PG_SZ;
 	}
 
-	paddr = (uint64_t)physfree;
-	vaddr = (uint64_t)physfree;
-	while(paddr < (uint64_t)physfree + SIZEOF_PAGE * 500) {
-	    update_page_table_idmap( 
-			(uint64_t)pml4_page, 
-			(uint64_t)paddr, 
-			(uint64_t)vaddr, 
-			PAGE_TRANS_READ_WRITE);
-		paddr += PG_SZ;
-		vaddr += PG_SZ;
-	}
+    phys_mem_offset_map(pml4_page, get_kernel_mm()->start_phys_mem);
 
 	uint64_t video_vaddr = get_kernel_mm()->start_vdo_buff;
 	printf("\nVIDEO MEMORY:%p",video_vaddr);
 	update_page_table_idmap(
-			(uint64_t)pml4_page, 
+			pml4_page, 
 			(uint64_t)VIDEO_MEMORY_ADDRESS, 
 			video_vaddr, 
 			PAGE_TRANS_READ_WRITE);
 	
 	struct str_cr3 cr3 = get_default_cr3();
-	cr3.p_PML4E_4Kb = ((uint64_t)pml4_page) >> 12;	//higher order 40 bits of the physical address
+	cr3.p_PML4E_4Kb = pml4_page >> 12;	//higher order 40 bits of the physical address
 	printf("New PML4: %p\n", pml4_page);
 
     char *x = kmalloc(10*4096);

@@ -83,5 +83,13 @@ int dec_ref_count_page(uint64_t addr);
  */
 int inc_ref_count_pages(uint64_t start_addr, uint64_t end_addr);
 
+/**
+ * Map physical memory in virtual space at offset
+ * @param pml4            address of pml4
+ * @param phys_mem_offset offset
+ * @return                OK or ERROR
+ */
+int phys_mem_offset_map(uint64_t pml4, uint64_t phys_mem_offset);
+
 #endif
 

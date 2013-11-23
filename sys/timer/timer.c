@@ -61,7 +61,7 @@ void timer_handler()
     {
     	/* Wakeup sleeping processes once for every 6 context switch: TODO: Remove later*/
 	if(++wakeup_count % 6 == 0){
-		sys_wakeup(1);
+		//sys_wakeup(1);
 	}
     	/* And yes, that's a 60 pointer CS506 project! :) Preemption! */
    	//switch_context();

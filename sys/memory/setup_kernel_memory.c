@@ -57,12 +57,12 @@ static int set_video_buffer_memory(uint64_t vdo_buff_start,
  * @param phys_mem_end   ending virtual address of physical memory map
  * @return               OK or ERROR
  */
-/*static int set_phys_memory(uint64_t phys_mem_start, uint64_t phys_mem_end) {
+static int set_phys_memory(uint64_t phys_mem_start, uint64_t phys_mem_end) {
 
     struct kernel_mm_struct *mm = get_kernel_mm();
 
     // TODO: Replace with error code
-    if(-1 == add_kernel_vma(mm, phys_mem_start, phys_mem_end,
+    if(-1 == add_vma(&(mm->mmap), phys_mem_start, phys_mem_end,
         PAGE_TRANS_READ_WRITE | PAGE_TRANS_NX, 0)) {
         return -1;
     }
@@ -73,7 +73,7 @@ static int set_video_buffer_memory(uint64_t vdo_buff_start,
     // TODO: Replace with error code
     return 0;
 
-}*/
+}
 
 int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
                         uint64_t p_kern_end, uint64_t p_vdo_buff_start,
@@ -102,15 +102,39 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
         uint32_t type;
     }__attribute__((packed)) *smap;
 
+    uint64_t phys_end_addr = 0;
+    int lower_chunk = 0;
+    uint64_t lower_chunk_start = 0;
+    uint64_t lower_chunk_end = 0;
+
     while(modulep[0] != 0x9001) modulep += modulep[1]+2;
     for(smap = (struct smap_t*)(modulep+2); smap <
                 (struct smap_t*)((char*)modulep + modulep[1] + 2*4); ++smap) {
         if (smap->type == 1 && smap->length != 0) {
+
+            if(phys_end_addr < smap->base + smap->length) {
+                phys_end_addr = smap->base + smap->length;
+            }
+
+            if(!lower_chunk) {
+                lower_chunk_start = smap->base;
+                lower_chunk_end = smap->base + smap->length;
+                lower_chunk ++;
+            }
+
             if(!new_chunk(smap->base, smap->base + smap->length)) {
                 return -1;
             }
 		}
 	}
+
+    // TODO: Check return value
+    uint64_t phys_mem_offset = get_unmapped_area(&(mm->mmap), kernmem,
+                                                                 phys_end_addr);
+    if(-1 == set_phys_memory(phys_mem_offset, phys_mem_offset
+                                                            + phys_end_addr)) {
+        return -1;
+    }
 
     if(-1 == scan_all_chunks()) {
         return -1;
@@ -124,7 +148,11 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     // Video buffer memory - is not part of chunks obtained from modulep. No
     //                       need to mark.
     // Kernel physical pages
-    if(-1 == inc_ref_count_pages(p_kern_start, p_kern_end)) {
+    if(0 > inc_ref_count_pages(p_kern_start, p_kern_end)) {
+        return -1;
+    }
+    // Ignore lower chunk
+    if(0 > inc_ref_count_pages(lower_chunk_start, lower_chunk_end)) {
         return -1;
     }
 
@@ -132,6 +160,13 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     if(-1 == init_free_phys_page_manager()) {
         return -1;
     }
+
+    printf("start kernel: %p\n", mm->start_kernel);
+    printf("end kernel  : %p\n", mm->end_kernel);
+    printf("start vdo   : %p\n", mm->start_vdo_buff);
+    printf("end vdo     : %p\n", mm->end_vdo_buff);
+    printf("start phys  : %p\n", mm->start_phys_mem);
+    printf("end phys    : %p\n", mm->end_phys_mem);
 
     // Set up page tables
     uint64_t pml4_page = get_selfref_PML4(NULL);
@@ -149,16 +184,17 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     update_page_table_idmap(pml4_page, p_vdo_buff_start, vdo_start_addr,
                             PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
 
+    phys_mem_offset_map(pml4_page, phys_mem_offset);
+
     // Set cr3
     struct str_cr3 cr3 = get_default_cr3();
     cr3.p_PML4E_4Kb = pml4_page >> 12;
     set_cr3(cr3);
 
-    // Indicate memory set up done to kernel memory allocator and page table
-    // helper. Set memory mapped video buffer for console io operations.
+    // Indicate memory set up done
     kmDeviceMemorySetUpDone();
-    ptDeviceMemorySetUpDone();
     global_video_vaddr = (void *)vdo_start_addr;
+    set_phys_mem_virt_map_base(phys_mem_offset);
 
     return 0;
 }

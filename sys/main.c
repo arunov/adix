@@ -61,6 +61,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p\n\n", phys, x, x, virt2phys_selfref((uint64_t)x));
 
     v_free_page((uint64_t) x);
+#if 0
     printf("physical address of kernmem %p is %p\n", &kernmem, virt2phys_selfref((uint64_t)&kernmem));
 
 	printf("Page tables successfully setup\n");
@@ -69,7 +70,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	
 	int fd = sys_open("aladdin.txt");
 	printf("\nFd returned after syscall %d",fd);
-	
+#endif
+
 /*    
     // Check do_mmap 
     int fd = open("aladdin.txt");

@@ -69,10 +69,10 @@ struct kernel_mm_struct {
     uint64_t end_vdo_buff;
 
     /* Starting virtual address of physical memory mapped in kernel space */
-    //uint64_t start_phys_mem;
+    uint64_t start_phys_mem;
 
     /* Ending virtual address of physical memory mapped in kernel space */
-    //uint64_t end_phys_mem;
+    uint64_t end_phys_mem;
 
 };
 

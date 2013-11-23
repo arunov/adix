@@ -1,31 +1,17 @@
 #include <sys/memory/page_table_helper.h>
 #include <sys/memory/free_phys_pages.h>
 
-static uint64_t alloc_phys_page(uint64_t *phys_addr, uint64_t prot) {
-
-    uint64_t phys = alloc_phys_pages(1);
-    if(phys_addr) *phys_addr = phys;
-    return VIRTUAL_ADDR(phys);
-}
-
-static uint64_t (*alloc_page)(uint64_t *phys_addr, uint64_t prot)
-                                                            = alloc_phys_page;
-
-void ptDeviceMemorySetUpDone() {
-    alloc_page = v_alloc_page_get_phys;
-}
-
 void set_phys_mem_virt_map_base(uint64_t a_phys_mem_virt_map_base) {
     phys_mem_virt_map_base = a_phys_mem_virt_map_base;
 }
 
 uint64_t get_zeroed_page_trans_obj(uint64_t *phys_addr) {
 
-    uint64_t page_vaddr = alloc_page(phys_addr, PAGE_TRANS_READ_WRITE);
+    uint64_t phys = alloc_phys_pages(1);
+    if(phys_addr) *phys_addr = phys;
+    uint64_t page_vaddr = VIRTUAL_ADDR(phys);
 
-    if(page_vaddr) {
-        memset((void*)page_vaddr, 0, SIZEOF_PAGE_TRANS);
-    }
+    memset((void*)page_vaddr, 0, SIZEOF_PAGE_TRANS);
 
     return page_vaddr;
 }
@@ -236,7 +222,6 @@ uint64_t virt2phys_selfref(uint64_t virt) {
 
 }
 
-#if 0
 uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt) {
 
     uint64_t *pml4_vaddr = (uint64_t*) VIRTUAL_ADDR(pml4);
@@ -282,5 +267,4 @@ uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt) {
     return PAGE_TRANS_NEXT_LEVEL_ADDR(pt_vaddr[INDEX_PTE(virt)])
                     | PAGE_TRANS_ADDR_SIGN_EXT(pt_vaddr[INDEX_PTE(virt)]);
 }
-#endif
 

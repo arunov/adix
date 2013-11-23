@@ -229,7 +229,7 @@ uint64_t virt2phys_selfref(uint64_t virt);
  * @param virt virtual address
  * @return     physical address, if exists, otherwise (uint64_t)(-1)
  */
-//uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt); 
+uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt); 
 
 /**
  * Call this to indicate that device memory is set up. Page table set up makes

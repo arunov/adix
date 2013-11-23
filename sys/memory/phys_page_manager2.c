@@ -134,3 +134,23 @@ int inc_ref_count_pages(uint64_t start_addr, uint64_t end_addr) {
     return ret_val;
 }
 
+int phys_mem_offset_map(uint64_t pml4, uint64_t phys_mem_offset) {
+
+    struct chunk_t *node;
+
+    list_for_each_entry(node, &chunk_list_head, chunk_list) {
+
+        uint64_t paddr = node->phys_addr_start;
+
+        while(paddr < node->phys_addr_end) {
+
+            // TODO: Check return value
+            update_page_table_idmap(pml4, paddr, paddr + phys_mem_offset,
+                                                        PAGE_TRANS_READ_WRITE);
+            paddr += SIZEOF_PAGE;
+        }
+    }
+
+    return 0;
+}
+
