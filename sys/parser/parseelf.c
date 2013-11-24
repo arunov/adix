@@ -80,7 +80,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				uint64_t size = prgm_header[num_phdr].p_filesz;
 				uint64_t vir_addr = prgm_header[num_phdr].p_vaddr;
 				uint64_t flag =  prgm_header[num_phdr].p_flags;
-				uint64_t prot = PAGE_TRANS_USER_SUPERVISOR;
+				uint64_t prot = PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_READ_WRITE;
 			//	if(!(flag & PT_E))
 			//		prot = prot | PAGE_TRANS_NX;
 				if(flag & PT_W)

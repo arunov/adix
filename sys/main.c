@@ -32,14 +32,14 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 {
     setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
 
-    add_vma(&get_kernel_mm()->mmap, 0x8000, 0x12000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
+    add_vma(&get_kernel_mm()->mmap, 0xffffffffffff0000, 0xfffffffffffff000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
     uint64_t phys1 = alloc_phys_pages(1);
-    update_curr_page_table(phys1, 0x10000, 0);
+    update_curr_page_table(phys1, 0xffffffffffff8000UL, 0);
 
-    *((int*)0x10000) = 5;
-    *((int*)0x10004) = 6;
+    *((int*)0xffffffffffff8000UL) = 5;
+    *((int*)0xffffffffffff8004UL) = 6;
 
-    printf("hi :) %d %d\n", *((int*)0x10000), *((int*)0x10004));
+    printf("hi :) %d %d\n", *((int*)0xffffffffffff8000UL), *((int*)0xffffffffffff8004UL));
     printf("cr4: %p\n", get_cr4());
 
     uint64_t phys;
