@@ -1,5 +1,6 @@
 #include <sys/memory/page_table_helper.h>
 #include <sys/memory/free_phys_pages.h>
+#include <sys/memory/phys_page_manager2.h>
 
 void set_phys_mem_virt_map_base(uint64_t a_phys_mem_virt_map_base) {
     phys_mem_virt_map_base = a_phys_mem_virt_map_base;
@@ -301,5 +302,93 @@ uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt) {
 
     return PAGE_TRANS_NEXT_LEVEL_ADDR(pt_vaddr[INDEX_PTE(virt)])
                     | PAGE_TRANS_ADDR_SIGN_EXT(pt_vaddr[INDEX_PTE(virt)]);
+}
+
+static int cow_fork_level(uint64_t *v_src, uint64_t *v_dest, int level) {
+
+    for(int i = 0; i < NUM_PAGE_TRANS_ENTRIES; i ++) {
+
+        if(v_src[i] & PAGE_TRANS_PRESENT) {
+
+            if(level == 1) {
+                // Mark src as read only
+                v_src[i] &= (~PAGE_TRANS_READ_WRITE);
+
+                // Copy to dest
+                v_dest[i] = v_src[i];
+
+                // Physical page
+                uint64_t phys = PAGE_TRANS_NEXT_LEVEL_ADDR(v_src[i])
+                                        | PAGE_TRANS_ADDR_SIGN_EXT(v_src[i]);
+
+                // Get page descriptor
+                struct phys_page_t *page_desc = get_phys_page_desc(phys);
+                if(!page_desc) {
+                    // TODO: Free stuff!
+                    return -1;
+                }
+
+                // Update refcount, mark COW
+                page_desc->refcount ++;
+                page_desc->flag = PAGE_COW; // TODO: OR instead of assigning
+
+                continue;
+            }
+
+            // Shallow copy kernel page table entries
+            if(level == 4 && i >= PML4_KERNEL_ENTRY_START &&
+                                                i <= PML4_KERNEL_ENTRY_END) {
+                v_dest[i] = v_src[i];
+                continue;
+            }
+
+            // Do not copy self reference entry
+            if(level == 4 && i == SELF_REF_ENTRY) {
+                continue;
+            }
+
+            uint64_t src_phys = PAGE_TRANS_NEXT_LEVEL_ADDR(v_src[i])
+                                        | PAGE_TRANS_ADDR_SIGN_EXT(v_src[i]);
+
+            // Create a page translation object
+            uint64_t dest_phys = alloc_phys_pages(1);
+            if(!dest_phys) {
+                // TODO: Free stuff!
+                return -1;
+            }
+
+            // Copy flags and address of next level page table
+            v_dest[i] = PAGE_TRANS_NON_ADDR_FIELDS(v_src[i])
+                                        | PAGE_TRANS_NEXT_LEVEL_ADDR(dest_phys);
+            if(-1 == cow_fork_level((uint64_t*)VIRTUAL_ADDR(src_phys),
+                            (uint64_t*)VIRTUAL_ADDR(dest_phys), level - 1)) {
+                // TODO: Free stuff!
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+uint64_t cow_fork_page_table(uint64_t *phys_addr) {
+
+    // Create a PML4 object
+    uint64_t p_dest_pml4;
+    uint64_t v_dest_pml4 = get_selfref_PML4(&p_dest_pml4);
+    if(!v_dest_pml4) {
+        return 0;
+    }
+
+    if(-1 == cow_fork_level((uint64_t*)SELF_REF_PML4(0),
+                                                (uint64_t*)v_dest_pml4, 4)) {
+        return (uint64_t)0;
+    }
+
+    if(phys_addr) {
+        *phys_addr = p_dest_pml4;
+    }
+
+    return v_dest_pml4;
 }
 

@@ -40,7 +40,7 @@ struct mm_struct {
     uint64_t end_stack;
 
     /* List of mm_struct */
-    struct list_head mm_list;
+    //struct list_head mm_list;
 
 };
 
@@ -233,6 +233,19 @@ uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
  */
 int do_mmap(struct list_head *mmap, int file, uint64_t offset, uint64_t addr,
                                                 uint64_t len, uint64_t prot);
+
+/**
+ * Deep copy mm_struct for fork
+ * @param src pointer to source mm_struct
+ * @return    pointer to new mm_struct object, NULL on ERROR
+ */
+struct mm_struct* cow_fork_mm_struct(struct mm_struct *src);
+
+/**
+ * Deep copy kernel mm_struct for fork
+ * @return pointer to new mm_struct object, NULL on ERROR
+ */
+struct kernel_mm_struct* cow_fork_kmm_struct();
 
 #endif
 

@@ -14,6 +14,7 @@
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/setup_kernel_memory.h>
 #include <sys/memory/free_phys_pages.h>
+#include <sys/memory/phys_page_manager2.h>
 
 #define INITIAL_STACK_SIZE 4096
 #define SET_NXE 0x800ULL
@@ -32,30 +33,33 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 {
     setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
 
-    add_vma(&get_kernel_mm()->mmap, 0xffffffffffff0000, 0xfffffffffffff000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
+    add_vma(&get_kernel_mm()->mmap, 0x10000, 0x1f000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
     uint64_t phys1 = alloc_phys_pages(1);
-    update_curr_page_table(phys1, 0xffffffffffff8000UL, 0);
+    update_curr_page_table(phys1, 0x18000UL, PAGE_TRANS_READ_WRITE);
 
-    *((int*)0xffffffffffff8000UL) = 5;
-    *((int*)0xffffffffffff8004UL) = 6;
+    uint64_t new_cr3;
+    if((uint64_t)(-1) == cow_fork_page_table(&new_cr3)) {
+        printf("I tried!\n");
+    }
 
-    printf("hi :) %d %d\n", *((int*)0xffffffffffff8000UL), *((int*)0xffffffffffff8004UL));
-    printf("cr4: %p\n", get_cr4());
+    struct str_cr3 cr3 = get_default_cr3();
+    cr3.p_PML4E_4Kb = new_cr3 >> 12;
+    set_cr3(cr3);
 
-    uint64_t phys;
-    char *x = (char*)v_alloc_page_get_phys(&phys, PAGE_TRANS_READ_WRITE);
-    *x = 'a';
-    *(x+1) = 'b';
-    *(x+2) = 'c';
-    *(x+3) = '\0';
-    uint64_t perm;
-    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p", phys, x, x, virt2phys_selfref((uint64_t)x, &perm));
-    printf(", perm = %p\n\n", perm);
-    v_free_page((uint64_t) x);
+    *((int*)0x18000UL) = 5;
+    *((int*)0x18004UL) = 6;
 
-    *x = 'x';
-    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p", phys, x, x, virt2phys_selfref((uint64_t)x, &perm));
-    printf(", perm = %p\n\n", perm);
+    printf("hi :) %d %d\n", *((int*)0x18000UL), *((int*)0x18004UL));
+
+    struct mm_struct *src = new_mm();
+    init_data_vma(src, 0x500000, 0x600000, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, MAP_ANONYMOUS);
+    init_code_vma(src, 0x300000, 0x400000, PAGE_TRANS_USER_SUPERVISOR, 0);
+    //init_stack_vma(src, 0x800000, 0x900000, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, MAP_ANONYMOUS);
+    print_vmas(src);
+
+    struct mm_struct *dest = cow_fork_mm_struct(src);
+    printf("\nnew mm_struct\n");
+    print_vmas(dest);
 
 #if 0
     printf("physical address of kernmem %p is %p\n", &kernmem, virt2phys_selfref((uint64_t)&kernmem));
