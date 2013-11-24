@@ -2,6 +2,10 @@
 #include <defs.h>
 #include <sys/parser/tarfs.h>
 #include <sys/parser/parsetarfs.h>
+#include <sys/filesystems/file_structures.h>
+#include <sys/scheduler/scheduler.h>
+#include <sys/scheduler/pcb.h>
+
 
 int getsize(char *);
 int strcmp(const char *,const char *);
@@ -77,8 +81,8 @@ int sys_open(const char* pathname){
 	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
-	uint64_t i;
-	int fd;
+	struct process_files_table* pft;
+	uint64_t i, fd;
 	for (i = 0; ; i++){
 		header = (struct posix_header_ustar *)header_address;
 		if (strcmp(header->name,pathname)==0){
@@ -93,66 +97,52 @@ int sys_open(const char* pathname){
 		if (size % 512)
 			header_address += 512;
 	}
-	for(i =0; i<ULIMIT; i++){
-		if(process_open_files_table[i].header == 0){
-			process_open_files_table[i].header = header;	
-			process_open_files_table[i].offset = 0;
-			fd = i;
-			break;
-		}
-	}
-	if(i==ULIMIT){
-		printf(" Number of open files exceeds ULIMIT");
-		return -1;
-	}
+	pft = get_new_process_files_table(header,0); //TODO: Do we need offset?
+	fd = add_to_process_file_table(getCurrentTask(),pft);
 	printf("\nFd returned from sys_open:%d",fd);
 	return fd;
 }
 
 int64_t sys_read(int fd, void *buf, uint64_t count){
-	int64_t i = -1;
-	if(process_open_files_table[fd].header == 0)
-		return i;
+	int64_t i = 0;
+	struct process_files_table* pft = get_process_files_table(getCurrentTask(),fd);
+	if(pft == NULL){
+		return -1;
+	}
 	char *filetype = "0";
 	char *dirtype = "5";
 
 	printf("\n Recieved and reading fd %d, buf:%p count:%d",fd,buf,count);
-	if(strcmp(process_open_files_table[fd].header->typeflag,dirtype)==0){
+	if(strcmp(pft->header->typeflag,dirtype)==0){
 		printf("Reading a directory");
 	}
-	else if(strcmp(process_open_files_table[fd].header->typeflag,filetype)==0){
-		uint64_t header_address = (uint64_t)process_open_files_table[fd].header;
-		uint64_t size_of_file = getsize(process_open_files_table[fd].header->size);
-		uint64_t readptr = header_address + 512 + process_open_files_table[fd].offset;
+	else if(strcmp(pft->header->typeflag,filetype)==0){
+		uint64_t header_address = (uint64_t)pft->header;
+		uint64_t size_of_file = getsize(pft->header->size);
+		uint64_t readptr = header_address + 512 + pft->offset;
 		char *temp = (char *)buf;
 		for(i =0;i<count;i++){
-			if(size_of_file==process_open_files_table[fd].offset){
+			if(size_of_file==pft->offset){
 				*temp = *(char *)readptr;
 				break;
 			}
 			*temp++ = *(char *)readptr++;
-			process_open_files_table[fd].offset++;
+			pft->offset++;
 		}	
 	}
 	return i;
 }
 
 int sys_close(int fd){
-	if(process_open_files_table[fd].header != 0){
-		process_open_files_table[fd].header = 0;
-		process_open_files_table[fd].offset = 0;
-		return 0;
-	}
-	else
-		return -1;
+	return reset_process_files_table(getCurrentTask(), fd);
 }
 
 int sys_opendir(const char *pathname){
 	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
-	uint64_t i;
-	int fd;
+	struct process_files_table* pft;
+	uint64_t fd, i;
 	for (i = 0; ; i++){
 		header = (struct posix_header_ustar *)header_address;
 		if (strcmp(header->name,pathname)==0){
@@ -163,7 +153,7 @@ int sys_opendir(const char *pathname){
 			}
 			else{	
 				printf("%s not a directory\n", pathname);
-				return -1;
+				return NULL;
 			}	
 		}
 		else if (header->name[0] == '\0')
@@ -173,18 +163,8 @@ int sys_opendir(const char *pathname){
 		if (size % 512)
 			header_address += 512;
 	}
-	for(i =0; i<ULIMIT; i++){
-		if(process_open_files_table[i].header == 0){
-			process_open_files_table[i].header = header;	
-			process_open_files_table[i].offset = 0;
-			fd = i;
-			break;
-		}
-	}
-	if(i==ULIMIT){
-		printf("ULIMIT exceeded\n");
-		return -1;
-	}
+	pft = get_new_process_files_table(header,0);
+	fd = add_to_process_file_table(getCurrentTask(),pft);
 	return fd;
 }
 
@@ -212,12 +192,13 @@ int check_in_dir(const char* file, const char* dir){
 
 struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
 	struct posix_header_ustar* to_ret = (struct posix_header_ustar*)ret;
-	if(process_open_files_table[fd].header == 0)
-		return 0;
+	struct process_files_table* pft = get_process_files_table(getCurrentTask(),fd);
+	if(pft == NULL)
+		return NULL;
 	char *dirtype = "5";
-	if(strcmp(process_open_files_table[fd].header->typeflag,dirtype)==0){
-		uint64_t header_address = (uint64_t)process_open_files_table[fd].header;
-		for (uint64_t j = 0;j<=process_open_files_table[fd].offset ; j++){
+	if(strcmp(pft->header->typeflag,dirtype)==0){
+		uint64_t header_address = (uint64_t)pft->header;
+		for (uint64_t j = 0;j<= pft->offset ; j++){
 			struct posix_header_ustar *header = (struct posix_header_ustar *)header_address;
 			if (header->name[0] == '\0')
 				break;
@@ -227,15 +208,15 @@ struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
 				header_address += 512;
 		
 			struct posix_header_ustar *return_header = (struct posix_header_ustar *)header_address;
-			if(check_in_dir(return_header->name,process_open_files_table[fd].header->name)==-1){
+			if(check_in_dir(return_header->name,pft->header->name)==-1){
 				return 0;
 			}	
-			else if(check_in_dir(return_header->name,process_open_files_table[fd].header->name)==1){
+			else if(check_in_dir(return_header->name,pft->header->name)==1){
 				j--;
 			}	
 			else{
-				if(j==process_open_files_table[fd].offset){
-					process_open_files_table[fd].offset++;
+				if(j==pft->offset){
+					pft->offset++;
 					to_ret = return_header;
 					return to_ret;
 
@@ -247,7 +228,7 @@ struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
 	}
 	else{
 		printf("Not a directory");
-		return 0;
+		return NULL;
 	}
 	return 0;
 }
@@ -260,21 +241,22 @@ int sys_closedir(int fd){
 
 int sys_lseek(int fd, off64_t offset, int whence) {
 
-    if(!process_open_files_table[fd].header) {
+	struct process_files_table* pft = get_process_files_table(getCurrentTask(),fd);
+    if(pft == NULL) {
         // No such file!
         return -1;
     }
 
     switch(whence) {
     case SEEK_SET:
-        process_open_files_table[fd].offset = offset;
+        pft->offset = offset;
         break;
     case SEEK_CUR:
-        process_open_files_table[fd].offset += offset;
+        pft->offset += offset;
         break;
     case SEEK_END:
         // TODO: Seek from end of file
-        process_open_files_table[fd].offset = offset;
+        pft->offset = offset;
         break;
     }
 

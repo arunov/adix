@@ -16,6 +16,7 @@
 #define OPENDIR 7
 #define READDIR 8
 #define CLOSEDIR 9
+#define WRITE 10
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
@@ -27,6 +28,7 @@ uint64_t uprintf(const char *format_string);
 /* FIle system operations */
 int open(const char* filename);
 int64_t read(int fd, void *buf, uint64_t count);
+int64_t write(int fd, void *buf, uint64_t count);
 int lseek(int fd, off64_t offset, int whence);
 int close(int fd);
 int opendir(const char *pathname);

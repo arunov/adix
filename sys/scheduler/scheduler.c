@@ -57,17 +57,21 @@ static void wakeup_proc(struct pcb_t *waiting_task){
 	list_del(&waiting_task->lister);//delete from wait queue
 	list_add(&waiting_task->lister, &pcb_run_queue);//add to run queue
 	printf("\n#####WAKING UP process %d",waiting_task->pid);
-	sys_yield();
 }
 
 void sys_wakeup(uint64_t wait_desc){
 	struct pcb_t *proc;
+	struct pcb_t *temp[MAX_WAIT_PROC]; //TODO: Poses an upper bound?
+	int i=0;
 	list_for_each_entry(proc, &pcb_wait_queue, lister){
 		if(proc->wait_desc == wait_desc){
-			wakeup_proc(proc);
+			temp[i++] = proc;
 		}
 	}
-//	printPcbRunQueue();
+	while(i != 0){
+		wakeup_proc(temp[--i]);
+	}
+	sys_yield();
 }
 
 void cleanupTerminated(){

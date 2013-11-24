@@ -1,7 +1,7 @@
 #include<defs.h>
 #include<syscall.h>
 #include<sys/parser/tarfs.h>
-uint64_t ret;
+uint64_t ret ;
 void yield(){
 	__syscall0(YIELD);
 }
@@ -21,10 +21,6 @@ int64_t read(int fd, void *buf, uint64_t count){
 	return ret;
 }
 
-int64_t write(int fd, void *buf, uint64_t count){
-	uint64_t ret = __syscall3(WRITE, fd, (uint64_t)buf, count);
-	return ret;
-}
 int lseek(int fd, off64_t offset, int whence){
 	int ret = __syscall3(LSEEK, fd, offset, whence);
 	return ret;

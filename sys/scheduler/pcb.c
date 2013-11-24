@@ -53,7 +53,6 @@ struct pcb_t* createTask(enum ptype proc_type,
 	pcb->pid = getNextPid();
 	pcb->state = P_READY;
 	pcb->type = proc_type;
-	
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
 		pcb->stack_base = getFreeVirtualPage();
@@ -94,6 +93,44 @@ void printPcb(struct pcb_t *this){
 		this->state,
 		this->type,
 		this->cr3_content);
-	printf("---E_PCB---");
+	printf("---E_PCB---"); 
 }
+
+struct process_files_table* get_process_files_table(
+				struct pcb_t *this,
+				int fd)
+{
+	return this->open_files[fd];
+
+}
+
+uint64_t add_to_process_file_table(
+				struct pcb_t *this,
+				struct process_files_table *pfd)
+{
+	uint64_t i;
+	for(i =0; i<OPEN_FILES_LIMIT; i++){
+		//search next available slot
+		if(this->open_files[i] == 0){
+			this->open_files[i] = pfd;
+			break;
+		}
+	}
+	if(i == OPEN_FILES_LIMIT){
+		printf(" Number of open files exceeds OPEN_FILES_LIMIT");
+		return -1;
+	}
+	return i;
+}
+
+uint64_t reset_process_files_table( struct pcb_t *this,
+				uint64_t fd){
+	struct process_files_table* pft = get_process_files_table(this,fd);
+	if(pft == NULL){
+		return -1;
+	}
+	kfree(get_process_files_table(this,fd));
+	this->open_files[fd] = NULL;
+	return 0;
+}				
 

@@ -4,7 +4,7 @@
 #include <sys/kstdio.h>
 #include <sys/keyboard.h>
 #include <sys/utils.h>
-
+#include <sys/terminal/terminal_driver.h>
 struct kbkeypress {
     uint64_t keys[2];
 } gKbKeyState = {{0, 0}};
@@ -164,6 +164,7 @@ void keyboard_handler()
                 c2 = shift_kbdus[scancode];
             }
         }
+	terminal_enqueue(c2);
         if(c2 != '\n' && c2 != '\t')
         {
             *(video_buf-20) = c1;

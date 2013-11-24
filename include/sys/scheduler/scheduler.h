@@ -4,6 +4,7 @@
 #include<defs.h>
 
 #define NOT_WAITING 0x00
+#define MAX_WAIT_PROC 20
 /* Method used to switch to another kernel thread*/
 void switchTo(void*);
 /*Schedule a process/task*/
