@@ -254,11 +254,15 @@ int v_free_page(uint64_t virt) {
     if(!virt)
         return -1;
 
-    uint64_t phys = virt2phys_selfref(virt);
+    uint64_t perm;
+    uint64_t phys = virt2phys_selfref(virt, &perm);
 
     if(phys == (uint64_t)-1) {
         return -1;
     }
+
+    update_curr_page_table(0, virt, perm);
+    // TODO: munmap
 
     return free_phys_page(phys);
 }

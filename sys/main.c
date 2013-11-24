@@ -4,7 +4,7 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 #include <sys/memory/phys_page_manager.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/handle_cr.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/list.h>
 #include <sys/parser/parsetarfs.h>
@@ -30,27 +30,17 @@ struct phys_page_manager phys_page_mngr_obj;
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
-	struct smap_t {
-		uint64_t base, length;
-		uint32_t type;
-	}__attribute__((packed)) *smap;
+    setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
 
-	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
-	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
-		if (smap->type == 1 && smap->length != 0) {
-			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
-			printf("No of pages: %d\n", (smap->length/PG_SZ));
-		}
-	}
-	printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
-	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
-	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
+    add_vma(&get_kernel_mm()->mmap, 0x8000, 0x12000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
+    uint64_t phys1 = alloc_phys_pages(1);
+    update_curr_page_table(phys1, 0x10000, 0);
 
-        /* Free list and Page Tables */
-	//phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
-    //    finish_scan(&phys_page_mngr_obj);
-        setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
-	//setup_kernel_pgtbl(&kernmem, physbase, physfree);
+    *((int*)0x10000) = 5;
+    *((int*)0x10004) = 6;
+
+    printf("hi :) %d %d\n", *((int*)0x10000), *((int*)0x10004));
+    printf("cr4: %p\n", get_cr4());
 
     uint64_t phys;
     char *x = (char*)v_alloc_page_get_phys(&phys, PAGE_TRANS_READ_WRITE);
@@ -58,9 +48,15 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     *(x+1) = 'b';
     *(x+2) = 'c';
     *(x+3) = '\0';
-    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p\n\n", phys, x, x, virt2phys_selfref((uint64_t)x));
-
+    uint64_t perm;
+    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p", phys, x, x, virt2phys_selfref((uint64_t)x, &perm));
+    printf(", perm = %p\n\n", perm);
     v_free_page((uint64_t) x);
+
+    *x = 'x';
+    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p", phys, x, x, virt2phys_selfref((uint64_t)x, &perm));
+    printf(", perm = %p\n\n", perm);
+
 #if 0
     printf("physical address of kernmem %p is %p\n", &kernmem, virt2phys_selfref((uint64_t)&kernmem));
 
@@ -82,7 +78,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     do_mmap(&(mm->mmap), fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
 */	
-    	cooperative_schedule(&kernmem,physfree);
+	cooperative_schedule(&kernmem,physfree);
 	// kernel starts here
 	while(1);
 }

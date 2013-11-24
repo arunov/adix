@@ -2,7 +2,7 @@
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/phys_page_manager2.h>
 #include <sys/memory/free_phys_pages.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/handle_cr.h>
 
 /**
  * Create vma for kernel virtual memory
@@ -185,6 +185,10 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
                             PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
 
     phys_mem_offset_map(pml4_page, phys_mem_offset);
+
+    // Protect read-only pages from supervisor-level writes
+    printf("cr0 : %p\n", get_cr0());
+    set_cr0(get_cr0() | CR0_WP);
 
     // Set cr3
     struct str_cr3 cr3 = get_default_cr3();

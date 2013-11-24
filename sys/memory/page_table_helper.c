@@ -110,7 +110,7 @@ int update_page_table_idmap(uint64_t pml4, uint64_t phys, uint64_t virt,
     // Check physical page present
     if(pt_vaddr[INDEX_PTE(virt)] & PAGE_TRANS_PRESENT) {
         // TODO: Replace with logger
-        //printf("Mapping again!");
+        printf("Mapping again!");
     }
 
     pt_vaddr[INDEX_PTE(virt)] = PAGE_TRANS_NEXT_LEVEL_ADDR(phys)
@@ -134,6 +134,11 @@ int update_curr_page_table(uint64_t phys, uint64_t virt,
 
     // Check PDP present
     if(!((*pml4e_vaddr) & PAGE_TRANS_PRESENT)) {
+
+        if(!phys) {
+            return -1;
+        }
+
         pdpe_vaddr = (uint64_t*)get_zeroed_page_trans_obj(&pdp);
         if(!pdpe_vaddr) {
             return -1;
@@ -147,6 +152,11 @@ int update_curr_page_table(uint64_t phys, uint64_t virt,
 
     // Check PD present
     if(!((*pdpe_vaddr) & PAGE_TRANS_PRESENT)) {
+
+        if(!phys) {
+            return -1;
+        }
+
         pde_vaddr = (uint64_t*)get_zeroed_page_trans_obj(&pd);
         if(!pde_vaddr) {
             return -1;
@@ -160,6 +170,11 @@ int update_curr_page_table(uint64_t phys, uint64_t virt,
 
     // Check PT present
     if(!((*pde_vaddr) & PAGE_TRANS_PRESENT)) {
+
+        if(!phys) {
+            return -1;
+        }
+
         pte_vaddr = (uint64_t*)get_zeroed_page_trans_obj(&pt);
         if(!pte_vaddr) {
             return -1;
@@ -170,17 +185,32 @@ int update_curr_page_table(uint64_t phys, uint64_t virt,
     }
 
     pte_vaddr = (uint64_t*)SELF_REF_PTE(virt);
-    if(!((*pte_vaddr) & PAGE_TRANS_PRESENT)) {
+    if((*pte_vaddr) & PAGE_TRANS_PRESENT) {
+
+        if(!phys) {
+            *pte_vaddr = PAGE_TRANS_NEXT_LEVEL_ADDR(*pte_vaddr)
+                                    | PAGE_TRANS_NON_ADDR_FIELDS(access_perm);
+
+            invalidate_tlb((char*)virt);
+            return 0;
+        }
+
         // TODO: Replace with logger
-        //printf("Mapping again!");
+        printf("Mapping again!");
+    }
+
+    if(!phys) {
+        return -1;
     }
 
     *pte_vaddr = PAGE_TRANS_NEXT_LEVEL_ADDR(phys) | PAGE_TRANS_PRESENT
                                     | PAGE_TRANS_NON_ADDR_FIELDS(access_perm);
+
+    invalidate_tlb((char*)virt);
     return 0;
 }
 
-uint64_t virt2phys_selfref(uint64_t virt) {
+uint64_t virt2phys_selfref(uint64_t virt, uint64_t *perm) {
 
     // Design notes
     //  - This function uses self referencing trick to access page translation
@@ -215,6 +245,11 @@ uint64_t virt2phys_selfref(uint64_t virt) {
     pte_vaddr = (uint64_t*)SELF_REF_PTE(virt);
     if(!((*pte_vaddr) & PAGE_TRANS_PRESENT)) {
         return (uint64_t)(-1);
+    }
+
+    if(perm) {
+        *perm = (*pte_vaddr) & (PAGE_TRANS_READ_WRITE
+                                | PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_NX);
     }
 
     return (PAGE_TRANS_NEXT_LEVEL_ADDR(*pte_vaddr)

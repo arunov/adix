@@ -25,7 +25,8 @@ struct pcb_t{
 	struct tss_t *tss;
 	/* Indicates which descriptor the process is sleeping on */
 	uint64_t wait_desc; 
-	struct list_head lister; 
+	struct list_head lister;
+	struct mm_struct *mm;
 };
 
 /* Create a new Task(PCB) and initialize its values.*/
