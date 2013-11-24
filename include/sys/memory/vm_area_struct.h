@@ -3,12 +3,11 @@
 
 #include <sys/list.h>
 
-#define VMA_POOL_COUNT 4
+#define MAP_ANONYMOUS 0x00000001U
+#define MAP_GROWSDOWN 0x00000002U
 
 /* Virtual memory area structure */
 struct vm_area_struct {
-    /* Pointer to mm_struct associated with vma */
-    //struct mm_struct *vm_mm;
 
     /* Starting virtual address of virtual memory area */
     uint64_t vm_start;
@@ -16,11 +15,15 @@ struct vm_area_struct {
     /* End virtual address of virtual memory area */
     uint64_t vm_end;
 
-    /* Next vma object */
-    //struct vm_area_struct *next;
-
     /* Protection bits for  */
-    char vm_page_prot;
+    uint64_t vm_page_prot;
+
+    /**
+     * Flags for memory area
+     * MAP_ANONYMOUS - no file backup
+     * MAP_GROWSDOWN - region can expand towards lower addresses
+     */
+    int vm_flags;
 
     /* List of vmas */
     struct list_head vm_list;

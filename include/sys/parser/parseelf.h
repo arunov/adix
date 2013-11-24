@@ -4,6 +4,12 @@
 #include <sys/memory/mm_struct.h>
 
 #define EI_NIDENT 16
+//p_flags
+#define PT_E 0x1ULL
+#define PT_W 0x2ULL
+#define PT_R 0x4ULL
+
+
 typedef struct {
 	unsigned char e_ident[EI_NIDENT];
 	uint16_t e_type;

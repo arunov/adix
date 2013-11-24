@@ -2,7 +2,7 @@
 #include<sys/scheduler/scheduler.h>
 #include<sys/kstdio.h>
 #include<sys/list.h>
-#include<sys/memory/handle_cr2_cr3.h>
+#include<sys/memory/handle_cr.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);

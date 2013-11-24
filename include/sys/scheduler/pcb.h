@@ -28,6 +28,7 @@ struct pcb_t{
 	uint64_t wait_desc; 
 	struct  process_files_table* open_files[OPEN_FILES_LIMIT];
 	struct list_head lister; 
+	struct mm_struct *mm;
 };
 
 /* Create a new Task(PCB) and initialize its values.*/

@@ -9,9 +9,7 @@
 #include <sys/memory/phys_page_manager.h>
 #include <sys/kstdio.h> // TODO: Replace with logger
 #include <sys/kstring.h>
-
-// Size of page
-#define SIZEOF_PAGE 4096
+#include <sys/memory/page_constants.h>
 
 // Number of entries in page translation objects
 #define NUM_PAGE_TRANS_ENTRIES 512
@@ -155,84 +153,105 @@
 
 
 /**
- * Helper for page translation objects
+ * Base address of virtual memory where all of physical memory is mapped.
+ * Initialized with 0 for identity mapping.
  */
-struct page_table_helper{
-    struct phys_page_manager *phys_mgr;
-
-    /**
-     * Base address of virtual memory where all of physical memory is mapped.
-     * Initialized with 0 for identity mapping.
-     */
-    uint64_t phys_mem_virt_map_base;
-};
+uint64_t phys_mem_virt_map_base;
 
 // Virtual address corresponding to physical address 'a'
-#define VIRTUAL_ADDR(a) ((uint64_t)((char*)(a) + \
-                                                (this->phys_mem_virt_map_base)))
-
-/**
- * Initialize page table helper with free page manager and identity mapping.
- * @param this              pointer to 'page_table_helper' object
- * @param a_phys_page_mgr   physical page manager used to get free pages
- */
-void init_page_table_helper(struct page_table_helper *this,
-                                    struct phys_page_manager *a_phys_page_mgr);
+#define VIRTUAL_ADDR(a) ((uint64_t)((char*)(a) + phys_mem_virt_map_base))
 
 /**
  * Set base address of virtual area where all of physical memory is mapped.
- * @param this                      pointer to 'page_table_helper' object
  * @param a_phys_mem_virt_map_base  base address of virtual area
  */
-void set_phys_mem_virt_map_base(struct page_table_helper *this,
-                                            uint64_t a_phys_mem_virt_map_base);
+void set_phys_mem_virt_map_base(uint64_t a_phys_mem_virt_map_base);
 
 /**
  * Get zeroed page translation object.
- * @param this  pointer to 'page_table_helper' object
  * @return  address of newly created page translation object
  */
-uint64_t get_zeroed_page_trans_obj(struct page_table_helper *this);
+uint64_t get_zeroed_page_trans_obj();
 
 /**
  * Get PML4 object that has a self reference entry.
- * @param this  pointer to 'page_table_helper' object
- * @return  address of newly created PML4 object
+ * @param phys_addr physical address of PML4 is output here
+ * @return          virtual address of newly created PML4 object, NULL on error
  */
-uint64_t get_selfref_PML4(struct page_table_helper *this);
+uint64_t get_selfref_PML4(uint64_t *phys_addr);
 
 /**
  * Get duplicate PML4 object.
- * @param this  pointer to 'page_table_helper' object
- * @param src   PML4 object that needs to be duplicated
+ * @param src       virtual address of PML4 object that needs to be duplicated
+ * @param phys_addr physical address of PML4 is output here
+ * @return          duplicated PML4 object, NULL on error
  */
-uint64_t get_duplicate_PML4(struct page_table_helper *this, uint64_t src);
+uint64_t get_duplicate_PML4(uint64_t src, uint64_t *phys_addr);
 
 /**
- * Map physical address to virtual address with required permissions in PML4
- * @param this          pointer to 'page_table_helper' object
- * @param pml4          address of PML4 in which mapping is to be done
- * @param phys          physical address to map virtual address 'virt' with
- * @param virt          virtual address that should be mapped to 'phys'
- * @param access_perm   access permissions ORed. For e.g.: PAGE_TRANS_READ_WRITE
- *                      | PAGE_TRANS_USER_SUPERVISOR
+ * Map physical address to virtual address with required permissions in PML4.
+ * Assumes identity mapping!
+ * @param pml4        physical address of PML4 in which mapping is to be done
+ * @param phys        physical address to map virtual address 'virt' with
+ * @param virt        virtual address that should be mapped to 'phys'
+ * @param access_perm access permissions ORed. For e.g.: PAGE_TRANS_READ_WRITE
+ *                    | PAGE_TRANS_USER_SUPERVISOR
+ * @return            OK or ERROR
  */
-void update_page_table(struct page_table_helper *this, uint64_t pml4,
-                            uint64_t phys, uint64_t virt, uint64_t access_perm);
+int update_page_table_idmap(uint64_t pml4, uint64_t phys, uint64_t virt,
+                                                        uint64_t access_perm);
+                            
 
 /**
  * Map physical address to virtual address with required permissions in PML4
  * loaded in CR3. This function does NOT assume identity mapping or virtual
  * address mapped with all physical addresses
- * @param this          pointer to 'page_table_helper' object
- * @param phys          physical address to map virtual address 'virt' with
- * @param virt          virtual address that should be mapped to 'phys'
- * @param access_perm   access permissions ORed. For e.g.: PAGE_TRANS_READ_WRITE
- *                      | PAGE_TRANS_USER_SUPERVISOR
+ * @param phys        physical address to map virtual address 'virt' with. If 0,
+ *                    then access permissions will be updated, provided all 4
+ *                    levels exist. Otherwise ERROR. In this mode, even
+ *                    PAGE_TRANS_PRESENT is set based on access_perm.
+ * @param virt        virtual address that should be mapped to 'phys'
+ * @param access_perm access permissions ORed. For e.g.: PAGE_TRANS_READ_WRITE
+ *                    | PAGE_TRANS_USER_SUPERVISOR
+ * @return            OK or ERROR
  */
-void update_curr_page_table(struct page_table_helper *this, uint64_t phys,
-                                        uint64_t virt, uint64_t access_perm);
+int update_curr_page_table(uint64_t phys, uint64_t virt, uint64_t access_perm);
 
-struct page_table_helper *getPageTableHelper();
+/**
+ * Find physical address corresponding to a virtual address.
+ * NOTE: needs self ref page tables
+ * @param virt virtual address
+ * @param perm return value of protection/permission bits
+ * @return     physical address, if exists, otherwise (uint64_t)(-1)
+ */
+uint64_t virt2phys_selfref(uint64_t virt, uint64_t *perm); 
+
+/**
+ * Find physical address corresponding to a virtual address.
+ * NOTE: needs identity mapping
+ * @param pml4 physical address of PML4 in which mapping is to be done
+ * @param virt virtual address
+ * @return     physical address, if exists, otherwise (uint64_t)(-1)
+ */
+uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt); 
+
+/**
+ * After modifications in page table, invalidate Translation-Lookaside Buffer
+ * (TLB).
+ * Ref: http://developer.amd.com/wordpress/media/2012/10/24593_APM_v21.pdf
+ * Section: 5.5.2 TLB Management
+ * @param m virtual address of page that has to be invalidated
+ */
+static inline void invalidate_tlb(char *m) {
+    __asm volatile("invlpg %0"
+                    :
+                    : "m"(*m)
+                    : "memory" // Clobber memory to avoid optimizer re-ordering
+                               // access before invlpg, which may cause nasty
+                               // bug. Ref:
+                               // http://wiki.osdev.org/Inline_Assembly/Examples
+                );
+}
+
 #endif
 
