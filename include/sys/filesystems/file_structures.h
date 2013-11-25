@@ -49,5 +49,12 @@ struct process_files_table* get_new_process_files_table(
 				uint64_t offset,
 				struct operation_pointers *op_pointer);
 
+/**
+ * Get copy of process_files_table structure object
+ * @param pft pointer to source page_files_table
+ * @return    pointer to copy of source
+ */
+struct process_files_table *get_duplicate_process_files_table(
+                                            struct process_files_table *pft);
 
 #endif

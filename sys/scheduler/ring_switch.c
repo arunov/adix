@@ -18,7 +18,7 @@ void jump_to_ring3(){
 	 struct userspace_args ua;
 
 	 ua = prepare_args_for_userspace(argv, envp);//replaced
-	 printf("\nJUMP_TO_RING3: rsp: %p rip: %p argc:%d argv:%p",rsp,rip, ua.argc, ua.argv);
+	 printf("\nJUMP_TO_RING3: rsp: %p rip: %p argc:%d argv:%p\n",rsp,rip, ua.argc, ua.argv);
 	_jump_to_ring3(rsp, rip, ua.argc, ua.argv, ua.envp);
 
 }

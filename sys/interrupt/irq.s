@@ -19,7 +19,6 @@
 .global irq13
 .global irq14
 .global irq15
-.global irq16
 
 #  0: Programmable Interval Timer 
 irq0:
@@ -132,13 +131,6 @@ irq15:
     cli
     pushq $0
     pushq $47
-    jmp irq_common_stub
-
-#  16: System call
-irq16:
-    cli
-    pushq %rax
-    pushq $48
     jmp irq_common_stub
 
 # We call a C function in here. We need to let the assembler know

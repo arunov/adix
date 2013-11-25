@@ -10,5 +10,8 @@
 // Page alignment
 #define PAGE_ALIGN (0xffffffffffffffffUL << LOG2_SIZEOF_PAGE)
 
+// Offset in page
+#define OFFSET_IN_PAGE(a) ((a) & (~PAGE_ALIGN))
+
 #endif
 

@@ -111,7 +111,7 @@ int update_page_table_idmap(uint64_t pml4, uint64_t phys, uint64_t virt,
     // Check physical page present
     if(pt_vaddr[INDEX_PTE(virt)] & PAGE_TRANS_PRESENT) {
         // TODO: Replace with logger
-        printf("Mapping again!");
+        printf("Mapping again!\n");
     }
 
     pt_vaddr[INDEX_PTE(virt)] = PAGE_TRANS_NEXT_LEVEL_ADDR(phys)
@@ -197,7 +197,7 @@ int update_curr_page_table(uint64_t phys, uint64_t virt,
         }
 
         // TODO: Replace with logger
-        printf("Mapping again!");
+        printf("Mapping again!\n");
     }
 
     if(!phys) {

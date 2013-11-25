@@ -3,6 +3,7 @@
 
 #include <defs.h>
 #include <sys/list.h>
+#include <sys/memory/page_table_helper.h>
 
 /**
  * Free list of physical pages

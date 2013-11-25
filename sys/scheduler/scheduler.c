@@ -3,6 +3,7 @@
 #include<sys/kstdio.h>
 #include<sys/list.h>
 #include<sys/memory/handle_cr.h>
+#include<sys/memory/page_table_helper.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);
@@ -12,7 +13,22 @@ static struct pcb_t* getNextTask(){
 	return list_entry(pcb_run_queue.next,struct pcb_t,lister);
 }
 
+static struct pcb_t *prepTask = NULL;
+
+void updatePrepTask(struct pcb_t *pcb) {
+    prepTask = pcb;
+}
+
 struct pcb_t* getCurrentTask(){
+
+    if(prepTask) {
+        return prepTask;
+    }
+
+    if(pcb_run_queue.prev == &pcb_run_queue) {
+        return NULL;
+    }
+
 	return list_entry(pcb_run_queue.prev,struct pcb_t,lister);
 }
 
@@ -31,6 +47,13 @@ void sys_yield(){
 	if(nextTask->cr3_content != NULL){
 		set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
 	}
+    if(nextTask->pid == 1 || nextTask->pid == 3) {
+    //printf("nextTask: pid: %p, stack_base: %p, ", nextTask->pid, nextTask->stack_base);
+    //printf("user_stack: %p, user_stack_phys: %p\n", nextTask->u_stack_base, virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
+    //printf("nextTask: pid: %p, ", nextTask->pid);
+    //printf("user_stack_phys: %p, ", virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
+    //printf("k_stack_ptr: %p\n", nextTask->stack_base[1]);
+    }
 	switchTo(nextTask->stack_base);
 }
 
@@ -82,13 +105,13 @@ void cleanupTerminated(){
 	struct pcb_t *terminated_task = getTerminatedTask();	
 	if(terminated_task != NULL){
 		list_del(&terminated_task->lister);
-		printf("\nContenets of PCB after cleanup..");	
+		//printf("\nContents of PCB after cleanup..");	
 		printPcbRunQueue();
 	}
 }
 
 void addToTaskList(struct pcb_t *pcb){
-	list_add_tail(&pcb->lister,&pcb_run_queue);
+	list_add(&pcb->lister,&pcb_run_queue);
 }
 
 void printPcbRunQueue(){

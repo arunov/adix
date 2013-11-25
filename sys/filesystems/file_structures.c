@@ -14,3 +14,12 @@ struct process_files_table* get_new_process_files_table(
 	pft->op_pointers = op_pointers;
 	return pft;
 }
+
+struct process_files_table *get_duplicate_process_files_table(
+                                            struct process_files_table *pft) {
+
+    return get_new_process_files_table(pft->header, pft->offset,
+                                                            pft->op_pointers);
+
+}
+

@@ -8,9 +8,9 @@ void _start(uint64_t argc, char **argv, char **envp) {
 /*	int argc = 1;
 	char* argv[10];
 	char* envp[10];*/
-	printf("\nNumber of args: %d",argc);
+	printf("Number of args: %d\n",argc);
 	for(int i=0;i<argc;i++){
-		printf("\nArg nu %d is : %s ", i, argv[i]);
+		printf("Arg nu %d is : %s\n", i, argv[i]);
 	}
 	int res =0;
 	res = main(argc, argv, envp);

@@ -13,6 +13,7 @@
 .global _sys_closedir
 .global _sys_sleep
 .global _sys_clrscr
+.global _sys_fork
 
 .extern sys_call_table
 .extern sys_yield
@@ -26,6 +27,7 @@
 .extern sys_readdir
 .extern sys_closedir
 .extern sys_sleep
+.extern sys_fork
 .extern printf
 .extern set_tss
 .extern clear_screen
@@ -95,4 +97,17 @@ _sys_sleep:
 _sys_clrscr:
 	call clear_screen
 	retq
-	
+
+_sys_fork:
+	call sys_fork
+    pushq %rax
+	#Setup TSS
+	movq %rsp,%rdi
+	addq $0xB0,%rdi
+	call set_tss
+	#Load new valure for tss
+	movq $0x28, %rdi
+	ltr %di
+    popq %rax
+	retq
+

@@ -132,9 +132,26 @@ static int cow(struct vm_area_struct *node, uint64_t fault_addr) {
         return COW_ERROR;
     }
 
-    // Create copy on write
+    // Decrement refcount
     page_desc->refcount --;
-    return page_not_present(node, fault_addr);
+
+    // Get new physical page
+    uint64_t new_phys = alloc_phys_pages(1);
+    if(!new_phys) {
+        printf("Cannot allocate physical page :(. Exiting!\n");
+        sys_exit(1);
+        return -1;
+    }
+
+    // Copy contents to new physical page
+    memcpy((void*)VIRTUAL_ADDR(new_phys), (void*)(fault_addr & PAGE_ALIGN),
+                                                                SIZEOF_PAGE);
+
+    // Add to page table
+    update_curr_page_table(new_phys, fault_addr & PAGE_ALIGN,
+                                                            node->vm_page_prot);
+
+    return 0;
 }
 
 /**
@@ -204,11 +221,11 @@ int page_fault_handler(uint64_t err_code) {
 
     // Get memory area
     struct list_head *vma_list_head;
-
-    if(fault_addr >= get_kernel_mm()->start_kernel) {
+    struct pcb_t *currTask = getCurrentTask();
+    if(fault_addr >= get_kernel_mm()->start_kernel || !currTask) {
         vma_list_head = &(get_kernel_mm()->mmap);
     } else {
-        vma_list_head = &(getCurrentTask()->mm->mmap);
+        vma_list_head = &(currTask->mm->mmap);
     }
 
     // Get memory region

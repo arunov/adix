@@ -10,6 +10,10 @@
 #include <sys/gdt.h>
 #include <sys/filesystems/file_structures.h>
 #include <sys/terminal/terminal_driver.h>
+#include <sys/memory/page_constants.h>
+#include <sys/memory/free_phys_pages.h>
+#include <sys/scheduler/scheduler.h>
+
 extern char physbase;
 static uint64_t next_pid = 1;
 
@@ -65,9 +69,10 @@ struct pcb_t* createTask(enum ptype proc_type,
 					0,
 					get_terminal_ops());
     pcb->mm = new_mm();
+    updatePrepTask(pcb);
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
-		pcb->stack_base = getFreeVirtualPage();
+		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
 		prepareInitialStack(pcb->stack_base,instruction_address);
 	} 
 	else if(proc_type == UPROC){
@@ -78,12 +83,13 @@ struct pcb_t* createTask(enum ptype proc_type,
 		/* Load the binary corresponding to this process */
 		instruction_address = exec(program, pcb->mm);
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
-		pcb->stack_base = getFreeVirtualPage();
-		pcb->u_stack_base = getFreeVirtualPage();
+		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
+		pcb->u_stack_base = (uint64_t*)v_alloc_pages_at_virt(1, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, 0x70000000);
 		printf("##########stack alocated for user process: %p",pcb->u_stack_base);
 		prepareInitialStack(pcb->stack_base,(uint64_t)&jump_to_ring3);
 		prepareInitialStack(pcb->u_stack_base, instruction_address);
 	}
+    updatePrepTask(NULL);
 	return pcb;
 }
 
@@ -147,5 +153,98 @@ uint64_t reset_process_files_table( struct pcb_t *this,
 	kfree(get_process_files_table(this,fd));
 	this->open_files[fd] = NULL;
 	return 0;
-}				
+}
+
+#define SYS_FORK_CHILD_RIP_OFFSET 0x28
+
+uint64_t sys_fork() {
+
+    // Get rsp of parent
+    static uint64_t p_rsp;
+
+	__asm volatile(
+		"movq %%rsp, %0;"
+		:"=g"(p_rsp)
+		:
+	);
+
+    uint64_t c_rsp = p_rsp + SYS_FORK_CHILD_RIP_OFFSET; 
+
+    struct pcb_t *p_pcb = getCurrentTask();
+
+    // PCB to return
+    struct pcb_t *c_pcb = (struct pcb_t*)kmalloc(sizeof(struct pcb_t));
+    if(NULL == c_pcb) {
+        return NULL;
+    }
+
+    /* stack_base */
+    c_pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
+    if(c_pcb->stack_base == NULL) {
+        kfree(c_pcb);
+        return NULL;
+    }
+
+    // Copy stack
+    memcpy((void*)((char*)(c_pcb->stack_base) + OFFSET_IN_PAGE(c_rsp)),
+                    (void*)((char*)(p_pcb->stack_base) + OFFSET_IN_PAGE(c_rsp)),
+                                        SIZEOF_PAGE - OFFSET_IN_PAGE(c_rsp));
+    memset((void*)(c_pcb->stack_base), 0, OFFSET_IN_PAGE(c_rsp));
+
+    c_pcb->stack_base[SP_OFFSET] = (uint64_t)(c_pcb->stack_base)
+            + OFFSET_IN_PAGE(c_rsp) - sizeof(uint64_t) * NUM_REGISTERS_BACKED;
+
+    /* u_stack_base */
+    c_pcb->u_stack_base = p_pcb->u_stack_base;
+
+    /* pid */
+    c_pcb->pid = getNextPid();
+
+    /* state */
+    c_pcb->state = p_pcb->state;
+
+    /* type */
+    c_pcb->type = p_pcb->type;
+
+    /* cr3_content */
+    if(0 == cow_fork_page_table(&(c_pcb->cr3_content))) {
+        // TODO: Deep free!
+        kfree(c_pcb);
+        return NULL;
+    }
+
+    /* tss */
+    c_pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
+    if(NULL == c_pcb->tss) {
+        // TODO: Deep free!
+        kfree(c_pcb);
+        return NULL;
+    }
+
+    /* wait_desc */
+    c_pcb->wait_desc = p_pcb->wait_desc;
+
+    /* open_files */
+    for(int i = 0; i < OPEN_FILES_LIMIT; i++) {
+        if(p_pcb->open_files[i]) {
+            c_pcb->open_files[i] =
+                        get_duplicate_process_files_table(p_pcb->open_files[i]);
+            continue;
+        }
+        c_pcb->open_files[i] = NULL;
+    }
+
+    /* mm */
+    c_pcb->mm = cow_fork_mm_struct(p_pcb->mm);
+    if(NULL == c_pcb->mm) {
+        // TODO: Deep free!
+        kfree(c_pcb);
+        return NULL;
+    }
+
+    /* lister */
+    addToTaskList(c_pcb);
+
+    return c_pcb->pid;
+}
 

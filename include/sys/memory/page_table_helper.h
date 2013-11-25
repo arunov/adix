@@ -260,7 +260,8 @@ static inline void invalidate_tlb(char *m) {
 }
 
 /**
- * Get deep copy of PML4 object for copy on write fork. Note: kernel pages are not deep copied.
+ * Get deep copy of PML4 object for copy on write fork. Note: kernel pages are
+ * not deep copied.
  * @param phys_addr physical address of PML4 is output here
  * @return          duplicated PML4 object, NULL on error
  */
