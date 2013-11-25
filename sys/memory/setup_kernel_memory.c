@@ -161,13 +161,6 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
         return -1;
     }
 
-    printf("start kernel: %p\n", mm->start_kernel);
-    printf("end kernel  : %p\n", mm->end_kernel);
-    printf("start vdo   : %p\n", mm->start_vdo_buff);
-    printf("end vdo     : %p\n", mm->end_vdo_buff);
-    printf("start phys  : %p\n", mm->start_phys_mem);
-    printf("end phys    : %p\n", mm->end_phys_mem);
-
     // Set up page tables
     uint64_t pml4_page = get_selfref_PML4(NULL);
 
@@ -187,7 +180,6 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     phys_mem_offset_map(pml4_page, phys_mem_offset);
 
     // Protect read-only pages from supervisor-level writes
-    printf("cr0 : %p\n", get_cr0());
     set_cr0(get_cr0() | CR0_WP);
 
     // Set cr3

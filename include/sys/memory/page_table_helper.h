@@ -17,6 +17,12 @@
 // Size of page translation object in bytes
 #define SIZEOF_PAGE_TRANS 4096
 
+// Start PML4 entry for kernel (inclusive)
+#define PML4_KERNEL_ENTRY_START 511
+
+// End PML4 entry for kernel (inclusive)
+#define PML4_KERNEL_ENTRY_END 511
+
 
 /*********************** Page translation object fields ***********************/
 // Physical address of next level object or physical page Bits - 12 to 51
@@ -252,6 +258,13 @@ static inline void invalidate_tlb(char *m) {
                                // http://wiki.osdev.org/Inline_Assembly/Examples
                 );
 }
+
+/**
+ * Get deep copy of PML4 object for copy on write fork. Note: kernel pages are not deep copied.
+ * @param phys_addr physical address of PML4 is output here
+ * @return          duplicated PML4 object, NULL on error
+ */
+uint64_t cow_fork_page_table(uint64_t *phys_addr);
 
 #endif
 
