@@ -3,10 +3,11 @@
 #include <sys/parser/parseelf.h>
 #include <sys/kstdio.h>
 #include <sys/memory/mm_struct.h>
+#include <sys/syscall/syscall_handler.h>
 
 void read_elf_header(int fd, Elf64_Ehdr *elf_header){
 	
-	sys_read(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
+	sys_read_stub(fd, (void *)elf_header, sizeof(Elf64_Ehdr));
 }
 
 int is_elf(Elf64_Ehdr elf_header){

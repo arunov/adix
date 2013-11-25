@@ -5,7 +5,7 @@
 */
 
 #include <defs.h>
-
+#include <sys/filesystems/file_structures.h>
 int parsetar();
 
 /* reads @numbytes from @offset of @filename into @buffer
@@ -37,5 +37,9 @@ int sys_opendir(const char *pathname);
 struct posix_header_ustar* sys_readdir(int fd, uint64_t ret);
 
 int sys_closedir(int fd);
+
+extern struct operation_pointers tarfs_ops;
+
+struct operation_pointers* get_tarfs_ops();
 
 #endif

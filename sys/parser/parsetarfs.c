@@ -13,6 +13,16 @@ int check_element_of_dir(const char* file, const char* dir);
 int check_in_dir(const char* file, const char* dir);
 int closefd(int fd);
 
+struct operation_pointers tarfs_ops = {
+	sys_open,
+	sys_read,
+	NULL,
+	sys_lseek,
+	sys_close,
+	sys_opendir,
+	sys_readdir,
+	sys_closedir
+};
 int parsetar(){
 	printf("inside parsetar tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
@@ -99,7 +109,7 @@ int sys_open(const char* pathname){
 		if (size % 512)
 			header_address += 512;
 	}
-	pft = get_new_process_files_table(header,0); //TODO: Do we need offset?
+	pft = get_new_process_files_table(header,0,get_tarfs_ops()); //TODO: Do we need offset?
 	fd = add_to_process_file_table(getCurrentTask(),pft);
 	printf("\nFd returned from sys_open:%d",fd);
 	return fd;
@@ -164,7 +174,7 @@ int sys_opendir(const char *pathname){
 		if (size % 512)
 			header_address += 512;
 	}
-	pft = get_new_process_files_table(header,0);
+	pft = get_new_process_files_table(header,0,get_tarfs_ops());
 	fd = add_to_process_file_table(getCurrentTask(),pft);
 	return fd;
 }
@@ -267,3 +277,6 @@ int sys_lseek(int fd, off64_t offset, int whence) {
     return 0;
 }
 
+struct operation_pointers* get_tarfs_ops(){
+	return &tarfs_ops;
+}

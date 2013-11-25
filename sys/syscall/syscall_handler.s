@@ -5,18 +5,21 @@
 .global _sys_exit
 .global _sys_open
 .global _sys_read
+.global _sys_write
 .global _sys_lseek
 .global _sys_close
 .global _sys_opendir
 .global _sys_readdir
 .global _sys_closedir
 .global _sys_sleep
+.global _sys_clrscr
 
 .extern sys_call_table
 .extern sys_yield
 .extern sys_exit
 .extern sys_open
-.extern sys_read
+.extern sys_read_stub
+.extern sys_write_stub
 .extern sys_lseek
 .extern sys_close
 .extern sys_opendir
@@ -25,7 +28,7 @@
 .extern sys_sleep
 .extern printf
 .extern set_tss
-
+.extern clear_screen
 sys_call_handler:
 	pushAllSysReg
 	movq $0x00,%rbx
@@ -57,8 +60,12 @@ _sys_open:
 	call sys_open
 	retq
 
+_sys_write:
+	call sys_write_stub
+	retq
+
 _sys_read:
-	call sys_read
+	call sys_read_stub
 	retq
 
 _sys_lseek:
@@ -84,3 +91,8 @@ _sys_closedir:
 _sys_sleep:
 	call sys_sleep
 	retq
+
+_sys_clrscr:
+	call clear_screen
+	retq
+	

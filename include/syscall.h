@@ -7,7 +7,7 @@
 #define PRINTF 1
 #define EXIT 2
 #define SLEEP 10
-
+#define CLRSCR 12
 /* File system system calls */
 #define OPEN 3
 #define READ 4
@@ -16,7 +16,7 @@
 #define OPENDIR 7
 #define READDIR 8
 #define CLOSEDIR 9
-#define WRITE 10
+#define WRITE 11
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
@@ -34,6 +34,7 @@ int close(int fd);
 int opendir(const char *pathname);
 struct posix_header_ustar* readdir(int fd);
 int closedir(int fd);
+void clrscr();
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

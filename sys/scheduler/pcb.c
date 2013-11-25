@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include<sys/kstdio.h>
 #include<sys/scheduler/pcb.h>
 #include<sys/memory/virtual_page_manager.h>
@@ -7,6 +8,8 @@
 #include <sys/memory/kmalloc.h>
 #include <sys/parser/exec.h>
 #include <sys/gdt.h>
+#include <sys/filesystems/file_structures.h>
+#include <sys/terminal/terminal_driver.h>
 extern char physbase;
 static uint64_t next_pid = 1;
 
@@ -53,6 +56,14 @@ struct pcb_t* createTask(enum ptype proc_type,
 	pcb->pid = getNextPid();
 	pcb->state = P_READY;
 	pcb->type = proc_type;
+	pcb->open_files[STDIN] = get_new_process_files_table(
+					NULL,
+					0,
+					get_terminal_ops());
+	pcb->open_files[STDOUT] = get_new_process_files_table(
+					NULL,
+					0,
+					get_terminal_ops());
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
 		pcb->stack_base = getFreeVirtualPage();
@@ -85,6 +96,7 @@ void update_wait_descriptor(struct pcb_t *this, uint64_t wait_desc){
 
 /* Print contents of the PCB passed as an argument.*/
 void printPcb(struct pcb_t *this){
+#if 0
 	printf("\n---PCB---");
 	printf("{Kernel Stack=%p},{User stack=%p},{pid=%d},{pstate=%d},{ptype=%d},{cr3=%p}",
 		this->stack_base,
@@ -94,6 +106,7 @@ void printPcb(struct pcb_t *this){
 		this->type,
 		this->cr3_content);
 	printf("---E_PCB---"); 
+#endif	
 }
 
 struct process_files_table* get_process_files_table(

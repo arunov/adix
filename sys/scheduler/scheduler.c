@@ -48,7 +48,9 @@ void sys_sleep(uint64_t wait_desc){
 	update_wait_descriptor(current_task, wait_desc);
 	list_del(&current_task->lister);
 	list_add(&current_task->lister, &pcb_wait_queue);
+	#ifdef DEBUG
 	printf("\n#####SLEEPING PROCESS %d",current_task->pid);
+	#endif
 	sys_yield();
 }
 
@@ -56,7 +58,9 @@ static void wakeup_proc(struct pcb_t *waiting_task){
 	update_wait_descriptor(waiting_task, NOT_WAITING);
 	list_del(&waiting_task->lister);//delete from wait queue
 	list_add(&waiting_task->lister, &pcb_run_queue);//add to run queue
+	#ifdef DEBUG
 	printf("\n#####WAKING UP process %d",waiting_task->pid);
+	#endif
 }
 
 void sys_wakeup(uint64_t wait_desc){
@@ -89,7 +93,9 @@ void addToTaskList(struct pcb_t *pcb){
 
 void printPcbRunQueue(){
 	struct pcb_t *the_pcb = NULL;
+	#ifdef DEBUG
 	printf("\nPCB READY QUEUE: ");
+	#endif
 	list_for_each_entry(the_pcb,&pcb_run_queue,lister){
 		printPcb(the_pcb);
 	}

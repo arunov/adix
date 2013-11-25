@@ -4,29 +4,39 @@
 #include <sys/filesystems/file_structures.h>
 #include <sys/scheduler/scheduler.h>
 #include <sys/kstring.h>
-#define FLUSH_CHAR '\n'
 
 char terminal_buffer[1024];
 uint64_t buffer_len = 0; 
 
+struct operation_pointers terminal_ops = {
+	terminal_open,
+	terminal_read,
+	terminal_write,
+	NULL,
+	terminal_close,
+	NULL,
+	NULL,
+	NULL
+};
 int terminal_open(const char* pathname){
 //	return add_to_process_file_table(getCurrentTask, pft);
 	return 0;
 }
 
-uint64_t terminal_read(int fd, void *buf, uint64_t count){
+int64_t terminal_read(int fd, void *buf, uint64_t count){
 	sys_sleep(TERMINAL_TYPE);
 	memcpy(buf, terminal_buffer, count);
-	return count;//TODO: Read MAX(count, bufferlen)
+	count = buffer_len;
+	buffer_len = 0;
+	return count;
 }
 
-uint64_t terminal_write(int fd, void *buf, uint64_t count){
+int64_t terminal_write(int fd, void *buf, uint64_t count){
 	((char*)(buf))[count] = '\0';
 	return printf(buf);
 }
 static void terminal_flush(){
-	buffer_len = 0;
-	sys_wakeup(TERMINAL_TYPE);
+	sys_wakeup(TERMINAL_TYPE);//TODO: WAkeup foreground process
 }
 
 void terminal_enqueue(char input_char){
@@ -36,6 +46,7 @@ void terminal_enqueue(char input_char){
 		terminal_flush();
 		return;
 	}
+
 	terminal_buffer[buffer_len++] = input_char;
 	//TODO:handle delete etc
 
@@ -46,4 +57,6 @@ int terminal_close(int fd){
 	return 0;
 }
 
-
+struct operation_pointers* get_terminal_ops(){
+	return &terminal_ops;
+}

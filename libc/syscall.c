@@ -58,3 +58,7 @@ void sleep(int sleep_interval){ //TODO
 uint64_t uprintf(const char *format_string){
 	return __syscall1(PRINTF,(uint64_t)format_string);
 }
+
+void clrscr(){
+	 __syscall0(CLRSCR);
+}

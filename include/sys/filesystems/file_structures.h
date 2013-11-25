@@ -29,11 +29,25 @@ struct posix_header_ustar {
 struct process_files_table{
 	struct posix_header_ustar *header;
 	uint64_t offset;
+	struct operation_pointers *op_pointers;
+};
+
+struct operation_pointers {
+	
+	int(*open)(const char* filename);
+	int64_t(*read)(int fd, void *buf, uint64_t count);
+	int64_t(*write)(int fd, void *buf, uint64_t count);
+	int (*lseek)(int fd, off64_t offset, int whence);
+	int (*close)(int fd);
+	int(*opendir)(const char *pathname);
+	struct posix_header_ustar* (*readdir)(int fd, uint64_t ret);
+	int (*closedir)(int fd);
 };
 
 struct process_files_table* get_new_process_files_table(
 				struct posix_header_ustar *header,
-				uint64_t offset);
+				uint64_t offset,
+				struct operation_pointers *op_pointer);
 
 
 #endif
