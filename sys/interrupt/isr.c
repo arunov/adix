@@ -1,7 +1,7 @@
 #include <sys/idt.h>
 #include <sys/isr.h>
 #include <sys/kstdio.h>
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/memory/handle_cr.h>
 #include <sys/memory/page_fault_handler.h>
 

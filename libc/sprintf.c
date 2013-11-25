@@ -1,11 +1,8 @@
-#include <sys/kstdarg.h>
-#include <sys/kstdio.h>
-#include <sys/sysconf.h>
+#include <stdio.h>
 #include <string.h>
-
+#include <defs.h>
 #define MAX_LENGTH_OF_STR_INT       11  // length of 32-bit uint max 4294967296
                                         //  (10) + '-' (1)
-
 #define DECIMAL_BASE    10
 #define HEX_BASE        16
 
@@ -16,27 +13,36 @@ enum {
     PRINTF_ST_NUM_OF_STATES     // 3
 };
 
+void putch(char *buf, uint64_t *counterp, char c){
+	buf[*counterp] = c;
+	*counterp = *counterp + 1;
+}
+
+/* Uses the above routine to output a string... */
+void puts(char *buf,uint64_t *counterp,  char *text)
+{
+    	int i;
+
+   	for (i = 0; i < strlen(text); i++)
+    	{
+        	putch(buf,counterp,text[i]);
+    	}
+}
 /*
  * Print 'bytes' bytes of value 'parg' in hexadecimal 
  * @param bytes    Number of bytes to be printed
  * @param parg     Pointer to data that needs to be printed
  * @return         Number of characters printed
  */
-static int hex_to_string(const void *parg, int bytes) {
+static int hex_to_string(const void *parg, int bytes, char *buf, uint64_t *counterp) {
     int nib_i, num_char = 0;
     unsigned char c;
     int start_print = 0; // Used for ignoring leading zeros
-
-    puts("0x");
+    puts(buf, counterp, "0x");
     num_char += 2;
 
-#ifdef __LITTLE_ENDIAN__
     for(nib_i = (bytes * 2) - 1; nib_i >= 0; nib_i --) {
         if(nib_i % 2 == 0)
-#else
-    for(nib_i = 0; nib_i < (bytes * 2); nib_i ++) {
-        if(nib_i % 2)
-#endif
         {
             c = (*((char*)parg + nib_i/2)) & 0x0F;
         } else {
@@ -55,7 +61,7 @@ static int hex_to_string(const void *parg, int bytes) {
 
         if(start_print) {
             num_char++;
-            putch(c);
+            putch(buf, counterp, c);
         }
     }
 
@@ -63,7 +69,7 @@ static int hex_to_string(const void *parg, int bytes) {
        All leading zeros are ignored. */
     if(2 == num_char) {
         num_char++;
-        putch('0');
+        putch(buf,counterp,'0');
     }
 
     return num_char;
@@ -74,9 +80,9 @@ static int hex_to_string(const void *parg, int bytes) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int pointer_to_string(va_list *ap) {
-    void *ptr = va_arg(*ap, void*);
-    return hex_to_string((void*)&ptr, sizeof(void*));
+static int pointer_to_string(__builtin_va_list *ap, char *buf, uint64_t *counterp) {
+    void *ptr = __builtin_va_arg(*ap, void*);
+    return hex_to_string((void*)&ptr, sizeof(void*),buf, counterp);
 }
 
 /*
@@ -84,9 +90,9 @@ static int pointer_to_string(va_list *ap) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int hexnum_to_string(va_list *ap) {
-    int d = va_arg(*ap, int);
-    return hex_to_string(&d, sizeof(int));
+static int hexnum_to_string(__builtin_va_list *ap,char *buf, uint64_t *counterp) {
+    int d = __builtin_va_arg(*ap, int);
+    return hex_to_string(&d, sizeof(int),buf, counterp);
 }
 
 /*
@@ -94,8 +100,8 @@ static int hexnum_to_string(va_list *ap) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int int_to_string(va_list *ap) {
-    int d = va_arg(*ap, int);
+static int int_to_string(__builtin_va_list *ap,  char *buf, uint64_t *counterp) {
+    int d = __builtin_va_arg(*ap, int);
     int neg = 0;
     char printf_string_buff[MAX_LENGTH_OF_STR_INT+1];    //to accommodate '\0' 
     char *loc = printf_string_buff + sizeof(printf_string_buff)-1;
@@ -117,7 +123,7 @@ static int int_to_string(va_list *ap) {
         *loc = '-';
     }
 
-    puts(loc);
+    puts(buf,counterp,loc);
     return printf_string_buff + sizeof(printf_string_buff) - loc;
 }
 
@@ -126,8 +132,8 @@ static int int_to_string(va_list *ap) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int char_to_string(va_list *ap) {
-    putch((char) va_arg(*ap, int));
+static int char_to_string(__builtin_va_list *ap, char *buf, uint64_t *counterp) {
+    putch(buf, counterp,(char) __builtin_va_arg(*ap, int));
     return 1;
 }
 
@@ -136,9 +142,9 @@ static int char_to_string(va_list *ap) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int string_to_string(va_list *ap) {
-    char *s = va_arg(*ap, char*);
-    puts(s);
+static int string_to_string(__builtin_va_list *ap,char *buf, uint64_t *counterp) {
+    char *s = __builtin_va_arg(*ap, char*);
+    puts(buf, counterp, s);
     return strlen(s);
 }
 
@@ -147,8 +153,8 @@ static int string_to_string(va_list *ap) {
  * @param ap    Pointer to variable argument list
  * @return      Number of characters printed
  */
-static int percent_to_string(va_list *ap) {
-    putch('%');
+static int percent_to_string(__builtin_va_list *ap,char *buf, uint64_t *counterp) {
+    putch(buf, counterp, '%');
     return 1;
 }
 
@@ -159,7 +165,7 @@ typedef struct format_string_parse_helper {
     const char conv_spec;
 
     /* Function pointer to handle format specifier */
-    int (*conv_to_string)(va_list*);
+    int (*conv_to_string)(__builtin_va_list*, char*, uint64_t*);
 } format_string_parser;
 
 /* Format specifiers and handlers */
@@ -175,20 +181,13 @@ static format_string_parser format_str_conv[] = {
     {'\0', 0},                  // end of string
 };
 
-/* See kstdio.h */
-int printf(const char *format, ...) {
-
-    const char *l_format = format;
-
-    va_list ap;
-    char c;
+int sprintf_va(char *buf, const char *format, __builtin_va_list *ap){
     int conv_spec_i, num_char = 0;
-
+    const char *l_format = format;
+    char c;
+	uint64_t buf_counter = 0;
     int state = PRINTF_ST_NORMAL;
-
-    va_start(ap, format);
-
-    while (*l_format) {
+	while (*l_format) {
         c = *l_format++;
 
         if(PRINTF_ST_PERCENT == state) {
@@ -199,7 +198,10 @@ int printf(const char *format, ...) {
 
                 if(format_str_conv[conv_spec_i].conv_spec == c) {
                     if(format_str_conv[conv_spec_i].conv_to_string) {
-                        num_char += format_str_conv[conv_spec_i].conv_to_string(&ap);
+                        num_char += format_str_conv[conv_spec_i].conv_to_string(
+								ap,
+								buf, 
+								&buf_counter);
                     }
                 }
             }
@@ -210,12 +212,23 @@ int printf(const char *format, ...) {
             state = PRINTF_ST_PERCENT;
             continue;
         } else { // print to output
-            putch(c);
-            num_char ++;
+            putch(buf, &buf_counter, c);
+            num_char++;
         }
     }
-
-    va_end(ap);
-    return num_char;
+	__builtin_va_end(*ap);
+	return num_char;
 }
 
+/* See sprintf.h */
+int sprintf(char *buf, const char *format, ...) {
+
+    __builtin_va_list ap;
+	int num_char;
+
+    __builtin_va_start(ap, format);
+	num_char = sprintf_va(buf, format, &ap);
+	
+	//buf[num_char] = '\0';
+    return num_char;
+}

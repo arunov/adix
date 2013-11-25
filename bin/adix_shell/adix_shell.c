@@ -24,7 +24,8 @@ void run_shell(){
 	int foreground;
 //	uprintf("Enter your name: ");
 	int count = read(STDIN, &buffer, BUF_SIZE);
-	uprintf("Your name is:");
+	printf("Your name is %d character long and is:",count);
+//	printf("Your name is character long and is:");
 	write(STDOUT, &buffer, count);
 
 	child_argc = parse_shell_command_args(buffer, child_argv);

@@ -1,5 +1,5 @@
 #include <sys/utils.h>
-#include <sys/kstring.h>
+#include <string.h>
 
 /* Ref: http://tekpool.wordpress.com/category/bit-count/ */
 int numOfBitsSet(const void *pBitmap, int bytes) {

@@ -2,7 +2,7 @@
 #include <sys/isr.h>
 #include <sys/irq.h>
 #include <sys/kstdio.h>
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/syscall/syscall_handler.h>
 
 /* This array is actually an array of function pointers. We use

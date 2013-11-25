@@ -1,6 +1,6 @@
 #include <defs.h>
 #include <sys/irq.h>
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/kstdio.h>
 #include <sys/scheduler/scheduler.h>
 

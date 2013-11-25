@@ -8,7 +8,7 @@
 #include <defs.h>
 #include <sys/memory/phys_page_manager.h>
 #include <sys/kstdio.h> // TODO: Replace with logger
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/memory/page_constants.h>
 
 // Number of entries in page translation objects

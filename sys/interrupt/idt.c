@@ -1,5 +1,5 @@
 #include <sys/idt.h>
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/isr.h>
 #include <sys/irq.h>
 #include <sys/timer.h>

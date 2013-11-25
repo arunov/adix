@@ -3,7 +3,7 @@
 #include <sys/terminal/terminal_driver.h>
 #include <sys/filesystems/file_structures.h>
 #include <sys/scheduler/scheduler.h>
-#include <sys/kstring.h>
+#include <string.h>
 
 char terminal_buffer[1024];
 uint64_t buffer_len = 0; 
