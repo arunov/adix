@@ -32,7 +32,7 @@ struct phys_page_manager phys_page_mngr_obj;
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
     setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
-
+/*
     add_vma(&get_kernel_mm()->mmap, 0x10000, 0x1f000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
     uint64_t phys1 = alloc_phys_pages(1);
     update_curr_page_table(phys1, 0x18000UL, PAGE_TRANS_READ_WRITE);
@@ -74,7 +74,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
 	uint64_t execret = exec("bin/hello");
 	printf("execret %p", execret);
-	
+*/	
 /*    
     // Check do_mmap 
     int fd = open("aladdin.txt");

@@ -18,6 +18,8 @@
 #define CLOSEDIR 9
 #define WRITE 11
 
+#define MALLOC 15
+#define EXEC 16
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
@@ -35,6 +37,9 @@ int opendir(const char *pathname);
 struct posix_header_ustar* readdir(int fd);
 int closedir(int fd);
 void clrscr();
+uint64_t execvpe(char *path, char *argv[], char *envp[]);
+/*Memory operations*/
+void* malloc(uint64_t size);
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

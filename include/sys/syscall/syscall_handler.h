@@ -1,7 +1,7 @@
 #ifndef SYSCALL_HANDLER_H
 #define SYSCALL_HANDLER_H
 
-#define NUM_SYS_CALLS 15
+#define NUM_SYS_CALLS 220
 
 void _sys_yield();
 void _sys_printf();

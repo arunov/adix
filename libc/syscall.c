@@ -62,3 +62,12 @@ uint64_t uprintf(const char *format_string){
 void clrscr(){
 	 __syscall0(CLRSCR);
 }
+
+void* malloc(uint64_t size){
+	return	(void*)__syscall1(MALLOC, size);
+}
+
+uint64_t execvpe(char *path, char *argv[], char *envp[]){
+	return (uint64_t)__syscall3(EXEC, (uint64_t)path, (uint64_t)argv, (uint64_t)envp);	
+}
+

@@ -217,6 +217,7 @@ int sprintf_va(char *buf, const char *format, __builtin_va_list *ap){
         }
     }
 	__builtin_va_end(*ap);
+	buf[num_char] = '\0';
 	return num_char;
 }
 
@@ -229,6 +230,5 @@ int sprintf(char *buf, const char *format, ...) {
     __builtin_va_start(ap, format);
 	num_char = sprintf_va(buf, format, &ap);
 	
-	//buf[num_char] = '\0';
     return num_char;
 }

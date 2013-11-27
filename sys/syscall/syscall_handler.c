@@ -5,7 +5,8 @@
 #include <sys/scheduler/scheduler.h>
 #include <sys/syscall/syscall_handler.h>
 #include <sys/parser/parsetarfs.h>
-
+#include <sys/memory/sys_malloc.h>
+#include <sys/scheduler/exec.h>
 typedef void* (sys_call_t)(void*) ;
 
 int64_t sys_read_stub(int fd, void *buf, uint64_t count){
@@ -71,6 +72,8 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[CLOSEDIR] = (sys_call_t*)sys_closedir_stub,
 	[SLEEP] = (sys_call_t*)_sys_sleep,
 	[WRITE] = (sys_call_t*)sys_write_stub,
-	[CLRSCR] = (sys_call_t*)_sys_clrscr
+	[CLRSCR] = (sys_call_t*)_sys_clrscr,
+	[MALLOC] = (sys_call_t*)sys_malloc,
+	[EXEC] = (sys_call_t*)sys_execvpe
 };
 
