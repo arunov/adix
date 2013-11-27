@@ -205,11 +205,11 @@ int page_fault_handler(uint64_t err_code) {
     // Get memory area
     struct list_head *vma_list_head;
 
-//    if(fault_addr >= get_kernel_mm()->start_kernel) {
+    if(fault_addr >= get_kernel_mm()->start_kernel) {
         vma_list_head = &(get_kernel_mm()->mmap);
-//    } else {
-//        vma_list_head = &(getCurrentTask()->mm->mmap);
-//    }
+    } else {
+        vma_list_head = &(getCurrentTask()->mm->mmap);
+    }
 
     // Get memory region
     struct vm_area_struct *node = NULL;
