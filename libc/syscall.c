@@ -71,3 +71,6 @@ uint64_t execvpe(char *path, char *argv[], char *envp[]){
 	return (uint64_t)__syscall3(EXEC, (uint64_t)path, (uint64_t)argv, (uint64_t)envp);	
 }
 
+uint64_t get_pid(){
+	return __syscall0(GETPID);
+}

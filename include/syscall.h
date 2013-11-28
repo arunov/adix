@@ -20,6 +20,7 @@
 
 #define MALLOC 15
 #define EXEC 16
+#define GETPID 17
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
@@ -40,6 +41,7 @@ void clrscr();
 uint64_t execvpe(char *path, char *argv[], char *envp[]);
 /*Memory operations*/
 void* malloc(uint64_t size);
+uint64_t get_pid();
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

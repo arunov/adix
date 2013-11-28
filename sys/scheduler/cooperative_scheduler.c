@@ -14,8 +14,8 @@ void cooperative_schedule(void *kernmem, void *physfree){
 	//replace createTask with exec
 //	addToTaskList(createTask(UPROC,0x0,"bin/hello",kernmem,  physfree));
 	addToTaskList(createTask(UPROC,0x0,"bin/adix_shell",kernmem,  physfree));
-//	addToTaskList(createTask(UPROC,0x0,"bin/world",kernmem,  physfree));
 	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeDaemon,0, kernmem, physfree));
+//	addToTaskList(createTask(UPROC,0x0,"bin/world",kernmem,  physfree));
 //	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeEcho,0, kernmem, physfree));
 //	addToTaskList(createTask(UPROC,0x0,(uint64_t)&invokeHello,kernmem,  physfree));
 //	addToTaskList(createTask(KTHREAD,(uint64_t)&invokeWorld, kernmem, physfree));

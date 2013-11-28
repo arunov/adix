@@ -3,6 +3,7 @@
 #include <sys/irq.h>
 #include <sys/kstdio.h>
 #include <sys/scheduler/scheduler.h>
+#include <sys/scheduler/scheduler_utils.h>
 #include <sys/syscall/syscall_handler.h>
 #include <sys/parser/parsetarfs.h>
 #include <sys/memory/sys_malloc.h>
@@ -74,6 +75,7 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[WRITE] = (sys_call_t*)sys_write_stub,
 	[CLRSCR] = (sys_call_t*)_sys_clrscr,
 	[MALLOC] = (sys_call_t*)sys_malloc,
-	[EXEC] = (sys_call_t*)sys_execvpe
+	[EXEC] = (sys_call_t*)sys_execvpe,
+	[GETPID] = (sys_call_t*)sys_getpid
 };
 
