@@ -3,7 +3,10 @@
 #include <syscall.h>
 
 int printf(const char *format, ...){
-	char buffer[BUF_SIZE]; //TODO: Malloc
+//	uprintf("\nBefore malloc");
+//	char *buffer = (char*) malloc(BUF_SIZE);
+	char buffer[BUF_SIZE];
+//	uprintf("\nafter malloc");
     __builtin_va_list ap;
 	int num_char;
 	/* prepare valist from arguments */

@@ -79,6 +79,7 @@ struct pcb_t* createTask(enum ptype proc_type,
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = getFreeVirtualPage();
 		pcb->u_stack_base = getFreeVirtualPage();
+		printf("##########stack alocated for user process: %p",pcb->u_stack_base);
 		prepareInitialStack(pcb->stack_base,(uint64_t)&jump_to_ring3);
 		prepareInitialStack(pcb->u_stack_base, instruction_address);
 	}

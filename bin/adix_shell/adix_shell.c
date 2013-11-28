@@ -44,7 +44,7 @@ void run_shell(){
 	char *child_argv[10];
 	int foreground;
 	int count = read(STDIN, &buffer, BUF_SIZE);
-	printf("\nYour name is %d character long and is:",count);
+	printf("\nCommand you entered is %d character long and is:",count);
 	write(STDOUT, &buffer, count);
 
 	child_argc = parse_shell_command_args((char*)buffer, child_argv);

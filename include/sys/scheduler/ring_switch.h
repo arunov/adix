@@ -6,6 +6,8 @@
 void jump_to_ring3();
 
 /* Prepares stack to jump to user space and does an iretq*/
-void _jump_to_ring3(uint64_t rsp, uint64_t rip);
+void _jump_to_ring3(uint64_t rsp, uint64_t rip, 
+					uint64_t argc, char **argv, char **envp);
 
+void exec_jump_to_ring3(int argc, char *argv[], char *envp[]);
 #endif
