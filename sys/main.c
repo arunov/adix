@@ -14,6 +14,7 @@
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/setup_kernel_memory.h>
 #include <sys/memory/free_phys_pages.h>
+#include <sys/ahci/ahci.h>
 
 #define INITIAL_STACK_SIZE 4096
 #define SET_NXE 0x800ULL
@@ -45,8 +46,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
 	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
 	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
-
-        /* Free list and Page Tables */
+        
+	
+	/* Free list and Page Tables */
 	//phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
     //    finish_scan(&phys_page_mngr_obj);
         setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
@@ -75,15 +77,20 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	uint64_t execret = exec("bin/hello");
 	printf("execret %p", execret);
 	
-/*    
+	//check asci
+	int ahci_ret = setup_ahci();
+	printf("asci_ret: %d\n", ahci_ret);
+   /* 
     // Check do_mmap 
     int fd = open("aladdin.txt");
     struct mm_struct *mm = new_mm();
     do_mmap(&(mm->mmap), fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
 */	
-    	cooperative_schedule(&kernmem,physfree);
+    	//cooperative_schedule(&kernmem,physfree);
 	// kernel starts here
+	
+
 	while(1);
 }
 

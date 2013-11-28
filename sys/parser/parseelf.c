@@ -10,7 +10,7 @@ void read_elf_header(int fd, Elf64_Ehdr *elf_header){
 }
 
 int is_elf(Elf64_Ehdr elf_header){
-	printf("e_ident%p\n",elf_header.e_ident[EI_NIDENT]);
+	//printf("e_ident%p\n",elf_header.e_ident[EI_NIDENT]);
 	//char *magic = "\177ELF";
 	if(elf_header.e_ident[0]==0x7f){
 		if(elf_header.e_ident[1]=='E'){
@@ -38,7 +38,7 @@ void print_elf_header(Elf64_Ehdr elf_header){
 }
 
 void read_prgm_header(int fd, Elf64_Phdr *prgm_header){
-	printf("%d",sizeof(Elf64_Phdr));
+	//printf("%d",sizeof(Elf64_Phdr));
 	sys_read(fd, (void *)prgm_header, sizeof(Elf64_Phdr));
 	
 }
@@ -60,19 +60,19 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 	Elf64_Ehdr elf_header ;
 	uint64_t entry = -1;
 	int fd = sys_open(filename);
-	printf("\nfd opened in loadelf: %d",fd);
+	//printf("\nfd opened in loadelf: %d",fd);
 	if(fd==-1)
 		return entry;
 	read_elf_header(fd, &elf_header);
-	print_elf_header(elf_header);
+	//print_elf_header(elf_header);
 	if(is_elf(elf_header)==0){
-		print_elf_header(elf_header);
+		//print_elf_header(elf_header);
 		uint16_t num_ph = elf_header.e_phnum;
 		entry = elf_header.e_entry;
 		Elf64_Phdr prgm_header[num_ph];
 		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
 			read_prgm_header(fd, &(prgm_header[num_phdr]));
-			print_prgm_header(prgm_header[num_phdr]);
+			//print_prgm_header(prgm_header[num_phdr]);
 		}
 		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
 			if(prgm_header[num_phdr].p_type==0x1){
@@ -86,10 +86,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				if(flag & PT_W)
 					prot = prot | PAGE_TRANS_READ_WRITE;
 
-				// do an mmap and do a read
-				printf("prgm head loadable %d size%p vir_addr%p offser %p flag %p prot %p\n", num_phdr, size, vir_addr, offset, flag, prot );
 				int mmap_return = do_mmap(&(this->mmap), fd, offset, vir_addr, size, prot);
-				printf("after mmap_return");
 				if(mmap_return != 0){
 					sys_close(fd);
 					return -1;

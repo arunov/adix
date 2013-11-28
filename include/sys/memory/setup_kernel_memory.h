@@ -6,7 +6,8 @@
 #include <sys/memory/page_constants.h>
 
 #define SIZEOF_VDO_BUFF SIZEOF_PAGE
-
+#define SIZEOF_AHCI 0xfffULL 
+#define P_AHCI_START 0xfebf0000ULL
 /**
  * Set up kernel memory - virtual and physical.
  *
