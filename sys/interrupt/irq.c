@@ -139,8 +139,6 @@ void irq_handler(uint64_t *r, uint64_t *num)
             //puts(" IRQ. System Halted!\n");
             //for (;;);
         }
-    } else if( *r == 48){
-	((void (*)(uint64_t))handler)(*num);
     }
 }
 

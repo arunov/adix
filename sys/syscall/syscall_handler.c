@@ -8,6 +8,8 @@
 #include <sys/parser/parsetarfs.h>
 #include <sys/memory/sys_malloc.h>
 #include <sys/scheduler/exec.h>
+#include <sys/scheduler/pcb.h>
+
 typedef void* (sys_call_t)(void*) ;
 
 int64_t sys_read_stub(int fd, void *buf, uint64_t count){
@@ -59,7 +61,6 @@ int sys_closedir_stub(int fd){
 
 }
 
-
 sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[YIELD] = (sys_call_t*)_sys_yield,
 	[PRINTF] = (sys_call_t*)_sys_printf,
@@ -76,6 +77,7 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[CLRSCR] = (sys_call_t*)_sys_clrscr,
 	[MALLOC] = (sys_call_t*)sys_malloc,
 	[EXEC] = (sys_call_t*)sys_execvpe,
-	[GETPID] = (sys_call_t*)sys_getpid
+	[GETPID] = (sys_call_t*)sys_getpid,
+    [FORK] = (sys_call_t*)_sys_fork,
 };
 

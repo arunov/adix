@@ -21,6 +21,7 @@
 #define MALLOC 15
 #define EXEC 16
 #define GETPID 17
+#define FORK 18
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
@@ -39,6 +40,7 @@ struct posix_header_ustar* readdir(int fd);
 int closedir(int fd);
 void clrscr();
 uint64_t execvpe(char *path, char *argv[], char *envp[]);
+uint64_t fork();
 /*Memory operations*/
 void* malloc(uint64_t size);
 uint64_t get_pid();

@@ -24,5 +24,7 @@ void printPcbRunQueue();
 void cleanupTerminated();
 /* Get current task that is being run by this CPU */
 struct pcb_t* getCurrentTask();
+/* Add task that is under preparation */
+void updatePrepTask(struct pcb_t *pcb);
 
 #endif

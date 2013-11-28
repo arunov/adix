@@ -5,7 +5,14 @@
 
 void* sys_malloc(uint64_t size) {
 
-    struct list_head *vma_list_head = &(getCurrentTask()->mm->mmap);
+    struct list_head *vma_list_head;
+
+    struct pcb_t *currTask = getCurrentTask();
+    if(!currTask) {
+        vma_list_head = &(get_kernel_mm()->mmap);
+    } else {
+        vma_list_head = &(currTask->mm->mmap);
+    }
 
     return (void*) mmap(vma_list_head, MALLOC_START_ADDR, size,
                             PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR,

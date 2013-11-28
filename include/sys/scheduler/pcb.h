@@ -57,4 +57,11 @@ uint64_t add_to_process_file_table(
 uint64_t reset_process_files_table( struct pcb_t *this,
 				uint64_t fd);
 
+/**
+ * Fork system call
+ * @return pid of child
+ */
+uint64_t sys_fork();
+
 #endif
+

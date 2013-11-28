@@ -7,4 +7,7 @@ libc.so
 obj/
 rootfs/bin/hello
 rootfs/lib/*.o
+.nfs*
+cscope.out
+rootfs/bin/*
 
