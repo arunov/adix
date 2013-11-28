@@ -43,6 +43,11 @@ void run_shell(){
 	int child_argc;
 	char *child_argv[10];
 	int foreground;
+    char *x = malloc(500);
+    *x = 'a';
+    *(x+1) = 'b';
+    *(x+2) = '\0';
+    printf("x: %s\n", x);
 	int count = read(STDIN, &buffer, BUF_SIZE);
 	printf("\nCommand you entered is %d character long and is:",count);
 	write(STDOUT, &buffer, count);

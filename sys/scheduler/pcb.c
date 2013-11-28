@@ -64,6 +64,7 @@ struct pcb_t* createTask(enum ptype proc_type,
 					NULL,
 					0,
 					get_terminal_ops());
+    pcb->mm = new_mm();
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
 		pcb->stack_base = getFreeVirtualPage();
@@ -75,7 +76,7 @@ struct pcb_t* createTask(enum ptype proc_type,
 		pcb->cr3_content = *((uint64_t*)&cr3); // TODO: Replace with loader load of binary
 		set_cr3(cr3);
 		/* Load the binary corresponding to this process */
-		instruction_address = exec(program);
+		instruction_address = exec(program, pcb->mm);
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = getFreeVirtualPage();
 		pcb->u_stack_base = getFreeVirtualPage();
