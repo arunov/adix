@@ -71,11 +71,11 @@ struct pcb_t* createTask(enum ptype proc_type,
 		prepareInitialStack(pcb->stack_base,instruction_address);
 	} 
 	else if(proc_type == UPROC){
-		/* It is sufficient to use different CR3 for user processes!*/
+		/* It is sufficient to use different CR3 for user processes! (is it?)*/
+		/* Load the binary corresponding to this process */
 		struct str_cr3 cr3 = create_kernel_pgtbl(kernmem, &physbase, physfree); 
 		pcb->cr3_content = *((uint64_t*)&cr3); // TODO: Replace with loader load of binary
 		set_cr3(cr3);
-		/* Load the binary corresponding to this process */
 		instruction_address = exec(program, pcb->mm);
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = getFreeVirtualPage();

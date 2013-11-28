@@ -6,6 +6,7 @@
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);
+LIST_HEAD(wait_timer_queue);
 
 /* Get next task that is ready to be run*/
 static struct pcb_t* getNextTask(){
@@ -63,11 +64,12 @@ static void wakeup_proc(struct pcb_t *waiting_task){
 	#endif
 }
 
-void sys_wakeup(uint64_t wait_desc){
+
+void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
 	struct pcb_t *proc;
 	struct pcb_t *temp[MAX_WAIT_PROC]; //TODO: Poses an upper bound?
 	int i=0;
-	list_for_each_entry(proc, &pcb_wait_queue, lister){
+	list_for_each_entry(proc, wait_queue, lister){
 		if(proc->wait_desc == wait_desc){
 			temp[i++] = proc;
 		}
@@ -75,7 +77,15 @@ void sys_wakeup(uint64_t wait_desc){
 	while(i != 0){
 		wakeup_proc(temp[--i]);
 	}
-	sys_yield();
+//	sys_yield();
+}
+
+void sys_wakeup_timer(uint64_t pid){
+	_sys_wakeup(&wait_timer_queue, pid);
+}
+
+void sys_wakeup(uint64_t wait_desc){
+	_sys_wakeup(&pcb_wait_queue, wait_desc);
 }
 
 void cleanupTerminated(){
