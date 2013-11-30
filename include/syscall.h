@@ -7,7 +7,7 @@
 #define PRINTF 1
 #define EXIT 2
 #define SLEEP 10
-
+#define CLRSCR 12
 /* File system system calls */
 #define OPEN 3
 #define READ 4
@@ -16,7 +16,12 @@
 #define OPENDIR 7
 #define READDIR 8
 #define CLOSEDIR 9
+#define WRITE 11
 
+#define MALLOC 15
+#define EXEC 16
+#define GETPID 17
+#define FORK 18
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
@@ -27,11 +32,18 @@ uint64_t uprintf(const char *format_string);
 /* FIle system operations */
 int open(const char* filename);
 int64_t read(int fd, void *buf, uint64_t count);
+int64_t write(int fd, void *buf, uint64_t count);
 int lseek(int fd, off64_t offset, int whence);
 int close(int fd);
 int opendir(const char *pathname);
 struct posix_header_ustar* readdir(int fd);
 int closedir(int fd);
+void clrscr();
+uint64_t execvpe(char *path, char *argv[], char *envp[]);
+uint64_t fork();
+/*Memory operations*/
+void* malloc(uint64_t size);
+uint64_t get_pid();
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

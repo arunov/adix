@@ -1,8 +1,9 @@
 #include <sys/idt.h>
 #include <sys/isr.h>
 #include <sys/kstdio.h>
-#include <sys/kstring.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <string.h>
+#include <sys/memory/handle_cr.h>
+#include <sys/memory/page_fault_handler.h>
 
 void idt_set_gate_with_privilege(int num, uint64_t isr_addr, unsigned char dpl) {
 	idt[num].flags = IDT_P | dpl | TYPE_INTERRUPT_GATE;
@@ -108,8 +109,16 @@ char *exception_messages[] =
 *  endless loop. All ISRs disable interrupts while they are being
 *  serviced as a 'locking' mechanism to prevent an IRQ from
 *  happening and messing up kernel data structures */
-void fault_handler(uint64_t *r)
+void fault_handler(uint64_t *r, uint64_t *err_code)
 {
+    /* Page fault handler */
+    if(*r == 14) {
+        if(0 == page_fault_handler(*err_code)) {
+            return;
+        }
+        for (;;);
+    }
+
     /* Is this a fault whose number is from 0 to 31? */
     if (*r < 32)
     {

@@ -4,6 +4,7 @@
 #include<defs.h>
 
 #define NOT_WAITING 0x00
+#define MAX_WAIT_PROC 20
 /* Method used to switch to another kernel thread*/
 void switchTo(void*);
 /*Schedule a process/task*/
@@ -23,5 +24,7 @@ void printPcbRunQueue();
 void cleanupTerminated();
 /* Get current task that is being run by this CPU */
 struct pcb_t* getCurrentTask();
+/* Add task that is under preparation */
+void updatePrepTask(struct pcb_t *pcb);
 
 #endif

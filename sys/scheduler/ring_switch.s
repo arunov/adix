@@ -11,8 +11,12 @@ _jump_to_ring3:
 	movq %rax, %fs
 	movq %rax, %gs
 	#Prepare TSS
+	
 	pushq %rdi
 	pushq %rsi
+	pushq %rdx
+	pushq %rcx
+	pushq %r8
 
 	movq %rsp, %rdi
 	addq $0x08, %rdi
@@ -20,6 +24,9 @@ _jump_to_ring3:
 	
 	movq $0x28, %rax
 	ltr %ax #Load ltr with offset
+	popq %r8
+	popq %rcx
+	popq %rdx
 	popq %rsi
 	popq %rdi
 	
@@ -30,4 +37,8 @@ _jump_to_ring3:
 	#RPL (3) | CS_segment_selector (24 - 0x18)
 	pushq $0x1b
 	pushq %rsi #Push rip
+	#prepare parameters for the user process
+	movq %rdx, %rdi
+	movq %rcx, %rsi
+	movq %r8, %rdx
 	iretq

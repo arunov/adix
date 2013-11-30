@@ -2,7 +2,7 @@
 #include <sys/isr.h>
 #include <sys/irq.h>
 #include <sys/kstdio.h>
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/syscall/syscall_handler.h>
 
 /* This array is actually an array of function pointers. We use
@@ -139,8 +139,6 @@ void irq_handler(uint64_t *r, uint64_t *num)
             //puts(" IRQ. System Halted!\n");
             //for (;;);
         }
-    } else if( *r == 48){
-	((void (*)(uint64_t))handler)(*num);
     }
 }
 

@@ -1,4 +1,4 @@
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/kstdio.h>
 
 #define BUFFER_ADDRESS(CURSOR_X, CURSOR_Y) (unsigned int)(CURSOR_Y * 80 + CURSOR_X);

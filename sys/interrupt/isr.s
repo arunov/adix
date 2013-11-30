@@ -268,8 +268,13 @@ isr_common_stub:
     # Pass to fault_handler:
     # pointer to interrupt number
     pushq %rdi
+    pushq %rsi
+
+    #Index of the Interrupt_No in Stack
     movq %rsp, %rdi
-    addq $0x8, %rdi
+    addq $0x10, %rdi
+    movq %rsp, %rsi
+    addq $0x18, %rsi
 
     # Saving state
     pushAllReg
@@ -283,8 +288,8 @@ isr_common_stub:
     pushq %rdx
     movq %gs, %rdx
     pushq %rdx
-
-    # New segment
+    
+    #Load Kernel Data Segment
     movabsq $0x10, %rax
     movq %rax, %ds
     movq %rax, %es
@@ -305,6 +310,7 @@ isr_common_stub:
 
     # Retrieving state
     popAllReg
+    popq %rsi	
     popq %rdi
 
     addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number

@@ -1,7 +1,7 @@
 #include<defs.h>
 #include<syscall.h>
 #include<sys/parser/tarfs.h>
-struct posix_header_ustar ret = {};
+uint64_t ret;
 void yield(){
 	__syscall0(YIELD);
 }
@@ -21,6 +21,10 @@ int64_t read(int fd, void *buf, uint64_t count){
 	return ret;
 }
 
+int64_t write(int fd, void *buf, uint64_t count){
+	uint64_t ret = __syscall3(WRITE, fd, (uint64_t)buf, count);
+	return ret;
+}
 int lseek(int fd, off64_t offset, int whence){
 	int ret = __syscall3(LSEEK, fd, offset, whence);
 	return ret;
@@ -54,3 +58,24 @@ void sleep(int sleep_interval){ //TODO
 uint64_t uprintf(const char *format_string){
 	return __syscall1(PRINTF,(uint64_t)format_string);
 }
+
+void clrscr(){
+	 __syscall0(CLRSCR);
+}
+
+void* malloc(uint64_t size){
+	return	(void*)__syscall1(MALLOC, size);
+}
+
+uint64_t execvpe(char *path, char *argv[], char *envp[]){
+	return (uint64_t)__syscall3(EXEC, (uint64_t)path, (uint64_t)argv, (uint64_t)envp);	
+}
+
+uint64_t get_pid(){
+	return __syscall0(GETPID);
+}
+
+uint64_t fork() {
+    return (uint64_t)__syscall0(FORK);
+}
+

@@ -79,7 +79,7 @@ int scan_all_chunks() {
     return 0;
 }
 
-static struct phys_page_t* get_phys_page(uint64_t addr) {
+struct phys_page_t* get_phys_page_desc(uint64_t addr) {
 
     addr &= PAGE_ALIGN;
     struct chunk_t *node;
@@ -97,7 +97,7 @@ static struct phys_page_t* get_phys_page(uint64_t addr) {
 
 int inc_ref_count_page(uint64_t addr) {
 
-    struct phys_page_t *node = get_phys_page(addr);
+    struct phys_page_t *node = get_phys_page_desc(addr);
 
     if(node) {
         node->refcount ++;
@@ -109,7 +109,7 @@ int inc_ref_count_page(uint64_t addr) {
 
 int dec_ref_count_page(uint64_t addr) {
 
-    struct phys_page_t *node = get_phys_page(addr);
+    struct phys_page_t *node = get_phys_page_desc(addr);
 
     if(node) {
         node->refcount --;

@@ -3,6 +3,8 @@
 #include <sys/memory/free_phys_pages.h>
 #include <sys/list.h>
 #include <sys/memory/kmalloc.h>
+#include <sys/scheduler/pcb.h>
+#include <sys/scheduler/scheduler.h>
 
 LIST_HEAD(phys_free_list_head);
 
@@ -179,7 +181,14 @@ uint64_t v_alloc_page_get_phys_at_virt(uint64_t *phys_addr, uint64_t prot,
     }
 
     uint64_t virt_addr;
-    virt_addr = mmap(&(get_kernel_mm()->mmap), virt, SIZEOF_PAGE, prot,
+    struct pcb_t *currTask = getCurrentTask();
+    struct list_head *vma_list_head;
+    if(virt >= get_kernel_mm()->start_kernel || !currTask) {
+        vma_list_head = &(get_kernel_mm()->mmap);
+    } else {
+        vma_list_head = &(currTask->mm->mmap);
+    }
+    virt_addr = mmap(vma_list_head, virt, SIZEOF_PAGE, prot,
                                                         MAP_ANONYMOUS, 0, 0);
 
     if(virt_addr == 0) {
@@ -221,7 +230,14 @@ uint64_t v_alloc_pages_at_virt(uint32_t n, uint64_t prot, uint64_t virt) {
         }
     }
 
-    virt_addr = mmap(&(get_kernel_mm()->mmap), virt, n * SIZEOF_PAGE, prot,
+    struct pcb_t *currTask = getCurrentTask();
+    struct list_head *vma_list_head;
+    if(virt >= get_kernel_mm()->start_kernel || !currTask) {
+        vma_list_head = &(get_kernel_mm()->mmap);
+    } else {
+        vma_list_head = &(currTask->mm->mmap);
+    }
+    virt_addr = mmap(vma_list_head, virt, SIZEOF_PAGE, prot,
                                                         MAP_ANONYMOUS, 0, 0);
 
     if(virt_addr == 0) {
@@ -254,11 +270,15 @@ int v_free_page(uint64_t virt) {
     if(!virt)
         return -1;
 
-    uint64_t phys = virt2phys_selfref(virt);
+    uint64_t perm;
+    uint64_t phys = virt2phys_selfref(virt, &perm);
 
     if(phys == (uint64_t)-1) {
         return -1;
     }
+
+    update_curr_page_table(0, virt, perm);
+    // TODO: munmap
 
     return free_phys_page(phys);
 }

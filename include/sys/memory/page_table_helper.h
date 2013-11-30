@@ -8,7 +8,7 @@
 #include <defs.h>
 #include <sys/memory/phys_page_manager.h>
 #include <sys/kstdio.h> // TODO: Replace with logger
-#include <sys/kstring.h>
+#include <string.h>
 #include <sys/memory/page_constants.h>
 
 // Number of entries in page translation objects
@@ -16,6 +16,12 @@
 
 // Size of page translation object in bytes
 #define SIZEOF_PAGE_TRANS 4096
+
+// Start PML4 entry for kernel (inclusive)
+#define PML4_KERNEL_ENTRY_START 511
+
+// End PML4 entry for kernel (inclusive)
+#define PML4_KERNEL_ENTRY_END 511
 
 
 /*********************** Page translation object fields ***********************/
@@ -206,7 +212,10 @@ int update_page_table_idmap(uint64_t pml4, uint64_t phys, uint64_t virt,
  * Map physical address to virtual address with required permissions in PML4
  * loaded in CR3. This function does NOT assume identity mapping or virtual
  * address mapped with all physical addresses
- * @param phys        physical address to map virtual address 'virt' with
+ * @param phys        physical address to map virtual address 'virt' with. If 0,
+ *                    then access permissions will be updated, provided all 4
+ *                    levels exist. Otherwise ERROR. In this mode, even
+ *                    PAGE_TRANS_PRESENT is set based on access_perm.
  * @param virt        virtual address that should be mapped to 'phys'
  * @param access_perm access permissions ORed. For e.g.: PAGE_TRANS_READ_WRITE
  *                    | PAGE_TRANS_USER_SUPERVISOR
@@ -218,9 +227,10 @@ int update_curr_page_table(uint64_t phys, uint64_t virt, uint64_t access_perm);
  * Find physical address corresponding to a virtual address.
  * NOTE: needs self ref page tables
  * @param virt virtual address
+ * @param perm return value of protection/permission bits
  * @return     physical address, if exists, otherwise (uint64_t)(-1)
  */
-uint64_t virt2phys_selfref(uint64_t virt); 
+uint64_t virt2phys_selfref(uint64_t virt, uint64_t *perm); 
 
 /**
  * Find physical address corresponding to a virtual address.
@@ -232,11 +242,30 @@ uint64_t virt2phys_selfref(uint64_t virt);
 uint64_t virt2phys_idmap(uint64_t pml4, uint64_t virt); 
 
 /**
- * Call this to indicate that device memory is set up. Page table set up makes
- * use of physical addresses (identity mapped) until this function is called.
- * After this, it makes use of virtual page allocations.
+ * After modifications in page table, invalidate Translation-Lookaside Buffer
+ * (TLB).
+ * Ref: http://developer.amd.com/wordpress/media/2012/10/24593_APM_v21.pdf
+ * Section: 5.5.2 TLB Management
+ * @param m virtual address of page that has to be invalidated
  */
-void ptDeviceMemorySetUpDone();
+static inline void invalidate_tlb(char *m) {
+    __asm volatile("invlpg %0"
+                    :
+                    : "m"(*m)
+                    : "memory" // Clobber memory to avoid optimizer re-ordering
+                               // access before invlpg, which may cause nasty
+                               // bug. Ref:
+                               // http://wiki.osdev.org/Inline_Assembly/Examples
+                );
+}
+
+/**
+ * Get deep copy of PML4 object for copy on write fork. Note: kernel pages are
+ * not deep copied.
+ * @param phys_addr physical address of PML4 is output here
+ * @return          duplicated PML4 object, NULL on error
+ */
+uint64_t cow_fork_page_table(uint64_t *phys_addr);
 
 #endif
 

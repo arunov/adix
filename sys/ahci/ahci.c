@@ -1,6 +1,6 @@
 #include<sys/ahci/ahci.h>
 #include<sys/memory/mm_struct.h>
-#include<sys/kstring.h>
+#include<string.h>
 #include<sys/memory/free_phys_pages.h>
 
 HBA_PORT hba_port = {0};

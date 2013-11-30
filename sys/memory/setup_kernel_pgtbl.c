@@ -1,7 +1,7 @@
 #include <sys/kstdio.h>
 #include <sys/memory/phys_page_manager.h>
 #include <sys/memory/page_table_helper.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/handle_cr.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/kmalloc.h>
@@ -13,7 +13,8 @@ void setup_kernel_pgtbl(void *kernmem, void *physbase, void *physfree){
 	struct str_cr3 cr3 = create_kernel_pgtbl(kernmem, physbase, physfree);
 	printf("New cr3: %x\n", *((uint64_t *)(&cr3)));
 	set_cr3(cr3);
-    printf("physical address of kernmem %p is %p\n", kernmem, virt2phys_selfref((uint64_t)kernmem));
+    uint64_t prot;
+    printf("kernmem %p has prot %p and virtual addr %p\n", kernmem, prot, virt2phys_selfref((uint64_t)kernmem, &prot));
     kmDeviceMemorySetUpDone();
 }
 

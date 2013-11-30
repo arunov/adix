@@ -1,6 +1,6 @@
 #include <sys/kstdio.h>
 #include <sys/scheduler/scheduler.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/handle_cr.h>
 
 int counter_souj = 0;
 

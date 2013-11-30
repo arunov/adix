@@ -4,7 +4,7 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 #include <sys/memory/phys_page_manager.h>
-#include <sys/memory/handle_cr2_cr3.h>
+#include <sys/memory/handle_cr.h>
 #include <sys/memory/setup_kernel_pgtbl.h>
 #include <sys/list.h>
 #include <sys/parser/parsetarfs.h>
@@ -15,6 +15,7 @@
 #include <sys/memory/setup_kernel_memory.h>
 #include <sys/memory/free_phys_pages.h>
 #include <sys/ahci/ahci.h>
+#include <sys/memory/phys_page_manager2.h>
 
 #define INITIAL_STACK_SIZE 4096
 #define SET_NXE 0x800ULL
@@ -75,9 +76,10 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("\nFd returned after syscall %d",fd);
 #endif
 */
+/*
 	uint64_t execret = exec("bin/hello");
 	printf("execret %p", execret);
-	
+*/	
 	//check asci
 	int ahci_ret = setup_ahci();
 	printf("asci_ret: %d\n", ahci_ret);

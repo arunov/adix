@@ -23,7 +23,7 @@ static void init_mm(struct mm_struct *mm) {
     mm->start_code = mm->end_code = 0x0ULL;
     mm->start_data = mm->end_data = 0x0ULL;
     mm->start_heap = mm->end_heap = 0x0ULL;
-    mm->start_stack = 0x0ULL;
+    mm->start_stack = mm->end_stack = 0x0ULL;
 }
 
 struct kernel_mm_struct* get_kernel_mm() {
@@ -34,7 +34,7 @@ struct mm_struct* new_mm() {
     struct mm_struct *mm = (struct mm_struct*)
                                             kmalloc(sizeof(struct mm_struct));
 
-    init_mm(mm);
+    if(mm) init_mm(mm);
     return mm;
 }
 
@@ -308,8 +308,6 @@ void print_vmas(struct mm_struct *this) {
     printf("->end_heap: %p,", this->end_heap);
     printf("->start_stack: %p,", this->start_stack);
     printf("->end_stack: %p,", this->end_stack);
-    printf("( ->mm_list).next: %p,", (this->mm_list).next);
-    printf("( ->mm_list).prev: %p,", (this->mm_list).prev);
     printf("#");
 
     list_for_each_entry(node, &this->mmap, vm_list) {
@@ -380,5 +378,82 @@ uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
     // TODO: If not anonymous VMA, update vma with file backup information
 
     return start_addr;
+}
+
+static int copy_vmas(struct list_head *src, struct list_head *dest) {
+
+    struct vm_area_struct *node = NULL;
+
+    list_for_each_entry(node, src, vm_list) {
+        struct vm_area_struct *new_node = (struct vm_area_struct*)
+                                        kmalloc(sizeof(struct vm_area_struct));
+
+        if(!new_node) {
+            // TODO: Free stuff!
+            return -1;
+        }
+
+        *new_node = *node;
+        list_add_tail(&new_node->vm_list, dest);
+    }
+
+    return 0;
+}
+
+struct kernel_mm_struct* cow_fork_kmm_struct() {
+
+    struct kernel_mm_struct *src = get_kernel_mm();
+
+    if(src == NULL) {
+        return NULL;
+    }
+
+    struct kernel_mm_struct *dest = (struct kernel_mm_struct*)
+                                    kmalloc(sizeof(struct kernel_mm_struct));
+
+    if(!dest) {
+        return NULL;
+    }
+
+    dest->start_kernel = src->start_kernel;
+    dest->end_kernel = src->end_kernel;
+    dest->start_vdo_buff = src->start_vdo_buff;
+    dest->end_vdo_buff = src->end_vdo_buff;
+    dest->start_phys_mem = src->start_phys_mem;
+    dest->end_phys_mem = src->end_phys_mem;
+
+    if(-1 == copy_vmas(&(src->mmap), &(dest->mmap))) {
+        return NULL;
+    }
+
+    return dest;
+}
+
+struct mm_struct* cow_fork_mm_struct(struct mm_struct *src) {
+
+    if(src == NULL) {
+        return NULL;
+    }
+
+    struct mm_struct *dest = new_mm();
+
+    if(!dest) {
+        return NULL;
+    }
+
+    dest->start_code = src->start_code;
+    dest->end_code = src->end_code;
+    dest->start_data = src->start_data;
+    dest->end_data = src->end_data;
+    dest->start_heap = src->start_heap;
+    dest->end_heap = src->end_heap;
+    dest->start_stack = src->start_stack;
+    dest->end_stack = src->end_stack;
+
+    if(-1 == copy_vmas(&(src->mmap), &(dest->mmap))) {
+        return NULL;
+    }
+
+    return dest;
 }
 

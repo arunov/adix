@@ -17,7 +17,7 @@ struct phys_page_t {
     /*
      * PAGE_COW - Page is in Copy On Write mode
      */
-    uint32_t flags;
+    uint32_t flag;
 };
 
 /**
@@ -90,6 +90,13 @@ int inc_ref_count_pages(uint64_t start_addr, uint64_t end_addr);
  * @return                OK or ERROR
  */
 int phys_mem_offset_map(uint64_t pml4, uint64_t phys_mem_offset);
+
+/**
+ * Get phys_page_t object pointer corresponding to physical address addr
+ * @param addr physical address
+ * @return     pointer to phys_page_t object
+ */
+struct phys_page_t* get_phys_page_desc(uint64_t addr);
 
 #endif
 

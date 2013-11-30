@@ -3,18 +3,9 @@
 /* parses tarfs and prints the names of files
 * returns the number of files in tarfs
 */
-#define ULIMIT 1024
 
 #include <defs.h>
-
-int ulimit; 
-
-struct process_files_table{
-	struct posix_header_ustar *header;
-	uint64_t offset;
-};
-struct process_files_table process_open_files_table[ULIMIT];
-
+#include <sys/filesystems/file_structures.h>
 int parsetar();
 
 /* reads @numbytes from @offset of @filename into @buffer
@@ -46,5 +37,9 @@ int sys_opendir(const char *pathname);
 struct posix_header_ustar* sys_readdir(int fd, uint64_t ret);
 
 int sys_closedir(int fd);
+
+extern struct operation_pointers tarfs_ops;
+
+struct operation_pointers* get_tarfs_ops();
 
 #endif
