@@ -31,6 +31,7 @@ struct phys_page_manager phys_page_mngr_obj;
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
+/*
 	struct smap_t {
 		uint64_t base, length;
 		uint32_t type;
@@ -47,13 +48,13 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
 	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
         
-	
+*/	
 	/* Free list and Page Tables */
 	//phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
     //    finish_scan(&phys_page_mngr_obj);
         setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
 	//setup_kernel_pgtbl(&kernmem, physbase, physfree);
-
+/*
     uint64_t phys;
     char *x = (char*)v_alloc_page_get_phys(&phys, PAGE_TRANS_READ_WRITE);
     *x = 'a';
@@ -73,7 +74,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	int fd = sys_open("aladdin.txt");
 	printf("\nFd returned after syscall %d",fd);
 #endif
-
+*/
 	uint64_t execret = exec("bin/hello");
 	printf("execret %p", execret);
 	
