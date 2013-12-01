@@ -18,12 +18,12 @@ _jump_to_ring3:
 	pushq %rcx
 	pushq %r8
 
-	movq %rsp, %rdi
-	addq $0x08, %rdi
-	call set_tss
+#	movq %rsp, %rdi
+#	addq $0x08, %rdi
+#	call set_tss
 	
-	movq $0x28, %rax
-	ltr %ax #Load ltr with offset
+#	movq $0x28, %rax
+#	ltr %ax #Load ltr with offset
 	popq %r8
 	popq %rcx
 	popq %rdx

@@ -4,8 +4,6 @@
 #define BUF_SIZE 1024
 #define DELIM " "
 #define BG_SYMBOL "bg"
-char buffer[BUF_SIZE];
-
 int parse_shell_command_args(char *buffer, char *child_argv[]){
 	int len = 0;
 	int i = 0;
@@ -21,9 +19,6 @@ int parse_shell_command_args(char *buffer, char *child_argv[]){
 }
 int is_foreground(int argc, char *child_argv[]){
 	return str_equal(child_argv[argc-1],BG_SYMBOL) ? 0 : 1;
-}
-void wait_pid(uint64_t pid){
-	return ;
 }
 
 void init_shell(){
@@ -41,22 +36,22 @@ char** get_env(){
 void run_shell(){
 	uint64_t pid = 0;
 	int child_argc;
-	char *child_argv[10];
 	int foreground;
-	int count = read(STDIN, &buffer, BUF_SIZE);
-	printf("\nCommand you entered is %d character long and is:",count);
-	write(STDOUT, &buffer, count);
+	char *buffer = malloc(BUF_SIZE);//each process should get its own buffer
+	char **child_argv = malloc(10 * sizeof(char*));
+	int count = read(STDIN, buffer, BUF_SIZE);
+	write(STDOUT, buffer, count);
 
 	child_argc = parse_shell_command_args((char*)buffer, child_argv);
 	foreground = is_foreground(child_argc, child_argv);
-	printf("\nNumbe of args %d",child_argc);
-	printf("\nIs foreground: %d",foreground);
-	printf("\nPID of the process: %d", get_pid());
-
-	//fork()	
+	printf("\nNumber of args %d.. ",child_argc);
+	printf("Is foreground: %d\n",foreground);
+	pid = fork();
 	if(pid == 0){
 		execvpe(child_argv[0], child_argv, get_env());
-	}else{
+		printf("Execution of the process \"%s\" failed",child_argv[0]);
+		exit(0);//If execvpe returned => it failed
+	} else{
 		if(foreground){
 			wait_pid(pid);
 		}
@@ -65,12 +60,11 @@ void run_shell(){
 
 int main(int argc, char* argv[], char* envp[]) {
 	init_shell();
+	int count = 1;
 	while(1){
-		uprintf("\n##ADIX >> ");
+		printf("\n##ADIX[%d]>> ",count);
+		count++;
 		run_shell();
-
 	}
-	
+	exit(0);
 }
-
-

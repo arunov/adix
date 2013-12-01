@@ -2,9 +2,9 @@
 #define _FILE_STRUCTURES_H
 #include <defs.h>
 
-#define TERMINAL_TYPE 1
-#define TARFS_TYPE 2
-#define FS_TYPE 3
+#define TERMINAL_TYPE 10000
+#define TARFS_TYPE 10001
+#define FS_TYPE 10002
 
 struct posix_header_ustar {
 	char name[100];

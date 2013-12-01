@@ -29,7 +29,6 @@
 .extern sys_sleep
 .extern sys_fork
 .extern printf
-.extern set_tss
 .extern clear_screen
 sys_call_handler:
 	pushAllSysReg
@@ -41,13 +40,6 @@ sys_call_handler:
 
 _sys_yield:
 	call sys_yield
-	#Setup TSS
-	movq %rsp,%rdi
-	addq $0xB0,%rdi
-	call set_tss
-	#Load new valure for tss
-	movq $0x28, %rdi
-	ltr %di
 	retq
 
 _sys_printf:
@@ -100,14 +92,5 @@ _sys_clrscr:
 
 _sys_fork:
 	call sys_fork
-    pushq %rax
-	#Setup TSS
-	movq %rsp,%rdi
-	addq $0xB0,%rdi
-	call set_tss
-	#Load new valure for tss
-	movq $0x28, %rdi
-	ltr %di
-    popq %rax
 	retq
 

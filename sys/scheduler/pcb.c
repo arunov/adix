@@ -6,7 +6,7 @@
 #include<sys/memory/page_table_helper.h> //TODO:Remove after 
 #include<sys/scheduler/ring_switch.h> //TODO:Remove after 
 #include <sys/memory/kmalloc.h>
-#include <sys/parser/exec.h>
+#include <sys/parser/parseelf.h>
 #include <sys/gdt.h>
 #include <sys/filesystems/file_structures.h>
 #include <sys/terminal/terminal_driver.h>
@@ -74,14 +74,16 @@ struct pcb_t* createTask(enum ptype proc_type,
 	if(proc_type == KTHREAD){
 		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
 		prepareInitialStack(pcb->stack_base,instruction_address);
+		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 	} 
 	else if(proc_type == UPROC){
 		/* It is sufficient to use different CR3 for user processes! (is it?)*/
 		/* Load the binary corresponding to this process */
 		struct str_cr3 cr3 = create_kernel_pgtbl(kernmem, &physbase, physfree); 
-		pcb->cr3_content = *((uint64_t*)&cr3); // TODO: Replace with loader load of binary
+		pcb->cr3_content = *((uint64_t*)&cr3);
 		set_cr3(cr3);
-		instruction_address = exec(program, pcb->mm);
+		//load elf
+		instruction_address = load_elf(pcb->mm, program);
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
 		pcb->u_stack_base = (uint64_t*)v_alloc_pages_at_virt(1, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, 0x70000000);

@@ -3,6 +3,8 @@ void *memcpy(void *dest, const void *src, unsigned int count)
 {
     const char *sp = (const char *)src;
     char *dp = (char *)dest;
+
+	/* NEVER EVER GIVE A PRINT STATMENT HERE-- THIS METHOD IS USED BY PRINT!!*/
     for(; count != 0; count--) *dp++ = *sp++;
     return dest;
 }
@@ -37,7 +39,6 @@ strtok(s, delim)
 	register int c, sc;
 	char *tok;
 	static char *last;
-
 
 	if (s == NULL && (s = last) == NULL)
 		return (NULL);

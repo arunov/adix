@@ -36,7 +36,7 @@ int opendir(const char *pathname){
 	return ret;
 }
 
-uint64_t fork() {
+int64_t fork() {
     uint64_t ret = __syscall0(FORK);
     return ret;
 }
