@@ -5,6 +5,7 @@
 #define DELIM " "
 #define BG_SYMBOL "bg"
 int parse_shell_command_args(char *buffer, char *child_argv[]){
+
 	int len = 0;
 	int i = 0;
 	for (i=0; *buffer != NULL; i++){
@@ -38,13 +39,12 @@ void run_shell(){
 	int child_argc;
 	int foreground;
 	char *buffer = malloc(BUF_SIZE);//each process should get its own buffer
-	char **child_argv = malloc(10 * sizeof(char*));
+	char **child_argv = (char**) malloc(10 * sizeof(char*));
 	int count = read(STDIN, buffer, BUF_SIZE);
 	write(STDOUT, buffer, count);
-
+	buffer[count] = '\0';
 	child_argc = parse_shell_command_args((char*)buffer, child_argv);
 	foreground = is_foreground(child_argc, child_argv);
-	printf("\nNumber of args %d.. ",child_argc);
 	printf("Is foreground: %d\n",foreground);
 	pid = fork();
 	if(pid == 0){

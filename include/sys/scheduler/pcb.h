@@ -3,7 +3,7 @@
 #include <defs.h>
 #include<sys/list.h>
 #include <sys/limits.h>
-#define NUM_REGISTERS_BACKED 14
+#define NUM_REGISTERS_BACKED 15
 #define STACK_SIZE 512
 #define SP_OFFSET 1
 enum pstate{

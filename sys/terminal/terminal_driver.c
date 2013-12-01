@@ -25,7 +25,7 @@ int terminal_open(const char* pathname){
 
 int64_t terminal_read(int fd, void *buf, uint64_t count){
 	sys_sleep(TERMINAL_TYPE);
-	memcpy(buf, terminal_buffer, count);
+	memcpy(buf, terminal_buffer, buffer_len);
 	count = buffer_len;
 	buffer_len = 0;
 	return count;

@@ -252,7 +252,7 @@ isr30:
 
 #  31: Reserved Exceptions
 isr31:
-    cli
+    #cli
     pushq $0
     pushq $31
     jmp isr_common_stub
@@ -314,6 +314,6 @@ isr_common_stub:
     popq %rdi
 
     addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number
-    sti
+    #sti
     iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 

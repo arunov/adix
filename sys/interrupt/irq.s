@@ -189,8 +189,8 @@ irq_common_stub:
     popq %rdi
 
     addq $0x10, %rsp   # Cleans up the pushed error code and pushed ISR number
-    sti
-    sti		#Why twice? Apparently schedule() disables other interrupts! 
+   # sti
+   # sti		#Why twice? Apparently schedule() disables other interrupts! 
     #WHY? No idea!! I have to move on, leaving it here for Arun to fix! :P
     iretq           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 

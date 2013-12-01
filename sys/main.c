@@ -109,6 +109,7 @@ void boot(void)
 	__asm__(
 		"movq %%rsp, %0;"
 		"movq %1, %%rsp;"
+		"cli" //Disable interrupts till first process inialization
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);

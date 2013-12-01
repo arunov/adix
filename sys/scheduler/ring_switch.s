@@ -34,6 +34,7 @@ _jump_to_ring3:
 	pushq %rdi #Push rsp
 	sti
 	pushfq
+	cli
 	#RPL (3) | CS_segment_selector (24 - 0x18)
 	pushq $0x1b
 	pushq %rsi #Push rip
