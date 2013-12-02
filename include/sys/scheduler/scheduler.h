@@ -26,5 +26,9 @@ void cleanupTerminated();
 struct pcb_t* getCurrentTask();
 /* Add task that is under preparation */
 void updatePrepTask(struct pcb_t *pcb);
-
+/* Sleep for sleep_interval duration */
+int sys_sleep_timer(int64_t sleep_interval);
+/* Update sleep_time_remaining and wakeup any process that has elapsed its 
+ * timer interval */
+void sys_wakeup_timer();
 #endif

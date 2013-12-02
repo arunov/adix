@@ -27,7 +27,7 @@
 
 void yield();
 void exit(int status);
-void sleep(int sleep_interval);
+int sleep(int64_t sleep_interval);
 void wait_pid(uint64_t pid);
 uint64_t uprintf(const char *format_string);
 

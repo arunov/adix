@@ -22,7 +22,7 @@
 
 #  0: Programmable Interval Timer 
 irq0:
-    cli
+    
     pushq $0    # A normal ISR stub that pops a dummy error code to keep a
                    # uniform stack frame
     pushq $32
@@ -30,105 +30,105 @@ irq0:
 
 #  1: Keyboard
 irq1:
-    cli
+    
     pushq $0
     pushq $33
     jmp irq_common_stub
 
 #  2: Future Use
 irq2:
-    cli
+    
     pushq $0
     pushq $34
     jmp irq_common_stub
 
 #  3: Future Use
 irq3:
-    cli
+    
     pushq $0
     pushq $35
     jmp irq_common_stub
 
 #  4: Future Use
 irq4:
-    cli
+    
     pushq $0
     pushq $36
     jmp irq_common_stub
 
 #  5: Future Use
 irq5:
-    cli
+    
     pushq $0
     pushq $37
     jmp irq_common_stub
 
 #  6: Future Use
 irq6:
-    cli
+    
     pushq $0
     pushq $38
     jmp irq_common_stub
 
 #  7: Future Use
 irq7:
-    cli
+    
     pushq $0
     pushq $39
     jmp irq_common_stub
 
 #  8: Future Use
 irq8:
-    cli
+    
     pushq $0
     pushq $40       
     jmp irq_common_stub
 
 #  9: Future Use
 irq9:
-    cli
+    
     pushq $0
     pushq $41
     jmp irq_common_stub
 
 #  10: Future Use
 irq10:
-    cli
+    
     pushq $0
     pushq $42
     jmp irq_common_stub
 
 #  11: Future Use
 irq11:
-    cli
+    
     pushq $0
     pushq $43
     jmp irq_common_stub
 
 #  12: Future Use
 irq12:
-    cli
+    
     pushq $0
     pushq $44
     jmp irq_common_stub
 
 #  13: Future Use
 irq13:
-    cli
+    
     pushq $0
     pushq $45
     jmp irq_common_stub
 
 #  14: Future Use
 irq14:
-    cli
+    
     pushq $0
     pushq $46
     jmp irq_common_stub
 
 #  15: Future Use
 irq15:
-    cli
+    
     pushq $0
     pushq $47
     jmp irq_common_stub

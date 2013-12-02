@@ -51,8 +51,8 @@ int closedir(int fd){
 }
 
 
-void sleep(int sleep_interval){ //TODO
-	__syscall1(SLEEP, sleep_interval);
+int sleep(int64_t sleep_interval){
+ 	return __syscall1(SLEEP, sleep_interval);
 }
 
 uint64_t uprintf(const char *format_string){

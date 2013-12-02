@@ -52,7 +52,7 @@ int closedir(int fd){
 }
 
 
-void sleep(int sleep_interval){ //TODO
+int sleep(uint64_t sleep_interval){ //TODO
 	__syscall1(SLEEP, sleep_interval);
 }
 

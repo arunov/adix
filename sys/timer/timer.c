@@ -54,13 +54,17 @@ void timer_handler()
 
     /* Increment our 'tick count' */
     timer_ticks++;
+	sys_wakeup_timer();
+	/* Switch every 10ms */
+	if(timer_ticks % 100 == 0){ 
+    /* And yes, that's a 60 pointer CS506 project! :) Preemption! */
+   		switch_context();
+	}
 
     /* Every 18 clocks (approximately 1 second), we will
     *  display a message on the screen */
     if (timer_ticks % PIT_CLOCK_HZ == 0)
     {
-    /* And yes, that's a 60 pointer CS506 project! :) Preemption! */
-   		switch_context();
         
 		timer_ticks = 0;
 

@@ -48,6 +48,7 @@ pushq %rcx
 pushq %rdx
 pushq %rdi
 pushq %rsi
+pushq %rsp
 pushq %rbp
 pushq %r8
 pushq %r9
@@ -70,6 +71,7 @@ popq %r10
 popq %r9
 popq %r8
 popq %rbp
+popq %rsp
 popq %rsi
 popq %rdi
 popq %rdx

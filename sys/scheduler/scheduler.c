@@ -83,6 +83,18 @@ void sys_sleep(uint64_t wait_desc){
 	sys_yield();
 }
 
+int sys_sleep_timer(int64_t sleep_interval){
+	if(sleep_interval <= 0){
+		return -1;
+	}
+	struct pcb_t *current_task = getCurrentTask();
+	current_task->sleep_time_rem = sleep_interval;
+	list_del(&current_task->lister);
+	list_add(&current_task->lister, &wait_timer_queue);
+	sys_yield();
+	return 0;
+}
+
 static void wakeup_proc(struct pcb_t *waiting_task){
 	update_wait_descriptor(waiting_task, NOT_WAITING);
 	list_del(&waiting_task->lister);//delete from wait queue
@@ -93,7 +105,7 @@ static void wakeup_proc(struct pcb_t *waiting_task){
 }
 
 
-void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
+static void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
 	struct pcb_t *proc;
 	struct pcb_t *temp[MAX_WAIT_PROC]; //TODO: Poses an upper bound?
 	int i=0;
@@ -107,8 +119,16 @@ void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
 	}
 }
 
-void sys_wakeup_timer(uint64_t pid){
-	_sys_wakeup(&wait_timer_queue, pid);
+void sys_wakeup_timer(){
+	struct pcb_t *proc;
+	//struct list_head* head = &wait_timer_queue;
+	list_for_each_entry(proc, &wait_timer_queue, lister){
+		proc->sleep_time_rem -= 1;
+		if(proc->sleep_time_rem == 0){
+			update_wait_descriptor(proc, TIMER_ELAPSED);
+		}
+	}
+	_sys_wakeup(&wait_timer_queue, TIMER_ELAPSED);
 }
 
 void sys_wakeup(uint64_t wait_desc){

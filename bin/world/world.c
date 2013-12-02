@@ -2,14 +2,13 @@
 #include <stdio.h>
 #include <syscall.h>
 #include <defs.h>
+
+/* This program prints World 5 times at an interval of 1 second */
 int main(int argc, char* argv[], char* envp[]) {
-	uint64_t wcounter =1 ;
 	int counter = 5;
-	while(counter){
-		if(wcounter++ % 50000000 == 0){
-			counter--;
-			printf("World!\n");
-		}
-	}
+	while(counter--){
+		sleep(1000);
+		printf("[%d] World!\n",get_pid());
+	}	
 	return 0;
 }
