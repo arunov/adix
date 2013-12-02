@@ -11,7 +11,9 @@ void read_elf_header(int fd, Elf64_Ehdr *elf_header){
 }
 
 int is_elf(Elf64_Ehdr elf_header){
-	//printf("e_ident%p\n",elf_header.e_ident[EI_NIDENT]);
+#ifdef DEBUG
+	printf("e_ident%p\n",elf_header.e_ident[EI_NIDENT]);
+#endif	
 	//char *magic = "\177ELF";
 	if(elf_header.e_ident[0]==0x7f){
 		if(elf_header.e_ident[1]=='E'){
@@ -21,11 +23,11 @@ int is_elf(Elf64_Ehdr elf_header){
 			}
 		}
 	}
-	printf("not an elf file");
 	return -1;
 }
 
 void print_elf_header(Elf64_Ehdr elf_header){
+#ifdef DEBUG
 	printf("entry:%p\n", elf_header.e_entry);
 	printf("programheadertable:%p\n", elf_header.e_phoff);
 	printf("sectionheadertable:%p\n", elf_header.e_shoff);
@@ -35,16 +37,19 @@ void print_elf_header(Elf64_Ehdr elf_header){
 	printf("sh_size:%p\n", elf_header.e_shentsize);
 	printf("sh_num_entries:%p\n", elf_header.e_shnum);
 	printf("index:%p\n", elf_header.e_shstrndx);
-
+#endif
 }
 
 void read_prgm_header(int fd, Elf64_Phdr *prgm_header){
-	//printf("%d",sizeof(Elf64_Phdr));
+#ifdef DEBUG
+	printf("%d",sizeof(Elf64_Phdr));
+#endif
 	sys_read(fd, (void *)prgm_header, sizeof(Elf64_Phdr));
 	
 }
 
 void print_prgm_header(Elf64_Phdr prgm_header){
+#ifdef DEBUG
 	printf("p_type: %p\n",prgm_header.p_type);
 	printf("p_flags: %p\n",prgm_header.p_flags);
 	printf("p_offset: %p\n",prgm_header.p_offset);
@@ -53,6 +58,7 @@ void print_prgm_header(Elf64_Phdr prgm_header){
 	printf("p_filesz: %p\n",prgm_header.p_filesz);
 	printf("p_memsz: %p\n",prgm_header.p_memsz);
 	printf("p_align: %p\n",prgm_header.p_align);
+#endif	
 }
 
 
@@ -61,9 +67,10 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 	Elf64_Ehdr elf_header ;
 	uint64_t entry = -1;
 	int fd = sys_open(filename);
-	//printf("\nfd opened in loadelf: %d",fd);
-	if(fd==-1)
+//	printf("\nfd opened in loadelf: %d",fd);
+	if(fd == -1){
 		return entry;
+	}
 	read_elf_header(fd, &elf_header);
 	//print_elf_header(elf_header);
 	if(is_elf(elf_header)==0){
@@ -78,7 +85,7 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
 			if(prgm_header[num_phdr].p_type==0x1){
 				uint64_t offset = prgm_header[num_phdr].p_offset;
-				uint64_t size = prgm_header[num_phdr].p_filesz;
+				uint64_t size = prgm_header[num_phdr].p_memsz;
 				uint64_t vir_addr = prgm_header[num_phdr].p_vaddr;
 				uint64_t flag =  prgm_header[num_phdr].p_flags;
 				uint64_t prot = PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_READ_WRITE;
@@ -87,6 +94,9 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				if(flag & PT_W)
 					prot = prot | PAGE_TRANS_READ_WRITE;
 
+#ifdef DEBUG
+				printf("prgm head loadable %d size%p vir_addr%p offser %p flag %p prot %p\n", num_phdr, size, vir_addr, offset, flag, prot );
+#endif
 				int mmap_return = do_mmap(&(this->mmap), fd, offset, vir_addr, size, prot);
 				if(mmap_return != 0){
 					sys_close(fd);

@@ -36,7 +36,7 @@ int opendir(const char *pathname){
 	return ret;
 }
 
-uint64_t fork() {
+int64_t fork() {
     uint64_t ret = __syscall0(FORK);
     return ret;
 }
@@ -52,7 +52,7 @@ int closedir(int fd){
 }
 
 
-void sleep(int sleep_interval){ //TODO
+int sleep(uint64_t sleep_interval){ //TODO
 	__syscall1(SLEEP, sleep_interval);
 }
 

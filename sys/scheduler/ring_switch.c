@@ -11,7 +11,8 @@ void jump_to_ring3(){
 	struct pcb_t *pcb = getCurrentTask();
 	uint64_t rsp = get_u_rsp(pcb);
 	uint64_t rip = get_u_rip(pcb);
-	char* argv[6] = {"pgm_name","first_param","second_param",};//replaced
+	printf("\n Jumping to ring3\n");
+/*	char* argv[6] = {"pgm_name","first_param","second_param",};//replaced
 	char* envp[5] = {"othing"};
 	argv[3] = 0;
 	envp[1] = 0;
@@ -19,7 +20,7 @@ void jump_to_ring3(){
 
 	 ua = prepare_args_for_userspace(argv, envp);//replaced
 	 printf("\nJUMP_TO_RING3: rsp: %p rip: %p argc:%d argv:%p\n",rsp,rip, ua.argc, ua.argv);
-	_jump_to_ring3(rsp, rip, ua.argc, ua.argv, ua.envp);
+*/	_jump_to_ring3(rsp, rip, 0, 0, NULL);
 
 }
 

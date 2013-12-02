@@ -40,8 +40,9 @@ static int check_page_prot(struct vm_area_struct *node, uint64_t fault_addr) {
  */
 static void segfault(uint64_t fault_addr) {
 
-    printf("Sometimes life hits you in the head with a brick. Don't lose "
-                                        "faith. Seg fault at %p\n", fault_addr);
+  //  printf("Sometimes life hits you in the head with a brick. Don't lose "
+//                                        "faith. Seg fault at %p\n", fault_addr);
+    printf("Seg fault at %p\n", fault_addr);
     //sys_exit(1);
 }
 

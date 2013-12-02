@@ -57,7 +57,7 @@ int read_tarfs(char *filename, uint64_t offset, uint64_t numbytes, char *buffer)
 	for (i = 0; ; i++){
 		struct posix_header_ustar *header = (struct posix_header_ustar *)header_address;
 		if (strcmp(header->name,filename)==0){
-			printf("file found: %s \n", filename);
+//			printf("file found: %s \n", filename);
 			break;
 		}
 		else if (header->name[0] == '\0')
@@ -90,7 +90,7 @@ int strcmp(const char *s1,const char *s2){
 }
 
 int sys_open(const char* pathname){
-	printf("pathname: %s\n", pathname);
+//	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
 	struct process_files_table* pft;
@@ -98,12 +98,14 @@ int sys_open(const char* pathname){
 	for (i = 0; ; i++){
 		header = (struct posix_header_ustar *)header_address;
 		if (strcmp(header->name,pathname)==0){
-			printf("file found: %s \n", pathname);
+//			printf("file found: %s \n", pathname);
 			break;
 
 		}
-		else if (header->name[0] == '\0')
+		else if (header->name[0] == '\0'){
+//			printf("Sys open failed]\n");
 			return -1;
+		}	
 		int size = getsize(header->size);
 		header_address += ((size / 512) + 1) * 512;
 		if (size % 512)
@@ -111,7 +113,7 @@ int sys_open(const char* pathname){
 	}
 	pft = get_new_process_files_table(header,0,get_tarfs_ops()); //TODO: Do we need offset?
 	fd = add_to_process_file_table(getCurrentTask(),pft);
-	printf("\nFd returned from sys_open:%d",fd);
+//	printf("\nFd returned from sys_open:%d",fd);
 	return fd;
 }
 
@@ -149,7 +151,7 @@ int sys_close(int fd){
 }
 
 int sys_opendir(const char *pathname){
-	printf("pathname: %s\n", pathname);
+//	printf("pathname: %s\n", pathname);
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
 	struct process_files_table* pft;
@@ -159,11 +161,11 @@ int sys_opendir(const char *pathname){
 		if (strcmp(header->name,pathname)==0){
 			char *dirtype = "5";
 			if(strcmp(header->typeflag,dirtype)==0){
-				printf("Found directory: %s \n ", pathname);
+//				printf("Found directory: %s \n ", pathname);
 				break;	
 			}
 			else{	
-				printf("%s not a directory\n", pathname);
+//				printf("%s not a directory\n", pathname);
 				return NULL;
 			}	
 		}

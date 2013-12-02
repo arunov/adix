@@ -51,8 +51,8 @@ int closedir(int fd){
 }
 
 
-void sleep(int sleep_interval){ //TODO
-	__syscall1(SLEEP, sleep_interval);
+int sleep(int64_t sleep_interval){
+ 	return __syscall1(SLEEP, sleep_interval);
 }
 
 uint64_t uprintf(const char *format_string){
@@ -67,15 +67,18 @@ void* malloc(uint64_t size){
 	return	(void*)__syscall1(MALLOC, size);
 }
 
-uint64_t execvpe(char *path, char *argv[], char *envp[]){
-	return (uint64_t)__syscall3(EXEC, (uint64_t)path, (uint64_t)argv, (uint64_t)envp);	
+int64_t execvpe(char *path, char *argv[], char *envp[]){
+	return (int64_t)__syscall3(EXEC, (uint64_t)path, (uint64_t)argv, (uint64_t)envp);	
 }
 
 uint64_t get_pid(){
 	return __syscall0(GETPID);
 }
 
-uint64_t fork() {
+int64_t fork() {
     return (uint64_t)__syscall0(FORK);
 }
 
+void wait_pid(uint64_t pid){
+	__syscall1(WAITPID, pid);
+}

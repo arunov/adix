@@ -1,3 +1,4 @@
+.extern set_tss
 
 .macro pushReg
 pushq %rax
@@ -6,6 +7,7 @@ pushq %rcx
 pushq %rdx
 pushq %rdi
 pushq %rsi
+pushq %rbp
 pushq %r8
 pushq %r9
 pushq %r10
@@ -25,6 +27,7 @@ popq %r11
 popq %r10
 popq %r9
 popq %r8
+popq %rbp
 popq %rsi
 popq %rdi
 popq %rdx
@@ -43,6 +46,10 @@ switchTo:
 	movq %rsp,0x08(%rax) #save current rsp reg value onto the stack[1]
 	movq 0x08(%rdi),%rsp #get sp of new process onto rsp reg
 	#If the previous task was terminated remove it from the run queue
+	orq $0x0000000000000ff0, %rdi
+	call set_tss #Set tss for the new task
+	movq $0x28, %rax
+	ltr %ax
 	call cleanupTerminated 
 	popReg
 	#Get IP for the next task and return

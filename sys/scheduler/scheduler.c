@@ -7,6 +7,7 @@
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);
+LIST_HEAD(wait_timer_queue);
 
 /* Get next task that is ready to be run*/
 static struct pcb_t* getNextTask(){
@@ -40,7 +41,9 @@ struct pcb_t* getTerminatedTask(){
 }
 
 void sys_yield(){
-//	printf("\n#####Yielding to next process######");
+#ifdef SCHED_DEBUG
+	printf("\n#####Yielding to next process######");
+#endif	
 	struct pcb_t *nextTask = getNextTask();
 	list_del(&nextTask->lister);//remove from head
 	list_add_tail(&nextTask->lister,&pcb_run_queue); //add to tail
@@ -48,7 +51,8 @@ void sys_yield(){
 		set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
 	}
     if(nextTask->pid == 1 || nextTask->pid == 3) {
-    //printf("nextTask: pid: %p, stack_base: %p, ", nextTask->pid, nextTask->stack_base);
+//    printf("nextTask: pid: %p, stack_base: %p, ", nextTask->pid, nextTask->stack_base);
+//	printf("nextTask: pid %p rsp %p\n",nextTask->pid, get_u_rsp(nextTask));
     //printf("user_stack: %p, user_stack_phys: %p\n", nextTask->u_stack_base, virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
     //printf("nextTask: pid: %p, ", nextTask->pid);
     //printf("user_stack_phys: %p, ", virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
@@ -63,6 +67,8 @@ void sys_exit(int status){
 	list_del(&current_task->lister);//delete from run queue
 	//add to terminated queue
 	list_add(&current_task->lister,&pcb_terminated_queue);
+	//wakeup any process waiting for it
+	sys_wakeup(current_task->pid);
 	sys_yield();//schedule next job
 }
 
@@ -71,26 +77,39 @@ void sys_sleep(uint64_t wait_desc){
 	update_wait_descriptor(current_task, wait_desc);
 	list_del(&current_task->lister);
 	list_add(&current_task->lister, &pcb_wait_queue);
-	#ifdef DEBUG
+	#ifdef SCHED_DEBUG
 	printf("\n#####SLEEPING PROCESS %d",current_task->pid);
 	#endif
 	sys_yield();
+}
+
+int sys_sleep_timer(int64_t sleep_interval){
+	if(sleep_interval <= 0){
+		return -1;
+	}
+	struct pcb_t *current_task = getCurrentTask();
+	current_task->sleep_time_rem = sleep_interval;
+	list_del(&current_task->lister);
+	list_add(&current_task->lister, &wait_timer_queue);
+	sys_yield();
+	return 0;
 }
 
 static void wakeup_proc(struct pcb_t *waiting_task){
 	update_wait_descriptor(waiting_task, NOT_WAITING);
 	list_del(&waiting_task->lister);//delete from wait queue
 	list_add(&waiting_task->lister, &pcb_run_queue);//add to run queue
-	#ifdef DEBUG
+	#ifdef SCHED_DEBUG
 	printf("\n#####WAKING UP process %d",waiting_task->pid);
 	#endif
 }
 
-void sys_wakeup(uint64_t wait_desc){
+
+static void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
 	struct pcb_t *proc;
 	struct pcb_t *temp[MAX_WAIT_PROC]; //TODO: Poses an upper bound?
 	int i=0;
-	list_for_each_entry(proc, &pcb_wait_queue, lister){
+	list_for_each_entry(proc, wait_queue, lister){
 		if(proc->wait_desc == wait_desc){
 			temp[i++] = proc;
 		}
@@ -98,7 +117,22 @@ void sys_wakeup(uint64_t wait_desc){
 	while(i != 0){
 		wakeup_proc(temp[--i]);
 	}
-	sys_yield();
+}
+
+void sys_wakeup_timer(){
+	struct pcb_t *proc;
+	//struct list_head* head = &wait_timer_queue;
+	list_for_each_entry(proc, &wait_timer_queue, lister){
+		proc->sleep_time_rem -= 1;
+		if(proc->sleep_time_rem == 0){
+			update_wait_descriptor(proc, TIMER_ELAPSED);
+		}
+	}
+	_sys_wakeup(&wait_timer_queue, TIMER_ELAPSED);
+}
+
+void sys_wakeup(uint64_t wait_desc){
+	_sys_wakeup(&pcb_wait_queue, wait_desc);
 }
 
 void cleanupTerminated(){
@@ -116,7 +150,7 @@ void addToTaskList(struct pcb_t *pcb){
 
 void printPcbRunQueue(){
 	struct pcb_t *the_pcb = NULL;
-	#ifdef DEBUG
+	#ifdef SCHED_DEBUG
 	printf("\nPCB READY QUEUE: ");
 	#endif
 	list_for_each_entry(the_pcb,&pcb_run_queue,lister){

@@ -3,9 +3,13 @@
 #include <defs.h>
 #include<sys/list.h>
 #include <sys/limits.h>
-#define NUM_REGISTERS_BACKED 14
+#define NUM_REGISTERS_BACKED 15
 #define STACK_SIZE 512
 #define SP_OFFSET 1
+
+#define ULIMIT 1000
+#define TIMER_ELAPSED ULIMIT+1
+
 enum pstate{
 	P_READY,	/* Process ready */
 	P_TERMINATED	/* Terminated */
@@ -26,6 +30,7 @@ struct pcb_t{
 	struct tss_t *tss;
 	/* Indicates which descriptor the process is sleeping on */
 	uint64_t wait_desc; 
+	uint64_t sleep_time_rem;//TODO:Handle sleep through signals!
 	struct  process_files_table* open_files[OPEN_FILES_LIMIT];
 	struct list_head lister; 
 	struct mm_struct *mm;

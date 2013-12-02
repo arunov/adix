@@ -27,7 +27,7 @@ void switch_context(){
 	/* Acknowledge master PIC */
 	outportb(0x20, 0x20);
 	/* Yield to next process */
-        sys_yield();
+    sys_yield();
 }
 
 /* Handles the timer. In this case, it's very simple: We
@@ -54,24 +54,24 @@ void timer_handler()
 
     /* Increment our 'tick count' */
     timer_ticks++;
+	sys_wakeup_timer();
+	/* Switch every 10ms */
+	if(timer_ticks % 100 == 0){ 
+    /* And yes, that's a 60 pointer CS506 project! :) Preemption! */
+   		switch_context();
+	}
 
     /* Every 18 clocks (approximately 1 second), we will
     *  display a message on the screen */
     if (timer_ticks % PIT_CLOCK_HZ == 0)
     {
-    	/* Wakeup sleeping processes once for every 6 context switch: TODO: Remove later*/
-	if(++wakeup_count % 6 == 0){
-		//sys_wakeup(1);
-	}
-    	/* And yes, that's a 60 pointer CS506 project! :) Preemption! */
-   	//switch_context();
         
-	timer_ticks = 0;
+		timer_ticks = 0;
 
-	if(++time_sec == 60)
+		if(++time_sec == 60)
         {
             time_sec = 0;
-	    if(++time_min == 60)
+	    	if(++time_min == 60)
             {
 
                  time_min = 0;
