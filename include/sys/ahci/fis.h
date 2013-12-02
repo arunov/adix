@@ -1,3 +1,13 @@
+#ifndef _FIS_H
+#define _FIS_H
+
+#include<defs.h>
+
+#define ATA_CMD_READ_DMA 0xC8
+#define ATA_CMD_READ_DMA_EX 0x25
+#define ATA_CMD_WRITE_DMA 0xCA
+#define ATA_CMD_WRITE_DMA_EX 0x35
+
 typedef enum
 {
 	FIS_TYPE_REG_H2D	= 0x27,	// Register FIS - host to device
@@ -164,4 +174,4 @@ typedef struct tagFIS_DMA_SETUP
 
 } FIS_DMA_SETUP;
 
-
+#endif

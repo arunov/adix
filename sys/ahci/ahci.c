@@ -1,4 +1,5 @@
 #include<sys/ahci/ahci.h>
+#include<sys/ahci/ahcicommands.h>
 #include<sys/memory/mm_struct.h>
 #include<string.h>
 #include<sys/memory/free_phys_pages.h>
@@ -15,7 +16,7 @@ int setup_ahci(){
 	printf("mm->start_ahci_mem: %p\n", mm->start_ahci_mem);
 	HBA_MEM *hba_mem = (HBA_MEM *)mm->start_ahci_mem;
 	printf("hba_mem: %p\n", hba_mem);
-	print_hba_mem(hba_mem);
+//	print_hba_mem(hba_mem);
 	DWORD mem_pi = hba_mem->pi;
 	int num_pi =0;
 	DWORD mem_cap_np = (hba_mem->cap)&HBA_MEM_CAP_NP;
@@ -69,10 +70,10 @@ int setup_ahci(){
 	mem_cap_ncs++;
 	printf("mem_cap_ncs: %p\n",mem_cap_ncs);
 	if(((hba_mem->cap)&HBA_MEM_CAP_S64A)!=0){
-		printf("64 bit supported\n");	
+//		printf("64 bit supported\n");	
 	}
 	else
-		printf("64 bit address not supported\n");
+//		printf("64 bit address not supported\n");
 	mem_pi = hba_mem->pi; 
 	
 	/* port rebase */
@@ -84,11 +85,14 @@ int setup_ahci(){
 	}	
 
 	/*start engine */
+	mem_pi = hba_mem->pi; 
+
 	for(int i = 0;i<=mem_cap_np;i++){
 		if(mem_pi&0x1){
 			while(hba_mem->ports[i].cmd & HBA_PORT_CMD_CR);
 			hba_mem->ports[i].cmd |= HBA_PORT_CMD_FRE;
 			hba_mem->ports[i].cmd |= HBA_PORT_CMD_ST;
+			printf("hba_mem->ports[i].serr: %p",hba_mem->ports[i].serr);
 		}
 		mem_pi>>=1;
 		
@@ -99,28 +103,28 @@ int setup_ahci(){
 void port_rebase(HBA_PORT *port, int i, int num_pi){
 //TODO: we are assuming that number of commandlist is 32
 	uint32_t FB_BASE = AHCI_BASE + (num_pi/4 + 1)*4096;//each clb is 1K
-	printf("FB_BASE = %p", FB_BASE);
+//	printf("FB_BASE = %p", FB_BASE);
 	uint64_t CLB_BASE = FB_BASE + (num_pi/16 + 1)*4096; //each fis structure is 256B
-	printf("CLB_BASE = %p", CLB_BASE);
+//	printf("CLB_BASE = %p", CLB_BASE);
 	port->clb = AHCI_BASE + (i<<10);
 	port->clbu = 0;
 	uint64_t clb = port->clb;
-	printf("clb: %p",clb);
+//	printf("clb: %p",clb);
 	//if(clb&PAGE_ALIGNED){
 		uint64_t clb_vir = v_alloc_page_get_phys(&clb, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
-		printf("clb virtual address: %p",clb_vir );
+//		printf("clb virtual address: %p",clb_vir );
 
-		memset((void*)clb_vir, 0, 1024);
-		printf("memsetclb");
+		memset((void*)clb_vir, 0, 4096);
+//		printf("memsetclb");
 	//}
 	port->fb = FB_BASE + (i<<8);
 	port->fbu = 0;
 	uint64_t fb = port->fb;
-	printf("fb:%p",fb);
+//	printf("fb:%p",fb);
 	if(fb&PAGE_ALIGNED){
 		uint64_t fb_vir = v_alloc_page_get_phys(&fb, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
-		memset((void*)fb_vir, 0, 1024);
-		printf("memsetfb");
+		memset((void*)fb_vir, 0, 4096);
+//		printf("memsetfb");
 	}
 			
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)clb_vir;
@@ -129,10 +133,10 @@ void port_rebase(HBA_PORT *port, int i, int num_pi){
 		cmdheader[j].ctba = CLB_BASE + (i<<13) + (j<<8);
 		cmdheader[j].ctbau = 0;
 		uint64_t ctba = cmdheader[j].ctba;
-		printf("ctba: %p", ctba);
+//		printf("ctba: %p", ctba);
 		if(ctba&PAGE_ALIGNED){
 			uint64_t ctba_vir = v_alloc_page_get_phys(&ctba, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR); 
-			memset((void*)ctba_vir, 0, 1024);
+			memset((void*)ctba_vir, 0, 4096);
 			//printf("after memset ctba");
 		}
 	}
@@ -171,3 +175,50 @@ int print_hba_mem(HBA_MEM *hba_mem){
 
 	return 0;
 }
+
+int ahcicommands(){
+	struct kernel_mm_struct *mm = get_kernel_mm();
+       	HBA_MEM *hba_mem = (HBA_MEM *)mm->start_ahci_mem;
+       	printf("hba_mem: %p\n", hba_mem);
+        //	print_hba_mem(hba_mem);
+       	DWORD mem_pi = hba_mem->pi;
+       	//int num_pi =0;
+       	DWORD mem_cap_np = (hba_mem->cap)&HBA_MEM_CAP_NP;
+       	printf("mem_Cap_np: %p",mem_cap_np);
+       	/* get port details */
+	int sata_drive = -1;
+       	for(int i=0;i<=mem_cap_np;i++){
+       		if(mem_pi&0x1){
+       			printf("port%d",i);
+       			int dt = check_type(hba_mem->ports[i]);
+       			if (dt == AHCI_DEV_SATA){
+       				printf("SATA drive found at port %d\n", i);
+       				sata_drive = i;
+			}
+       			else if (dt == AHCI_DEV_SATAPI){
+       				printf("SATAPI drive found at port %d\n", i); 
+       			}
+       			else if (dt == AHCI_DEV_SEMB){
+       				printf("SEMB drive found at port %d\n", i);
+       			}
+       			else if (dt == AHCI_DEV_PM){
+       				printf("PM drive found at port %d\n", i);
+       			}
+       			else{
+       				printf("No drive found at port %d\n", i);
+			}	
+		}	
+	}
+	printf("sata_drive: %d",sata_drive);
+	DWORD startl = 0;
+	DWORD starth = 0;
+	char *write_buffer = "Hi I am a test string to write"; 
+	char read_buffer[512] ;
+	int write_ahci_ret =write_ahci(&hba_mem->ports[sata_drive], startl, starth, 1, (WORD *)write_buffer);
+	printf("write_ahci_ret: %d", write_ahci_ret);
+	printf("write_buffer: %s", write_buffer);
+	int read_ahci_ret =read_ahci(&hba_mem->ports[sata_drive], startl, starth, 1, (WORD *)read_buffer);
+	printf("read_ahci_ret: %d", read_ahci_ret);
+	printf("read_buffer: %s", read_buffer);
+	return 0;
+}	

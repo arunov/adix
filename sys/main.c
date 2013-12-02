@@ -81,16 +81,18 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	printf("execret %p", execret);
 */	
 	//check asci
-	int ahci_ret = setup_ahci();
+/*	int ahci_ret = setup_ahci();
 	printf("asci_ret: %d\n", ahci_ret);
-   /* 
+	int ahci_command_ret= ahcicommands();
+	printf("ahci_command_ret: %d\n",ahci_command_ret);
+  */ /* 
     // Check do_mmap 
     int fd = open("aladdin.txt");
     struct mm_struct *mm = new_mm();
     do_mmap(&(mm->mmap), fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
 */	
-    	//cooperative_schedule(&kernmem,physfree);
+    	cooperative_schedule(&kernmem,physfree);
 	// kernel starts here
 	
 

@@ -8,6 +8,7 @@
 #define HBA_PORT_CMD_FRE 0x10
 #define HBA_PORT_CMD_FR 0x4000
 #define HBA_PORT_CMD_CR 0x8000
+#define HBA_PORT_IS_TFES 0x40000000
 #define RESET_CMD_ST 0xfffffffe
 #define RESET_CMD_FRE 0xffffffef
 #define HBA_MEM_CAP_NP 0x1f
@@ -125,4 +126,7 @@ HBA_PRDT_ENTRY	prdt_entry[8];	// Physical region descriptor table entries, 0 ~ 6
 }HBA_CMD_TBL;
 
 int setup_ahci();
+
+int ahcicommands();
+
 #endif
