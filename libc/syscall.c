@@ -79,6 +79,12 @@ int64_t fork() {
     return (uint64_t)__syscall0(FORK);
 }
 
-void wait_pid(uint64_t pid){
-	__syscall1(WAITPID, pid);
+int64_t wait_pid(uint64_t pid){
+	return __syscall1(WAITPID, pid);
+}
+
+int64_t wait(){
+	/* Will wait for a child to wakeup itself */
+	uint64_t pid = get_pid();
+	return __syscall1(WAITPID, pid);
 }

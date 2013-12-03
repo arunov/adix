@@ -24,6 +24,9 @@ struct pcb_t{
 	uint64_t *stack_base;
 	uint64_t *u_stack_base;
 	uint64_t pid;
+	struct pcb_t *parent; 
+	int64_t wakeup_return;//TODO: Remove
+	struct list_head *children;
 	enum pstate state;
 	enum ptype type;
 	uint64_t cr3_content;
@@ -33,6 +36,7 @@ struct pcb_t{
 	uint64_t sleep_time_rem;//TODO:Handle sleep through signals!
 	struct  process_files_table* open_files[OPEN_FILES_LIMIT];
 	struct list_head lister; 
+	struct list_head child_lister; 
 	struct mm_struct *mm;
 };
 
@@ -67,6 +71,9 @@ uint64_t reset_process_files_table( struct pcb_t *this,
  * @return pid of child
  */
 uint64_t sys_fork();
-
+int has_children();
+void add_child(struct pcb_t *this, struct pcb_t *c_pcb);
+void remove_child(struct pcb_t *c_pcb);
+void remove_parent_info_from_children(struct pcb_t *this);
 #endif
 

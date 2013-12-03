@@ -11,31 +11,17 @@
 
 void* next_available_address = NULL;
 
-void my_malloc_init(){
-	next_available_address = (void*)(&(getCurrentTask()->u_stack_base[10]));
-}
-
 uint64_t get_argc(char *argv[]){
 	int i =0;
-	if(next_available_address == NULL){
-		my_malloc_init();
-	}
 	if(argv == NULL) return 0;
 	for(i=0; argv[i] != NULL; i++);
-
 	return i;
-}
-
-//TODO: Remove
-void* my_malloc(uint64_t size){
-	void* address = next_available_address;
-	next_available_address += size;
-	return address;
 }
 
 char** dup_argv(uint64_t argc, char **argv, void*(*alloc)(uint64_t)){
 	int i,len;
-	char **uargv = (char**)alloc(argc * sizeof(char *));
+	//you need extra one pointer to mark the end
+	char **uargv = (char**)alloc((argc+1) * sizeof(char *));
 	for(i=0; i<argc; i++){
 		len = strlen(argv[i]);
 		//allocate memory for the string itself
@@ -43,6 +29,7 @@ char** dup_argv(uint64_t argc, char **argv, void*(*alloc)(uint64_t)){
 		//copy the contents from userspace1 to userspace 2
 		memcpy(uargv[i], argv[i], len+1);
 	}
+	uargv[i] = NULL;
 	return uargv;
 }
 
@@ -52,6 +39,9 @@ char** get_userspace_env(char *envp[]){
 
 struct userspace_args* dup_args(char **argv, char **envp,void*(*alloc)(uint64_t)){
 	struct userspace_args *ua = (struct userspace_args*) alloc(sizeof(struct userspace_args)); 
+	if(ua == NULL){
+		return NULL;
+	}
 	ua->argc = get_argc(argv);
 	ua->argv = dup_argv(ua->argc, argv, alloc);
 	ua->envp = get_userspace_env(envp);

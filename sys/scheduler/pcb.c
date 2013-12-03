@@ -49,6 +49,13 @@ static void prepareInitialStack(uint64_t *stack, uint64_t ip_val){
 	stack[SP_OFFSET] = (uint64_t)&stack[STACK_SIZE-1-NUM_REGISTERS_BACKED]; 
 }
 
+static struct list_head* init_children_list(){
+	 struct list_head *lh = kmalloc(sizeof( struct list_head));
+	 lh->next = lh;
+	 lh->prev = lh;
+	 return lh;
+
+}
 
 struct pcb_t* createTask(enum ptype proc_type, 
 			uint64_t instruction_address, 
@@ -58,6 +65,7 @@ struct pcb_t* createTask(enum ptype proc_type,
 	printf("creating Task\n");
 	struct pcb_t *pcb = newPcb();
 	pcb->pid = getNextPid();
+	pcb->parent = NULL;
 	pcb->state = P_READY;
 	pcb->type = proc_type;
 	pcb->open_files[STDIN] = get_new_process_files_table(
@@ -69,6 +77,7 @@ struct pcb_t* createTask(enum ptype proc_type,
 					0,
 					get_terminal_ops());
     pcb->mm = new_mm();
+	pcb->children = init_children_list();
     updatePrepTask(pcb);
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
@@ -202,6 +211,11 @@ uint64_t sys_fork() {
     /* pid */
     c_pcb->pid = getNextPid();
 
+	/* parent pid */
+	c_pcb->parent = p_pcb;//TODO: What will happen if parent exited before child?
+	c_pcb->children = init_children_list();
+	add_child(p_pcb, c_pcb);
+
     /* state */
     c_pcb->state = p_pcb->state;
 
@@ -250,3 +264,36 @@ uint64_t sys_fork() {
     return c_pcb->pid;
 }
 
+int has_children(struct pcb_t *pcb){
+	struct list_head *lh = pcb->children;
+	if(lh->next == lh && lh->prev == lh){
+		return 0; //no children
+	}
+	return 1;
+}
+
+void add_child(struct pcb_t *this, struct pcb_t *c_pcb){
+	list_add_tail(&c_pcb->child_lister, this->children); 
+}
+
+void remove_child(struct pcb_t *c_pcb){
+	list_del(&c_pcb->child_lister);	
+}
+
+void remove_parent_info_from_children(struct pcb_t *this){
+	struct pcb_t *pcb;
+	list_for_each_entry(pcb, this->children, child_lister){
+		/* Reset parent field for each of the children. 
+		 * Called when parent exits! */
+		//TODO: Mark them as zombies! And do what? GOD knows!
+		pcb->parent = NULL;
+	}
+
+}
+
+void deep_free_task(struct pcb_t *this){
+	//TODO: Deep free
+	kfree(this->children);
+	kfree(this->tss);
+	kfree(this);
+}

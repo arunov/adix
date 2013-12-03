@@ -23,12 +23,14 @@
 #define GETPID 17
 #define FORK 18
 #define WAITPID 19
+#define WAIT 20
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
 void exit(int status);
 int sleep(int64_t sleep_interval);
-void wait_pid(uint64_t pid);
+int64_t wait_pid(uint64_t pid);
+int64_t wait();
 uint64_t uprintf(const char *format_string);
 
 /* FIle system operations */
