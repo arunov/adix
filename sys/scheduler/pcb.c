@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include<sys/kstdio.h>
 #include<sys/scheduler/pcb.h>
 #include<sys/memory/virtual_page_manager.h>
@@ -78,6 +79,11 @@ struct pcb_t* createTask(enum ptype proc_type,
 					get_terminal_ops());
     pcb->mm = new_mm();
 	pcb->children = init_children_list();
+    pcb->name = NULL;
+    if(program) {
+        pcb->name = (char*)kmalloc(strlen(program) + 1);
+        memcpy(pcb->name, program, strlen(program) + 1);
+    }
     updatePrepTask(pcb);
 	//Prepare stack for the initial context switch
 	if(proc_type == KTHREAD){
@@ -210,6 +216,17 @@ uint64_t sys_fork() {
 
     /* pid */
     c_pcb->pid = getNextPid();
+
+    /* name */
+    c_pcb->name = NULL;
+    if(p_pcb->name) {
+        c_pcb->name = (char*)kmalloc(strlen(p_pcb->name) + 1);
+        if(!c_pcb->name) {
+            kfree(c_pcb);
+            return NULL;
+        }
+        memcpy(c_pcb->name, p_pcb->name, strlen(p_pcb->name) + 1);
+    }
 
 	/* parent pid */
 	c_pcb->parent = p_pcb;//TODO: What will happen if parent exited before child?

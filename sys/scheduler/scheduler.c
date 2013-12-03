@@ -178,3 +178,37 @@ void printPcbRunQueue(){
 		printPcb(the_pcb);
 	}
 }
+
+void sys_process_list() {
+	struct pcb_t *the_pcb = NULL;
+
+    printf("\n(pid) status process\n");
+    printf("--------------------\n");
+
+    list_for_each_entry(the_pcb, &pcb_run_queue, lister) {
+        printf("(%p) Running", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    list_for_each_entry(the_pcb, &pcb_wait_queue, lister) {
+        printf("(%p) Waiting", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    list_for_each_entry(the_pcb, &wait_timer_queue, lister) {
+        printf("(%p) Sleeping", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    printf("\n");
+}
+

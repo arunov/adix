@@ -24,4 +24,5 @@ struct posix_header_ustar* sys_readdir_stub(int fd, uint64_t ret);
 int sys_closedir_stub(int fd);
 void _sys_clrscr();
 uint64_t _sys_fork();
+void sys_process_list();
 #endif

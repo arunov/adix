@@ -81,5 +81,6 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
     [FORK] = (sys_call_t*)_sys_fork,
     [WAITPID] = (sys_call_t*)sys_sleep,
 	[SLEEP] = (sys_call_t*)sys_sleep_timer,
+    [PROCESS_LIST] = (sys_call_t*)sys_process_list,
 };
 

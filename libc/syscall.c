@@ -88,3 +88,8 @@ int64_t wait(){
 	uint64_t pid = get_pid();
 	return __syscall1(WAITPID, pid);
 }
+
+void process_list() {
+    __syscall0(PROCESS_LIST);
+}
+
