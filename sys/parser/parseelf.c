@@ -72,15 +72,15 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 		return entry;
 	}
 	read_elf_header(fd, &elf_header);
-	print_elf_header(elf_header);
+	//print_elf_header(elf_header);
 	if(is_elf(elf_header)==0){
-		print_elf_header(elf_header);
+		//print_elf_header(elf_header);
 		uint16_t num_ph = elf_header.e_phnum;
 		entry = elf_header.e_entry;
 		Elf64_Phdr prgm_header[num_ph];
 		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
 			read_prgm_header(fd, &(prgm_header[num_phdr]));
-			print_prgm_header(prgm_header[num_phdr]);
+			//print_prgm_header(prgm_header[num_phdr]);
 		}
 		for(int num_phdr =0;num_phdr < num_ph;num_phdr++){
 			if(prgm_header[num_phdr].p_type==0x1){
@@ -94,12 +94,10 @@ uint64_t load_elf(struct mm_struct *this, char* filename){
 				if(flag & PT_W)
 					prot = prot | PAGE_TRANS_READ_WRITE;
 
-				// do an mmap and do a read
 #ifdef DEBUG
 				printf("prgm head loadable %d size%p vir_addr%p offser %p flag %p prot %p\n", num_phdr, size, vir_addr, offset, flag, prot );
 #endif
 				int mmap_return = do_mmap(&(this->mmap), fd, offset, vir_addr, size, prot);
-//				printf("after mmap_return");
 				if(mmap_return != 0){
 					sys_close(fd);
 					return -1;

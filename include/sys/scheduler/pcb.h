@@ -24,6 +24,7 @@ struct pcb_t{
 	uint64_t *stack_base;
 	uint64_t *u_stack_base;
 	uint64_t pid;
+    char *name;
 	struct pcb_t *parent; 
 	int64_t wakeup_return;//TODO: Remove
 	struct list_head *children;

@@ -24,6 +24,8 @@
 #define FORK 18
 #define WAITPID 19
 #define WAIT 20
+#define PROCESS_SNAPSHOT 21
+#define FREE 17
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
@@ -47,7 +49,29 @@ int64_t execvpe(char *path, char *argv[], char *envp[]);
 int64_t fork();
 /*Memory operations*/
 void* malloc(uint64_t size);
+void free(void *ptr);
+/* Process */
 uint64_t get_pid();
+
+enum ps_state {
+    RUNNING,
+    WAITING,
+    WAITING_TIMER
+};
+
+struct ps_t {
+    uint64_t pid;
+    char *name;
+    enum ps_state state;
+    struct ps_t *next;
+};
+
+/**
+ * Get list of live processes
+ * @param list *list gets populated with process list
+ */
+void process_snapshot(struct ps_t **list);
+void free_ps_list(struct ps_t **list);
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

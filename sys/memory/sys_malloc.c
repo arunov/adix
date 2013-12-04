@@ -20,3 +20,7 @@ void* sys_malloc(uint64_t size) {
 
 }
 
+void sys_free(void *ptr) {
+    // TODO:do something
+}
+

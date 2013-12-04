@@ -14,6 +14,7 @@
 #include <sys/memory/mm_struct.h>
 #include <sys/memory/setup_kernel_memory.h>
 #include <sys/memory/free_phys_pages.h>
+#include <sys/ahci/ahci.h>
 #include <sys/memory/phys_page_manager2.h>
 
 #define INITIAL_STACK_SIZE 4096
@@ -31,36 +32,39 @@ struct phys_page_manager phys_page_mngr_obj;
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
-    setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
 /*
-    add_vma(&get_kernel_mm()->mmap, 0x10000, 0x1f000, PAGE_TRANS_READ_WRITE, MAP_ANONYMOUS);
-    uint64_t phys1 = alloc_phys_pages(1);
-    update_curr_page_table(phys1, 0x18000UL, PAGE_TRANS_READ_WRITE);
+	struct smap_t {
+		uint64_t base, length;
+		uint32_t type;
+	}__attribute__((packed)) *smap;
 
-    uint64_t new_cr3;
-    if((uint64_t)(-1) == cow_fork_page_table(&new_cr3)) {
-        printf("I tried!\n");
-    }
+	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
+	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
+		if (smap->type == 1 && smap->length != 0) {
+			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+			printf("No of pages: %d\n", (smap->length/PG_SZ));
+		}
+	}
+	printf("Number of pages scanned: %d\n", phys_page_mngr_obj.n_nodes);
+	printf("Physbase: %p, Physfree: %p\n", physbase, physfree);
+	printf("Total pages for the current kernel: %d\n", (((uint64_t)physfree)-((uint64_t)physbase))/PG_SZ);
+        
+*/	
+	/* Free list and Page Tables */
+	//phys_page_manager_init(&phys_page_mngr_obj, modulep, physbase, physfree);
+    //    finish_scan(&phys_page_mngr_obj);
+        setup_kernel_memory((uint64_t)&kernmem, (uint64_t)physbase, (uint64_t)physfree, VIDEO_MEMORY_ADDRESS, modulep);
+	//setup_kernel_pgtbl(&kernmem, physbase, physfree);
+/*
+    uint64_t phys;
+    char *x = (char*)v_alloc_page_get_phys(&phys, PAGE_TRANS_READ_WRITE);
+    *x = 'a';
+    *(x+1) = 'b';
+    *(x+2) = 'c';
+    *(x+3) = '\0';
+    printf("phys addr expected = %p, virt addr = %p, content = %s, physical addr actual = %p\n\n", phys, x, x, virt2phys_selfref((uint64_t)x));
 
-    struct str_cr3 cr3 = get_default_cr3();
-    cr3.p_PML4E_4Kb = new_cr3 >> 12;
-    set_cr3(cr3);
-
-    *((int*)0x18000UL) = 5;
-    *((int*)0x18004UL) = 6;
-
-    printf("hi :) %d %d\n", *((int*)0x18000UL), *((int*)0x18004UL));
-
-    struct mm_struct *src = new_mm();
-    init_data_vma(src, 0x500000, 0x600000, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, MAP_ANONYMOUS);
-    init_code_vma(src, 0x300000, 0x400000, PAGE_TRANS_USER_SUPERVISOR, 0);
-    //init_stack_vma(src, 0x800000, 0x900000, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, MAP_ANONYMOUS);
-    print_vmas(src);
-
-    struct mm_struct *dest = cow_fork_mm_struct(src);
-    printf("\nnew mm_struct\n");
-    print_vmas(dest);
-
+    v_free_page((uint64_t) x);
 #if 0
     printf("physical address of kernmem %p is %p\n", &kernmem, virt2phys_selfref((uint64_t)&kernmem));
 
@@ -71,19 +75,27 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	int fd = sys_open("aladdin.txt");
 	printf("\nFd returned after syscall %d",fd);
 #endif
-
+*/
+/*
 	uint64_t execret = exec("bin/hello");
 	printf("execret %p", execret);
 */	
-/*    
+	//check asci
+/*	int ahci_ret = setup_ahci();
+	printf("asci_ret: %d\n", ahci_ret);
+	int ahci_command_ret= ahcicommands();
+	printf("ahci_command_ret: %d\n",ahci_command_ret);
+  */ /* 
     // Check do_mmap 
     int fd = open("aladdin.txt");
     struct mm_struct *mm = new_mm();
     do_mmap(&(mm->mmap), fd, 0, 0x1000, 100, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
     printf("Contents of mmapped file: %s", 0x1000UL);
 */	
-	cooperative_schedule(&kernmem,physfree);
+    	cooperative_schedule(&kernmem,physfree);
 	// kernel starts here
+	
+
 	while(1);
 }
 

@@ -74,6 +74,12 @@ struct kernel_mm_struct {
     /* Ending virtual address of physical memory mapped in kernel space */
     uint64_t end_phys_mem;
 
+    /* Starting virtual address of asci memory */
+    uint64_t start_ahci_mem;
+
+    /* Ending virtual address of asci memory */
+    uint64_t end_ahci_mem;
+
 };
 
 /**

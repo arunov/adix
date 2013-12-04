@@ -19,4 +19,5 @@ char* strtok(register char *s, char *delim);
 int str_equal(char *src, char *dst);
 /* Convert from string to integer */
 int atoi(char *str);
+int atohex( char *str );
 #endif

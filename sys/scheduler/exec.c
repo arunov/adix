@@ -53,6 +53,19 @@ uint64_t sys_execvpe(char *path, char *argv[], char *envp[]){
 	 //copy args to kernel space
 	 struct userspace_args* kargs = dup_args(argv, envp, kmalloc);
 	 struct pcb_t *pcb = getCurrentTask();
+
+     // Change process name
+     kfree(pcb->name);
+     pcb->name = NULL;
+     if(path) {
+         pcb->name = (char*)kmalloc(strlen(path) + 1);
+         if(!pcb->name) {
+            kfree(pcb);
+            return -1;
+         }
+         memcpy(pcb->name, path, strlen(path) + 1);
+     }
+
 	 struct mm_struct *old_mm = pcb->mm;
 	 pcb->mm = new_mm();
 	 //Load binary

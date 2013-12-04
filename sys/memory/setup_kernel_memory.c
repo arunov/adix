@@ -75,6 +75,21 @@ static int set_phys_memory(uint64_t phys_mem_start, uint64_t phys_mem_end) {
 
 }
 
+static int set_ahci_memory(uint64_t ahci_start_addr, uint64_t ahci_end_addr) {
+    
+    struct kernel_mm_struct *mm = get_kernel_mm();
+
+    if(-1 == add_vma(&(mm->mmap), ahci_start_addr, ahci_end_addr,
+        PAGE_TRANS_READ_WRITE | PAGE_TRANS_NX, 0)) {
+	return -1;
+    }
+
+    mm->start_ahci_mem = ahci_start_addr;
+    mm->end_ahci_mem = ahci_end_addr;
+
+    return 0;
+}
+
 int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
                         uint64_t p_kern_end, uint64_t p_vdo_buff_start,
                         uint32_t *modulep) {
@@ -95,6 +110,14 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
                                                             + SIZEOF_PAGE)) {
         return -1;
     }
+
+    //ASCI memory
+    uint64_t ahci_start_addr = get_unmapped_area(&(mm->mmap),
+                                kernmem, SIZEOF_PAGE);
+    if(-1 == set_ahci_memory(ahci_start_addr, ahci_start_addr
+                                                           + SIZEOF_PAGE)) {
+	return -1;
+    }	
 
     // Scan physical pages
     struct smap_t {
@@ -160,6 +183,16 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     if(-1 == init_free_phys_page_manager()) {
         return -1;
     }
+    /*	
+    printf("start kernel: %p\n", mm->start_kernel);
+    printf("end kernel  : %p\n", mm->end_kernel);
+    printf("start vdo   : %p\n", mm->start_vdo_buff);
+    printf("end vdo     : %p\n", mm->end_vdo_buff);
+    printf("start phys  : %p\n", mm->start_phys_mem);
+    printf("end phys    : %p\n", mm->end_phys_mem);
+    printf("start ahci  : %p\n", mm->start_ahci_mem);
+    printf("end ahci    : %p\n", mm->end_ahci_mem);
+    */
 
     // Set up page tables
     uint64_t pml4_page = get_selfref_PML4(NULL);
@@ -177,6 +210,9 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     update_page_table_idmap(pml4_page, p_vdo_buff_start, vdo_start_addr,
                             PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
 
+    update_page_table_idmap(pml4_page, P_AHCI_START, ahci_start_addr,
+                            PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR);
+    
     phys_mem_offset_map(pml4_page, phys_mem_offset);
 
     // Protect read-only pages from supervisor-level writes
@@ -186,6 +222,7 @@ int setup_kernel_memory(uint64_t kernmem, uint64_t p_kern_start,
     struct str_cr3 cr3 = get_default_cr3();
     cr3.p_PML4E_4Kb = pml4_page >> 12;
     set_cr3(cr3);
+
 
     // Indicate memory set up done
     kmDeviceMemorySetUpDone();

@@ -76,10 +76,12 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[WRITE] = (sys_call_t*)sys_write_stub,
 	[CLRSCR] = (sys_call_t*)_sys_clrscr,
 	[MALLOC] = (sys_call_t*)sys_malloc,
+    [FREE] = (sys_call_t*)sys_free,
 	[EXEC] = (sys_call_t*)sys_execvpe,
 	[GETPID] = (sys_call_t*)sys_getpid,
     [FORK] = (sys_call_t*)_sys_fork,
     [WAITPID] = (sys_call_t*)sys_sleep,
 	[SLEEP] = (sys_call_t*)sys_sleep_timer,
+    [PROCESS_SNAPSHOT] = (sys_call_t*)sys_process_snapshot,
 };
 
