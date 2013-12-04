@@ -64,8 +64,12 @@ void sys_yield(){
 static void handle_wakeup_on_exit(struct pcb_t *current_task){
 	if(current_task->parent){ 
 		/* This is a child process. Notify parent if its waiting for its child */
-		sys_wakeup(current_task->parent->pid);//if waiting on wait() syscall
-		sys_wakeup(current_task->pid); //if waiting on waitpid() syscall
+		int num_wakeups = sys_wakeup(current_task->pid); //if waiting on waitpid() syscall
+		if(num_wakeups == 0){
+			/* If someone was waiting for this process on waitpid, 
+			 * no one should wait for this on wait, TODO: Needs surgery*/
+			sys_wakeup(current_task->parent->pid);//if waiting on wait() syscall
+		}
 		/* parent has to return from wait with child's pid*/
 		current_task->parent->wakeup_return = current_task->pid;
 		remove_child(current_task);//Remove this child from its parent's child list
@@ -125,18 +129,20 @@ static void wakeup_proc(struct pcb_t *waiting_task){
 }
 
 
-static void _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
+static int _sys_wakeup(struct list_head *wait_queue, uint64_t wait_desc){
 	struct pcb_t *proc;
 	struct pcb_t *temp[MAX_WAIT_PROC]; //TODO: Poses an upper bound?
-	int i=0;
+	int i=0,c;
 	list_for_each_entry(proc, wait_queue, lister){
 		if(proc->wait_desc == wait_desc){
 			temp[i++] = proc;
 		}
 	}
+	c=i;
 	while(i != 0){
 		wakeup_proc(temp[--i]);
 	}
+	return c;
 }
 
 void sys_wakeup_timer(){
@@ -151,8 +157,8 @@ void sys_wakeup_timer(){
 	_sys_wakeup(&wait_timer_queue, TIMER_ELAPSED);
 }
 
-void sys_wakeup(uint64_t wait_desc){
-	_sys_wakeup(&pcb_wait_queue, wait_desc);
+int sys_wakeup(uint64_t wait_desc){
+	return _sys_wakeup(&pcb_wait_queue, wait_desc);
 }
 
 void cleanupTerminated(){

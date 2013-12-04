@@ -5,7 +5,7 @@
 
 /* This program prints World 5 times at an interval of 1 second */
 int main(int argc, char* argv[], char* envp[]) {
-	int counter = 5;
+	int counter = 3;
 	while(counter--){
 		sleep(1000);
 		printf("[%d] Blah!\n",get_pid());

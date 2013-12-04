@@ -20,7 +20,7 @@ void jump_to_ring3(){
 
 	 ua = prepare_args_for_userspace(argv, envp);//replaced
 	 printf("\nJUMP_TO_RING3: rsp: %p rip: %p argc:%d argv:%p\n",rsp,rip, ua.argc, ua.argv);
-*/	_jump_to_ring3(rsp, rip, 0, 0, NULL);
+*/	_jump_to_ring3(rsp, rip, 1, 0, NULL);
 
 }
 

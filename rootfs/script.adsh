@@ -1,0 +1,6 @@
+#!bin/adsh
+
+bin/world
+bin/blah
+
+
