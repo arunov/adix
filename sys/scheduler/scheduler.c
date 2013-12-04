@@ -4,6 +4,8 @@
 #include<sys/list.h>
 #include<sys/memory/handle_cr.h>
 #include<sys/memory/page_table_helper.h>
+#include<sys/memory/sys_malloc.h>
+#include<syscall.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);
@@ -179,36 +181,67 @@ void printPcbRunQueue(){
 	}
 }
 
-void sys_process_list() {
+static struct ps_t* single_process_snapshot_copy(struct pcb_t *pcb,
+                                                        enum ps_state a_state) {
+    if(!pcb)
+        return NULL;
+
+    char *pname = NULL;
+    if(pcb->name) {
+        pname = (char*)sys_malloc(strlen(pcb->name) + 1);
+        if(!pname)
+            return NULL;
+        memcpy(pname, pcb->name, strlen(pcb->name) + 1);
+    }
+
+    struct ps_t *ps1 = (struct ps_t*)sys_malloc(sizeof(struct ps_t));
+    if(!ps1) {
+        sys_free(pname);
+        return NULL;
+    }
+    ps1->pid = pcb->pid;
+    ps1->name = pname;
+    ps1->state = a_state;
+    ps1->next = NULL;
+
+    return ps1;
+}
+
+void sys_process_snapshot(struct ps_t **list) {
+    if(!list)
+        return;
+
+    struct ps_t *last = NULL, *curr = NULL;
 	struct pcb_t *the_pcb = NULL;
 
-    printf("\n(pid) status process\n");
-    printf("--------------------\n");
-
     list_for_each_entry(the_pcb, &pcb_run_queue, lister) {
-        printf("(%p) Running", the_pcb->pid);
-        if(the_pcb->name) {
-            printf(" %s", the_pcb->name);
+        curr = single_process_snapshot_copy(the_pcb, RUNNING);
+        if(last) {
+            last->next = curr;
+        } else {
+            *list = curr;
         }
-        printf("\n");
+        last = curr;
     }
 
     list_for_each_entry(the_pcb, &pcb_wait_queue, lister) {
-        printf("(%p) Waiting", the_pcb->pid);
-        if(the_pcb->name) {
-            printf(" %s", the_pcb->name);
+        curr = single_process_snapshot_copy(the_pcb, WAITING);
+        if(last) {
+            last->next = curr;
+        } else {
+            *list = curr;
         }
-        printf("\n");
+        last = curr;
     }
 
     list_for_each_entry(the_pcb, &wait_timer_queue, lister) {
-        printf("(%p) Sleeping", the_pcb->pid);
-        if(the_pcb->name) {
-            printf(" %s", the_pcb->name);
+        curr = single_process_snapshot_copy(the_pcb, WAITING_TIMER);
+        if(last) {
+            last->next = curr;
+        } else {
+            *list = curr;
         }
-        printf("\n");
+        last = curr;
     }
-
-    printf("\n");
 }
 

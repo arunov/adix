@@ -1,7 +1,23 @@
 #include <syscall.h>
+#include <stdio.h>
+
+char *state_list[3] = {"running", "waiting", "waiting_timer"};
 
 int main() {
-    process_list();
+    struct ps_t *list;
+    process_snapshot(&list);
+    struct ps_t *scan = list;
+    printf("\n(pid) state process\n");
+    printf("-------------------\n");
+    while(scan) {
+        printf("(%p) %s", scan->pid, state_list[(int)(scan->state)]);
+        if(scan->name) {
+            printf(" %s", scan->name);
+        }
+        printf("\n");
+        scan = scan->next;
+    }
+    free_ps_list(&list);
     return 0;
 }
 

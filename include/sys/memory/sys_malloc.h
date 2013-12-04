@@ -10,6 +10,12 @@
  */
 void* sys_malloc(uint64_t size);
 
+/**
+ * System call free
+ * @param ptr pointer to memory that should be freed
+ */
+void sys_free(void *ptr);
+
 #define MALLOC_START_ADDR 0x100000UL
 
 #endif

@@ -94,7 +94,26 @@ int64_t wait(){
 	return __syscall1(WAITPID, pid);
 }
 
-void process_list() {
-    __syscall0(PROCESS_LIST);
+void free(void *ptr) {
+    return;
+}
+
+void process_snapshot(struct ps_t **list) {
+    __syscall1(PROCESS_SNAPSHOT, (uint64_t)list);
+}
+
+void free_ps_list(struct ps_t **list) {
+
+    if(list == NULL)
+        return;
+
+    struct ps_t *x = *list, *y = NULL;
+
+    while(x) {
+        y = x->next;
+        if(x->name) free(x->name);
+        free(x);
+        x = y;
+    }
 }
 
