@@ -1,7 +1,9 @@
 #include<defs.h>
 #include<syscall.h>
+#include<stdio.h>
 #include<sys/parser/tarfs.h>
-uint64_t ret;
+#include<sys/filesystems/file_structures.h>
+
 void yield(){
 	__syscall0(YIELD);
 }
@@ -42,7 +44,10 @@ int opendir(const char *pathname){
 
 struct posix_header_ustar* readdir(int fd){
 	//TODO malloc
-	return (struct posix_header_ustar*)__syscall2(READDIR, fd, (uint64_t)&ret);
+	struct posix_header_ustar* ret= (struct posix_header_ustar*)malloc(sizeof(struct posix_header_ustar));
+	
+	ret =  (struct posix_header_ustar*)__syscall2(READDIR, fd, (uint64_t)ret);
+	return ret;
 }
 
 int closedir(int fd){

@@ -1,5 +1,6 @@
 #include <sys/kstdio.h>
 #include <defs.h>
+#include <string.h>
 #include <sys/parser/tarfs.h>
 #include <sys/parser/parsetarfs.h>
 #include <sys/filesystems/file_structures.h>
@@ -203,8 +204,7 @@ int check_in_dir(const char* file, const char* dir){
 	}
 }
 
-struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
-	struct posix_header_ustar* to_ret = (struct posix_header_ustar*)ret;
+struct posix_header_ustar* sys_readdir(int fd, uint64_t to_ret){
 	struct process_files_table* pft = get_process_files_table(getCurrentTask(),fd);
 	if(pft == NULL)
 		return NULL;
@@ -230,8 +230,8 @@ struct posix_header_ustar* sys_readdir(int fd, uint64_t ret){
 			else{
 				if(j==pft->offset){
 					pft->offset++;
-					to_ret = return_header;
-					return to_ret;
+					memcpy((void *)to_ret,(void *)return_header,sizeof(struct posix_header_ustar));
+					return (struct posix_header_ustar*)to_ret;
 
 				}
 				else
