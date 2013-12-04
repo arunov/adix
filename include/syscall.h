@@ -23,12 +23,15 @@
 #define GETPID 17
 #define FORK 18
 #define WAITPID 19
+#define WAIT 20
+#define PROCESS_LIST 21
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
 void exit(int status);
 int sleep(int64_t sleep_interval);
-void wait_pid(uint64_t pid);
+int64_t wait_pid(uint64_t pid);
+int64_t wait();
 uint64_t uprintf(const char *format_string);
 
 /* FIle system operations */
@@ -46,6 +49,7 @@ int64_t fork();
 /*Memory operations*/
 void* malloc(uint64_t size);
 uint64_t get_pid();
+void process_list();
 
 /* User space system call stub for all system calls with 'zero' arguments. */
 SYSCALL_PROTO(0)(uint64_t syscall_num) {

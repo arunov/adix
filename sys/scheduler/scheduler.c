@@ -61,6 +61,21 @@ void sys_yield(){
 	switchTo(nextTask->stack_base);
 }
 
+static void handle_wakeup_on_exit(struct pcb_t *current_task){
+	if(current_task->parent){ 
+		/* This is a child process. Notify parent if its waiting for its child */
+		sys_wakeup(current_task->parent->pid);//if waiting on wait() syscall
+		sys_wakeup(current_task->pid); //if waiting on waitpid() syscall
+		/* parent has to return from wait with child's pid*/
+		current_task->parent->wakeup_return = current_task->pid;
+		remove_child(current_task);//Remove this child from its parent's child list
+	}
+	if(has_children(current_task)){
+		/* This task is a parent. Inform its children about its exit */
+		remove_parent_info_from_children(current_task);
+	}
+}
+
 void sys_exit(int status){ 
 	struct pcb_t *current_task = getCurrentTask();
 	updateState(current_task, P_TERMINATED);
@@ -68,11 +83,13 @@ void sys_exit(int status){
 	//add to terminated queue
 	list_add(&current_task->lister,&pcb_terminated_queue);
 	//wakeup any process waiting for it
-	sys_wakeup(current_task->pid);
+	handle_wakeup_on_exit(current_task);
 	sys_yield();//schedule next job
 }
 
-void sys_sleep(uint64_t wait_desc){
+/* TODO: Write a swrapper sys_wait*/
+
+int64_t sys_sleep(uint64_t wait_desc){
 	struct pcb_t *current_task = getCurrentTask();
 	update_wait_descriptor(current_task, wait_desc);
 	list_del(&current_task->lister);
@@ -81,6 +98,9 @@ void sys_sleep(uint64_t wait_desc){
 	printf("\n#####SLEEPING PROCESS %d",current_task->pid);
 	#endif
 	sys_yield();
+	/* The process woke up here when somebody woke up this process. 
+	 * That somebody is expected to populate the return value too!*/
+	return current_task->wakeup_return;
 }
 
 int sys_sleep_timer(int64_t sleep_interval){
@@ -141,6 +161,7 @@ void cleanupTerminated(){
 		list_del(&terminated_task->lister);
 		//printf("\nContents of PCB after cleanup..");	
 		printPcbRunQueue();
+		deep_free_task(terminated_task);
 	}
 }
 
@@ -157,3 +178,37 @@ void printPcbRunQueue(){
 		printPcb(the_pcb);
 	}
 }
+
+void sys_process_list() {
+	struct pcb_t *the_pcb = NULL;
+
+    printf("\n(pid) status process\n");
+    printf("--------------------\n");
+
+    list_for_each_entry(the_pcb, &pcb_run_queue, lister) {
+        printf("(%p) Running", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    list_for_each_entry(the_pcb, &pcb_wait_queue, lister) {
+        printf("(%p) Waiting", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    list_for_each_entry(the_pcb, &wait_timer_queue, lister) {
+        printf("(%p) Sleeping", the_pcb->pid);
+        if(the_pcb->name) {
+            printf(" %s", the_pcb->name);
+        }
+        printf("\n");
+    }
+
+    printf("\n");
+}
+

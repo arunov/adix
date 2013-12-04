@@ -12,7 +12,7 @@ void sys_yield();
 /* Exits from a process. Moves the task from run queue to terminated queue */
 void sys_exit(int status);
 /* Put current process onto sleep will somebody wakes him up*/
-void sys_sleep(uint64_t wait_desc);
+int64_t sys_sleep(uint64_t wait_desc);
 /* Wake up all the processor that are waiing for wait_desc*/
 void sys_wakeup(uint64_t wait_desc);
 /* Add a task to the pcb run queue*/
@@ -31,4 +31,6 @@ int sys_sleep_timer(int64_t sleep_interval);
 /* Update sleep_time_remaining and wakeup any process that has elapsed its 
  * timer interval */
 void sys_wakeup_timer();
+/* Free contents of this pcb - called from cleanup terminated!*/
+void deep_free_task(struct pcb_t *pcb);
 #endif

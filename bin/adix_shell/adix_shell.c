@@ -45,7 +45,7 @@ void run_shell(){
 	buffer[count] = '\0';
 	child_argc = parse_shell_command_args((char*)buffer, child_argv);
 	foreground = is_foreground(child_argc, child_argv);
-	printf("Is foreground: %d\n",foreground);
+//	printf("Is foreground: %d\n",foreground);
 	pid = fork();
 	if(pid == 0){
 		execvpe(child_argv[0], child_argv, get_env());

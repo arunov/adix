@@ -3,16 +3,31 @@
 #include <syscall.h>
 int main(int argc, char* argv[], char* envp[]) {
 	int counter = 0;
+	int64_t pid_ret;
     uint64_t child_pid = fork();
+	if(child_pid){
+		//Fork only in parent
+    	child_pid = fork();
+	}
+	if(child_pid){
+		//Fork only in parent
+    	child_pid = fork();
+	}
+
+	if(child_pid){
+		//Fork only in parent
+    	child_pid = fork();
+	}
     printf("[pid: %p] fork returned: %p\n", get_pid(), child_pid);
 
 	if(child_pid == 0){
 		execvpe("bin/world",NULL,NULL);		
 	}else{
-		wait_pid(child_pid);
+		pid_ret = wait();
+		printf("Parent exiting with returned PID [%d]\n",pid_ret);
 	}
 
-	while(counter++ < 5){
+	while(counter++ < 2){
 		printf("[pid: %p] Hello number %d\n", get_pid(), counter);
 	}
 
