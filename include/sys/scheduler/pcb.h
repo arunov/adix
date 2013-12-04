@@ -73,7 +73,7 @@ uint64_t reset_process_files_table( struct pcb_t *this,
  * Fork system call
  * @return pid of child
  */
-uint64_t sys_fork();
+int64_t sys_fork();
 int has_children();
 void add_child(struct pcb_t *this, struct pcb_t *c_pcb);
 void remove_child(struct pcb_t *c_pcb);

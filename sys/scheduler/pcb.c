@@ -189,7 +189,7 @@ uint64_t reset_process_files_table( struct pcb_t *this,
 
 #define SYS_FORK_CHILD_RIP_OFFSET 0x28
 
-uint64_t sys_fork() {
+int64_t sys_fork() {
 
     // Get rsp of parent
     static uint64_t p_rsp;
@@ -207,14 +207,14 @@ uint64_t sys_fork() {
     // PCB to return
     struct pcb_t *c_pcb = (struct pcb_t*)kmalloc(sizeof(struct pcb_t));
     if(NULL == c_pcb) {
-        return NULL;
+        return -1;
     }
 
     /* stack_base */
     c_pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
     if(c_pcb->stack_base == NULL) {
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     // Copy stack
@@ -238,7 +238,7 @@ uint64_t sys_fork() {
         c_pcb->name = (char*)kmalloc(strlen(p_pcb->name) + 1);
         if(!c_pcb->name) {
             kfree(c_pcb);
-            return NULL;
+            return -1;
         }
         memcpy(c_pcb->name, p_pcb->name, strlen(p_pcb->name) + 1);
     }
@@ -258,7 +258,7 @@ uint64_t sys_fork() {
     if(0 == cow_fork_page_table(&(c_pcb->cr3_content))) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* tss */
@@ -266,7 +266,7 @@ uint64_t sys_fork() {
     if(NULL == c_pcb->tss) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* wait_desc */
@@ -287,11 +287,15 @@ uint64_t sys_fork() {
     if(NULL == c_pcb->mm) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* lister */
-    addToTaskList(c_pcb);
+    if(-1 == addToTaskList(c_pcb)) {
+        // TODO: Deep free!
+        kfree(c_pcb);
+        return -1;
+    }
 
     return c_pcb->pid;
 }

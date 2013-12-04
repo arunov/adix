@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<sys/parser/tarfs.h>
 #include<sys/filesystems/file_structures.h>
+#include<ulimit.h>
 
 void yield(){
 	__syscall0(YIELD);
@@ -115,5 +116,13 @@ void free_ps_list(struct ps_t **list) {
         free(x);
         x = y;
     }
+}
+
+int setrlimit(int resource, const struct rlimit *rlim) {
+    return (int)(__syscall2(SETRLIMIT, (uint64_t)resource, (uint64_t)rlim));
+}
+
+int getrlimit(int resource, struct rlimit *rlim) {
+    return (int)(__syscall2(GETRLIMIT, (uint64_t)resource, (uint64_t)rlim));
 }
 
