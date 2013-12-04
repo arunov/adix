@@ -66,6 +66,10 @@ void run_shell(){
 		int count = read(STDIN, buffer, BUF_SIZE);
 		//write(STDOUT, buffer, count);
 		buffer[count] = '\0';
+		if(strlen(buffer) == 0){
+			/* No input received, continue */	
+			continue;
+		}
 		child_argc = parse_shell_command_args((char*)buffer, child_argv);
 		exec_command(child_argc, child_argv, get_env());
 	}

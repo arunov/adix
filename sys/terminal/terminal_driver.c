@@ -40,12 +40,12 @@ static void terminal_flush(){
 }
 
 void terminal_enqueue(char input_char){
-	printf("%c",input_char);
 	if(input_char == FLUSH_CHAR){
 		terminal_buffer[buffer_len] = '\0';
 		terminal_flush();
 		return;
 	}
+	printf("%c",input_char);
 
 	terminal_buffer[buffer_len++] = input_char;
 	//TODO:handle delete etc
