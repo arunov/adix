@@ -4,9 +4,14 @@
 #define BUF_SIZE 1024
 #define NUM_ARGS 10
 #define DELIM " "
+#define PATH_DELIM "."
 #define BG_SYMBOL "bg"
 
 char *self = "bin/adsh";
+char path[512] = "bin/";
+char child_argv_path[512];
+
+int setenv(int argc, char* argv[], char* envp[]);
 
 int parse_shell_command_args(char *buffer, char *child_argv[]){
 
@@ -30,13 +35,42 @@ void init_shell(){
 	clrscr();
 }
 
-char* resolve_path(char *command){
-	return command;
+char* resolve_path(char *command, char* path_token){
+	
+	char *ptr;
+
+	memcpy(child_argv_path, path_token, (strlen(path_token)+ 1) );
+	ptr = child_argv_path +strlen(path_token);
+	memcpy(ptr, command, (strlen(command)+1));
+	return child_argv_path;
+	
+}
+
+// supports "setenv path value"
+int setenv(int argc, char* argv[], char* envp[]){
+	if(argc!=3){
+		printf("setenv failed");
+		return -1;
+	}
+	if((str_equal(argv[1],"path"))==1){
+		memcpy(path,argv[2],strlen(argv[2])+1); 
+		return 0;
+	}
+	else{
+		printf("setenv failed");
+		return -1;
+	}	
+}
+
+void display_env_var(){
+	printf("PATH: %s\n",path);
 }
 
 char** get_env(){
 	return NULL;//TODO
 }
+
+
 
 void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 	int foreground = is_foreground(ecmd_argc, ecmd_argv);
@@ -45,9 +79,24 @@ void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 	pid = fork();
 	if(pid == 0){
 	//	printf("Execing %s\n",ecmd_argv[0]);
+		char *buffer = path, *path_token;
+		int i = 0;
+		int len = 0;
+		char *command = ecmd_argv[0];
 		execvpe(ecmd_argv[0], ecmd_argv, envp);
-		printf("\nCommand \"%s\" failed\n",ecmd_argv[0]);
+
+		for(i = 0; *buffer!= NULL; i++){
+			path_token = strtok(buffer,PATH_DELIM);	
+			ecmd_argv[0] = resolve_path(command, path_token);
+			execvpe(ecmd_argv[0], ecmd_argv, envp);
+			len = strlen(path_token);
+			buffer += len+1;
+		}
+		
+		printf("\nCommand \"%s\" failed\n",command);
 		exit(0);//If execvpe returned => it failed
+	
+	
 	} else{
 		if(foreground){
 			wait_pid(pid);
@@ -71,7 +120,17 @@ void run_shell(){
 			continue;
 		}
 		child_argc = parse_shell_command_args((char*)buffer, child_argv);
-		exec_command(child_argc, child_argv, get_env());
+		if(str_equal(child_argv[0],"setenv")==1){
+			setenv(child_argc, child_argv, get_env());	
+		}
+		else if(str_equal(child_argv[0],"export")==1){
+			display_env_var();
+			
+		}
+		
+		else{
+			exec_command(child_argc, child_argv, get_env());
+		}
 	}
 }
 
