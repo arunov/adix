@@ -6,12 +6,10 @@
 #define DELIM " "
 #define PATH_DELIM ":"
 #define BG_SYMBOL "bg"
-#define NUM_ENV_VARS 100
 
 char *self = "bin/adsh";
-char *path = "bin/";
-char **env;
-char *child_argv_path;
+char path[512] = "bin/";
+char child_argv_path[512];
 
 int setenv(int argc, char* argv[], char* envp[]);
 
@@ -34,13 +32,7 @@ int is_foreground(int argc, char *child_argv[]){
 }
 
 void init_shell(){
-	child_argv_path = malloc(10);
-//	env = (char**)malloc(NUM_ENV_VARS * sizeof(char*));
-//	clrscr();
-}
-
-void terminate_shell(){
-	free(env);
+	clrscr();
 }
 
 char* resolve_path(char *command, char* path_token){
@@ -87,9 +79,7 @@ void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 	pid = fork();
 	if(pid == 0){
 	//	printf("Execing %s\n",ecmd_argv[0]);
-		char *buffer , *path_token;
-		buffer = malloc(strlen(path)+1);
-		memcpy(buffer, path, strlen(path)+1);
+		char *buffer = path, *path_token;
 		int i = 0;
 		int len = 0;
 		char *command = ecmd_argv[0];
@@ -98,7 +88,6 @@ void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 		for(i = 0; *buffer!= NULL; i++){
 			path_token = strtok(buffer,PATH_DELIM);	
 			ecmd_argv[0] = resolve_path(command, path_token);
-			open(ecmd_argv[0]);
 			execvpe(ecmd_argv[0], ecmd_argv, envp);
 			len = strlen(path_token);
 			buffer += len+1;
@@ -118,15 +107,13 @@ void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 /* Run the shell that reads inputs and executes them*/
 void run_shell(){
 	int child_argc;
-	printf("ENtered run shell\n");
-	//int count = 1;
+	int count = 1;
 	while(1){
-		uprintf("\n##ADIX[%d]>> ");
-		uprintf(self);
+		printf("\n##ADIX[%d]>> ",count++);
 		char *buffer = malloc(BUF_SIZE);//each process should get its own buffer
 		char **child_argv = (char**) malloc(NUM_ARGS * sizeof(char*));
 		int count = read(STDIN, buffer, BUF_SIZE);
-		write(STDOUT, buffer, count);
+		//write(STDOUT, buffer, count);
 		buffer[count] = '\0';
 		if(strlen(buffer) == 0){
 			/* No input received, continue */	
@@ -227,27 +214,14 @@ void exec_shell_script(int argc, char *argv[], char *envp[]){
 	}	
 }
 
-int process_shell_jobs(int argc, char* argv[], char* envp[]){
-	return 0;
-
-}
-
-void process_exec_jobs(int argc, char* argv[], char* envp[]){
+int main(int argc, char* argv[], char* envp[]) {
+	if(argc>1){
 		if(str_equal(argv[1],"-f")){
 			exec_shell_script(argc, argv, envp);
 		}else{
 			exec_command(argc-1, &argv[1], envp);
 		}
-
-}
-int main(int argc, char* argv[], char* envp[]) {
-	if(argc>1){
-		int shell_job = process_shell_jobs(argc, argv, env);
-		if(!shell_job){
-		process_exec_jobs(argc, argv, env);
-		}
 	} else{
-		printf("In main----");
 		init_shell();
 		run_shell();
 	}

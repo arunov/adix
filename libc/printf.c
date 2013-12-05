@@ -11,8 +11,8 @@ int printf(const char *format, ...){
 	num_char = sprintf_va(buffer, format,&ap);	
 	/* Print onto the console */
 	buffer[num_char] = '\0';
-//	write(STDOUT, buffer, strlen(buffer));
-	uprintf(buffer);
+	write(STDOUT, buffer, strlen(buffer));
+//	uprintf(buffer);
     return num_char;
 
 }
