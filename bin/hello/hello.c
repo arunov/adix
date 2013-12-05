@@ -4,7 +4,7 @@
 int main(int argc, char* argv[], char* envp[]) {
 	int counter = 0;
 	int64_t pid_ret;
-    uint64_t child_pid = fork();
+    int64_t child_pid = fork();
 	if(child_pid){
 		//Fork only in parent
     	child_pid = fork();

@@ -16,7 +16,7 @@ int64_t sys_sleep(uint64_t wait_desc);
 /* Wake up all the processor that are waiing for wait_desc*/
 int sys_wakeup(uint64_t wait_desc);
 /* Add a task to the pcb run queue*/
-void addToTaskList(struct pcb_t*);
+int addToTaskList(struct pcb_t*);
 /* Print entries on the run queue*/
 void printPcbRunQueue();
 /* Clear PCB and related information when a process is terminated. 

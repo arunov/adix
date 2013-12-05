@@ -10,4 +10,6 @@ rootfs/lib/*.o
 .nfs*
 cscope.out
 rootfs/bin/*
+newfs.506
+tarfs
 

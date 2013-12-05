@@ -9,6 +9,7 @@
 #include <sys/memory/sys_malloc.h>
 #include <sys/scheduler/exec.h>
 #include <sys/scheduler/pcb.h>
+#include <sys/ulimit/sys_ulimit.h>
 
 typedef void* (sys_call_t)(void*) ;
 
@@ -101,5 +102,7 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
     [WAITPID] = (sys_call_t*)sys_sleep,
 	[SLEEP] = (sys_call_t*)sys_sleep_timer,
     [PROCESS_SNAPSHOT] = (sys_call_t*)sys_process_snapshot,
+    [GETRLIMIT] = (sys_call_t*)sys_getrlimit,
+    [SETRLIMIT] = (sys_call_t*)sys_setrlimit,
 };
 

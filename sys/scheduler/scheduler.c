@@ -6,10 +6,14 @@
 #include<sys/memory/page_table_helper.h>
 #include<sys/memory/sys_malloc.h>
 #include<syscall.h>
+#include<sys/ulimit/sys_ulimit.h>
 LIST_HEAD(pcb_run_queue);
 LIST_HEAD(pcb_terminated_queue);
 LIST_HEAD(pcb_wait_queue);
 LIST_HEAD(wait_timer_queue);
+
+/* Number of processes */
+static uint64_t noproc = 0;
 
 /* Get next task that is ready to be run*/
 static struct pcb_t* getNextTask(){
@@ -88,6 +92,7 @@ void sys_exit(int status){
 	list_del(&current_task->lister);//delete from run queue
 	//add to terminated queue
 	list_add(&current_task->lister,&pcb_terminated_queue);
+    noproc --;
 	//wakeup any process waiting for it
 	handle_wakeup_on_exit(current_task);
 	sys_yield();//schedule next job
@@ -174,8 +179,15 @@ void cleanupTerminated(){
 	}
 }
 
-void addToTaskList(struct pcb_t *pcb){
+int addToTaskList(struct pcb_t *pcb){
+    if(noproc + 1 > rlimit_cur[RLIMIT_NPROC]) {
+        return -1;
+    }
+
 	list_add(&pcb->lister,&pcb_run_queue);
+    noproc++;
+
+    return 0;
 }
 
 void printPcbRunQueue(){

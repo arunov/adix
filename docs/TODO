@@ -1,6 +1,10 @@
-- Implement prune function in kmalloc
 - If a missing page is not MAP_ANONYMOUS, load file contents
-- Check return value of update_curr_page_table
 - Implement munmap, use in free
-- Modify do_mmap to take final protection bits as arguments. For instance a read-only code has to be written to buffer and then the buffer should be made read-only.
+- printf cursor blink
+- timer not printing properly!
+- seg-fault with empty input (hit enter)
+- seg-fault with more than 1 space after command
+- seg-fault with 1 backspace and enter
+- backspace not printing in shell
+- mmap, munmap interface
 

@@ -25,7 +25,10 @@
 #define WAITPID 19
 #define WAIT 20
 #define PROCESS_SNAPSHOT 21
-#define FREE 17
+#define FREE 22
+#define GETRLIMIT 23
+#define SETRLIMIT 24
+
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
 void yield();
