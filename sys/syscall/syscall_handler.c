@@ -10,6 +10,7 @@
 #include <sys/scheduler/exec.h>
 #include <sys/scheduler/pcb.h>
 #include <sys/ulimit/sys_ulimit.h>
+#include <sys/memory/mm_struct.h>
 
 typedef void* (sys_call_t)(void*) ;
 
@@ -80,6 +81,20 @@ int sys_closedir_stub(int fd){
 
 }
 
+void* sys_mmap(void *addr, uint64_t length, uint64_t prot, int flags) {
+
+    struct pcb_t *pcb = getCurrentTask();
+    if(!pcb)
+        return NULL;
+
+    return (void*) mmap(&(pcb->mm->mmap), (uint64_t)addr, length,
+                prot | PAGE_TRANS_USER_SUPERVISOR, flags | MAP_ANONYMOUS, 0, 0);
+}
+
+void* sys_munmap(void *addr) {
+    return NULL;
+}
+
 sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
 	[YIELD] = (sys_call_t*)_sys_yield,
 	[PRINTF] = (sys_call_t*)_sys_printf,
@@ -104,5 +119,7 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
     [PROCESS_SNAPSHOT] = (sys_call_t*)sys_process_snapshot,
     [GETRLIMIT] = (sys_call_t*)sys_getrlimit,
     [SETRLIMIT] = (sys_call_t*)sys_setrlimit,
+    [MMAP] = (sys_call_t*)sys_mmap,
+    [MUNMAP] = (sys_call_t*)sys_munmap,
 };
 

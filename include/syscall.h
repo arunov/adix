@@ -28,6 +28,8 @@
 #define FREE 22
 #define GETRLIMIT 23
 #define SETRLIMIT 24
+#define MMAP 25
+#define MUNMAP 26
 
 #define SYSCALL_PROTO(num) static inline uint64_t __syscall##num
 
@@ -42,7 +44,12 @@ uint64_t uprintf(const char *format_string);
 int open(const char* filename);
 int64_t read(int fd, void *buf, uint64_t count);
 int64_t write(int fd, void *buf, uint64_t count);
+
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
 int lseek(int fd, off64_t offset, int whence);
+
 int close(int fd);
 int opendir(const char *pathname);
 struct posix_header_ustar* readdir(int fd);
@@ -53,6 +60,12 @@ int64_t fork();
 /*Memory operations*/
 void* malloc(uint64_t size);
 void free(void *ptr);
+
+#define MMAP_RW       0x2ULL
+#define MAP_ANONYMOUS 0x00000001U
+void* ummap(void *addr, uint64_t length, uint64_t prot, int flags);
+void* umunmap(void *addr);
+
 /* Process */
 uint64_t get_pid();
 

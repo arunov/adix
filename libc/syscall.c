@@ -125,3 +125,11 @@ int getrlimit(int resource, struct rlimit *rlim) {
     return (int)(__syscall2(GETRLIMIT, (uint64_t)resource, (uint64_t)rlim));
 }
 
+void* ummap(void *addr, uint64_t length, uint64_t prot, int flags) {
+    return (void*)__syscall4(MMAP, (uint64_t)addr, length, prot, (uint64_t)flags);
+}
+
+void* umunmap(void *addr) {
+    return (void*)__syscall1(MUNMAP, (uint64_t)addr);
+}
+
