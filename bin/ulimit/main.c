@@ -20,7 +20,6 @@ void printulimit(int res) {
 
 void printallulimits() {
 
-    printf("\n");
     for(int i = 0; i < RLIMIT_NORES; i ++) {
         printulimit(i);
     }
@@ -54,19 +53,18 @@ int main(int argc, char *argv[]) {
 
             x.rlim_cur = (uint64_t) newlim;
             if(-1 == setrlimit(resid, &x)) {
-                printf("\nsetrlimit failed\n");
+                printf("setrlimit failed\n");
             }
             return 0;
         }
 
         // argc = 2
-        printf("\n");
         printulimit(resid);
         return 0;
     }
 
 error:
-    printf("\nusage:\n%s [-a|[%s|%s|%s [new-limit]]]\n", argv[0], res_flag[0],
+    printf("usage:\n%s [-a|[%s|%s|%s [new-limit]]]\n", argv[0], res_flag[0],
                                                     res_flag[1], res_flag[2]);
 
     return 1;

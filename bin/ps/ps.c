@@ -7,7 +7,7 @@ int main() {
     struct ps_t *list;
     process_snapshot(&list);
     struct ps_t *scan = list;
-    printf("\n(pid) state process\n");
+    printf("(pid) state process\n");
     printf("-------------------\n");
     while(scan) {
         printf("(%p) %s", scan->pid, state_list[(int)(scan->state)]);
