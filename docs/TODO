@@ -3,4 +3,6 @@
 - Check return value of update_curr_page_table
 - Implement munmap, use in free
 - Modify do_mmap to take final protection bits as arguments. For instance a read-only code has to be written to buffer and then the buffer should be made read-only.
+- seg-fault with empty input (hit enter)
+- seg-fault with more than 1 space after command
 
