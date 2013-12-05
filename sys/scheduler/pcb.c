@@ -14,6 +14,7 @@
 #include <sys/memory/page_constants.h>
 #include <sys/memory/free_phys_pages.h>
 #include <sys/scheduler/scheduler.h>
+#include<sys/ulimit/sys_ulimit.h>
 
 extern char physbase;
 //static uint64_t next_pid = 1;
@@ -162,15 +163,16 @@ uint64_t add_to_process_file_table(
 				struct process_files_table *pfd)
 {
 	uint64_t i;
-	for(i =0; i<OPEN_FILES_LIMIT; i++){
+	for(i =0; i < rlimit_cur[RLIMIT_NOFILE]; i++){
 		//search next available slot
 		if(this->open_files[i] == 0){
 			this->open_files[i] = pfd;
 			break;
 		}
 	}
-	if(i == OPEN_FILES_LIMIT){
-		printf(" Number of open files exceeds OPEN_FILES_LIMIT");
+	if(i == rlimit_cur[RLIMIT_NOFILE]){
+		//printf(" Number of open files exceeds resource limit");
+        kfree(pfd);
 		return -1;
 	}
 	return i;

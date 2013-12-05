@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     }
 
 error:
-    printf("usage:\n%s [-a|[%s|%s|%s [new-limit]]]\n", argv[0], res_flag[0],
+    printf("usage:\n%s [-a|[%s|%s|%s [<new-limit>]]]\n", argv[0], res_flag[0],
                                                     res_flag[1], res_flag[2]);
 
     return 1;
