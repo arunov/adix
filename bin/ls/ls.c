@@ -33,5 +33,5 @@ void ls(char *path){
 		printf("%s\n", readdir_return->name);
 	}
 
-	close(fd);
+	closedir(fd);
 }

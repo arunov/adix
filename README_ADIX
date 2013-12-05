@@ -1,0 +1,15 @@
+
+tarfs:
+
+open
+
+Binaries:
+
+ls : implemented in bin/ls/ls.c
+
+lib functionalities:
+
+functionality --- sample test file that uses the functionality
+scanf --- bin/testscanf/testscanf.c
+open,close,read --- bin/test/test.c
+opendir,closedir,readdir --- bin/ls/ls.c
