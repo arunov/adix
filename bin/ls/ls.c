@@ -3,13 +3,23 @@
 #include <syscall.h>
 #include <defs.h>
 #include <files.h>
+#include <env.h>
+
+#define PWD_NAME "pwd"
 
 void ls(char *path);
 
 int main(int argc, char* argv[], char* envp[]) {
 	int i;
 	if(argc <=1){
-		ls(".");
+		char *pwd= get_env(PWD_NAME, envp);
+		if(pwd == NULL){
+			printf("No environemnt variable %s\n", PWD_NAME);
+			return -1;
+		}
+		printf("Value returned is %s\n",pwd);
+		/* ls on present working directory */
+		ls(pwd);
 		return 0;
 	}
 	

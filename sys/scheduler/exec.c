@@ -44,7 +44,8 @@ struct userspace_args* dup_args(char **argv, char **envp,void*(*alloc)(uint64_t)
 	}
 	ua->argc = get_argc(argv);
 	ua->argv = dup_argv(ua->argc, argv, alloc);
-	ua->envp = get_userspace_env(envp);
+	int envc = get_argc(envp);
+	ua->envp = dup_argv(envc, envp, alloc);
 	return ua;
 }
 

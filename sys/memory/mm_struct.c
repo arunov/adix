@@ -358,6 +358,7 @@ int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
 
         bytes -= bytes_read;
         v_addr += SIZEOF_PAGE;
+		offset += SIZEOF_PAGE;
 
     }
 

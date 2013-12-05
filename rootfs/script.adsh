@@ -1,6 +1,11 @@
 #!bin/adsh
 
-bin/world
-bin/blah
+setenv path bin/
+setenv home home/soujanya/
+getenv path
+getenv home
+env
+cd home/soujanya/
+ls
 
 

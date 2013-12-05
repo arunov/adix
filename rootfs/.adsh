@@ -1,0 +1,6 @@
+#!bin/adsh
+
+setenv path bin/
+setenv pwd home/
+
+

@@ -152,3 +152,15 @@ int atohex( char *str )
 	return value;
 	}
 }
+
+int strncmp(char *src, char *dst, uint64_t n){
+		if(src == NULL || dst == NULL){
+			return 0;
+		}
+		for(int i=0; i<n; i++){
+			if(*src++ != *dst++){
+				return 0;
+			}
+		}
+		return 1;
+}

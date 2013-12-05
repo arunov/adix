@@ -6,6 +6,7 @@
 #include <sys/filesystems/file_structures.h>
 #include <sys/scheduler/scheduler.h>
 #include <sys/scheduler/pcb.h>
+#include <sys/memory/kmalloc.h>
 
 
 int getsize(char *);
@@ -92,6 +93,10 @@ int strcmp(const char *s1,const char *s2){
 
 int sys_open(const char* pathname){
 //	printf("pathname: %s\n", pathname);
+	/* Tarfs requires files to be in bin/blah format. But for usability,
+	 * user will provide paths like /bin/blah*/
+	//char *pathname = (char*)kmalloc(strlen(o_pathname));
+	//memcpy(pathname, o_pathname+1, strlen(o_pathname));
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
 	struct process_files_table* pft;
@@ -153,6 +158,10 @@ int sys_close(int fd){
 
 int sys_opendir(const char *pathname){
 //	printf("pathname: %s\n", pathname);
+	/* Tarfs requires files to be in bin/blah format. But for usability,
+	 * user will provide paths like /bin/blah*/
+	//char *pathname = (char*)kmalloc(strlen(o_pathname));
+	//memcpy(pathname, o_pathname+1, strlen(o_pathname));
 	struct posix_header_ustar *header;
 	uint64_t header_address = (uint64_t)&_binary_tarfs_start;
 	struct process_files_table* pft;
