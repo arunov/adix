@@ -5,6 +5,7 @@
 
 #define MAP_ANONYMOUS 0x00000001U
 #define MAP_GROWSDOWN 0x00000002U
+#define MAP_GROWSUP   0x00000004U
 
 /* Virtual memory area structure */
 struct vm_area_struct {
@@ -22,8 +23,15 @@ struct vm_area_struct {
      * Flags for memory area
      * MAP_ANONYMOUS - no file backup
      * MAP_GROWSDOWN - region can expand towards lower addresses
+     * MAP_GROWSUP   - region can expand towards higher addresses
      */
     int vm_flags;
+
+    /**
+     * Limit for vma growth
+     * 0xffffffffffffffff ((uint64_t)-1) for unlimited
+     */
+    uint64_t max_size;
 
     /* List of vmas */
     struct list_head vm_list;

@@ -9,11 +9,15 @@
 #include <sys/memory/sys_malloc.h>
 #include <sys/scheduler/exec.h>
 #include <sys/scheduler/pcb.h>
+#include <sys/ulimit/sys_ulimit.h>
 
 typedef void* (sys_call_t)(void*) ;
 
 int64_t sys_read_stub(int fd, void *buf, uint64_t count){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return -1;
+	 }
 	 return	pft->op_pointers->read(
 		fd,
 		buf,
@@ -22,6 +26,9 @@ int64_t sys_read_stub(int fd, void *buf, uint64_t count){
 
 int64_t sys_write_stub(int fd, void *buf, uint64_t count){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return -1;
+	 }
 	return pft->op_pointers->write(
 		fd,
 		buf,
@@ -32,6 +39,9 @@ int64_t sys_write_stub(int fd, void *buf, uint64_t count){
 
 int sys_lseek_stub(int fd, off64_t offset, int whence){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return -1;
+	 }
 	return pft->op_pointers->lseek(
 		fd,
 		offset,
@@ -41,6 +51,9 @@ int sys_lseek_stub(int fd, off64_t offset, int whence){
 
 int sys_close_stub(int fd){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return -1;
+	 }
 	return pft->op_pointers->close(
 		fd);
 
@@ -48,6 +61,9 @@ int sys_close_stub(int fd){
 
 struct posix_header_ustar* sys_readdir_stub(int fd, uint64_t ret){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return NULL;
+	 }
 	return pft->op_pointers->readdir(
 		fd,
 		ret);
@@ -56,6 +72,9 @@ struct posix_header_ustar* sys_readdir_stub(int fd, uint64_t ret){
 
 int sys_closedir_stub(int fd){
 	 struct process_files_table *pft = get_process_files_table(getCurrentTask(),fd);
+	 if(pft == NULL){
+		return -1;
+	 }
 	return pft->op_pointers->closedir(
 		fd);
 
@@ -83,5 +102,7 @@ sys_call_t *sys_call_table[NUM_SYS_CALLS] = {
     [WAITPID] = (sys_call_t*)sys_sleep,
 	[SLEEP] = (sys_call_t*)sys_sleep_timer,
     [PROCESS_SNAPSHOT] = (sys_call_t*)sys_process_snapshot,
+    [GETRLIMIT] = (sys_call_t*)sys_getrlimit,
+    [SETRLIMIT] = (sys_call_t*)sys_setrlimit,
 };
 

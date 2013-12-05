@@ -117,9 +117,11 @@ int setenv(int argc, char* argv[]){
 
 void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 	int foreground = is_foreground(ecmd_argc, ecmd_argv);
-	uint64_t pid = 0;
+	int64_t pid = 0;
 	pid = fork();
-	if(pid == 0){
+    if(pid == -1) {
+        printf("fork failed\n");
+	} else if(pid == 0){
 		char *buffer = path, *path_token;
 		int i = 0;
 		int len = 0;

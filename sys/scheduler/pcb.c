@@ -14,14 +14,26 @@
 #include <sys/memory/page_constants.h>
 #include <sys/memory/free_phys_pages.h>
 #include <sys/scheduler/scheduler.h>
+#include<sys/ulimit/sys_ulimit.h>
 
 extern char physbase;
-static uint64_t next_pid = 1;
+//static uint64_t next_pid = 1;
 
 /* Get next available value for process id. This method should be used
    within this class only.*/
 static uint64_t getNextPid(){ 
-	return next_pid++;
+//	return next_pid++;
+	uint64_t i = 1;
+	for(uint64_t i = 1;i<ULIMIT;i++){
+		if(pid_array[i] == 0){
+			pid_array[i] = 1;
+			return i;
+		}
+	}
+	if(i == ULIMIT){
+		printf("ULIMIT reached. Cannot have more processes\n");
+	}
+	return -1;
 }
 
 uint64_t get_u_rsp(struct pcb_t *this){
@@ -106,6 +118,10 @@ struct pcb_t* createTask(enum ptype proc_type,
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
 		pcb->u_stack_base = (uint64_t*)v_alloc_pages_at_virt(1, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, 0x70000000);
+        struct vm_area_struct *u_stack_vma = find_vma(&(pcb->mm->mmap), (uint64_t)pcb->u_stack_base);
+        // TODO: Check NULL
+        u_stack_vma->vm_flags |= MAP_GROWSDOWN;
+        u_stack_vma->max_size = rlimit_cur[RLIMIT_STACK]/SIZEOF_PAGE;
 		printf("##########stack alocated for user process: %p",pcb->u_stack_base);
 		prepareInitialStack(pcb->stack_base,(uint64_t)&jump_to_ring3);
 		prepareInitialStack(pcb->u_stack_base, instruction_address);
@@ -151,22 +167,24 @@ uint64_t add_to_process_file_table(
 				struct process_files_table *pfd)
 {
 	uint64_t i;
-	for(i =0; i<OPEN_FILES_LIMIT; i++){
+	for(i =0; i < rlimit_cur[RLIMIT_NOFILE]; i++){
 		//search next available slot
 		if(this->open_files[i] == 0){
 			this->open_files[i] = pfd;
 			break;
 		}
 	}
-	if(i == OPEN_FILES_LIMIT){
-		printf(" Number of open files exceeds OPEN_FILES_LIMIT");
+	if(i == rlimit_cur[RLIMIT_NOFILE]){
+		//printf(" Number of open files exceeds resource limit");
+        kfree(pfd);
 		return -1;
 	}
 	return i;
 }
 
-uint64_t reset_process_files_table( struct pcb_t *this,
+int64_t reset_process_files_table( struct pcb_t *this,
 				uint64_t fd){
+				
 	struct process_files_table* pft = get_process_files_table(this,fd);
 	if(pft == NULL){
 		return -1;
@@ -178,7 +196,7 @@ uint64_t reset_process_files_table( struct pcb_t *this,
 
 #define SYS_FORK_CHILD_RIP_OFFSET 0x28
 
-uint64_t sys_fork() {
+int64_t sys_fork() {
 
     // Get rsp of parent
     static uint64_t p_rsp;
@@ -196,14 +214,14 @@ uint64_t sys_fork() {
     // PCB to return
     struct pcb_t *c_pcb = (struct pcb_t*)kmalloc(sizeof(struct pcb_t));
     if(NULL == c_pcb) {
-        return NULL;
+        return -1;
     }
 
     /* stack_base */
     c_pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
     if(c_pcb->stack_base == NULL) {
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     // Copy stack
@@ -227,7 +245,7 @@ uint64_t sys_fork() {
         c_pcb->name = (char*)kmalloc(strlen(p_pcb->name) + 1);
         if(!c_pcb->name) {
             kfree(c_pcb);
-            return NULL;
+            return -1;
         }
         memcpy(c_pcb->name, p_pcb->name, strlen(p_pcb->name) + 1);
     }
@@ -247,7 +265,7 @@ uint64_t sys_fork() {
     if(0 == cow_fork_page_table(&(c_pcb->cr3_content))) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* tss */
@@ -255,7 +273,7 @@ uint64_t sys_fork() {
     if(NULL == c_pcb->tss) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* wait_desc */
@@ -276,11 +294,15 @@ uint64_t sys_fork() {
     if(NULL == c_pcb->mm) {
         // TODO: Deep free!
         kfree(c_pcb);
-        return NULL;
+        return -1;
     }
 
     /* lister */
-    addToTaskList(c_pcb);
+    if(-1 == addToTaskList(c_pcb)) {
+        // TODO: Deep free!
+        kfree(c_pcb);
+        return -1;
+    }
 
     return c_pcb->pid;
 }

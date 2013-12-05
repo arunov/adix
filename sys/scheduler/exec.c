@@ -8,6 +8,8 @@
 #include <sys/memory/kmalloc.h>
 #include <sys/memory/sys_malloc.h>
 #include <sys/memory/free_phys_pages.h>
+#include <sys/memory/handle_cr.h>
+#include <sys/ulimit/sys_ulimit.h>
 
 void* next_available_address = NULL;
 
@@ -56,7 +58,7 @@ uint64_t sys_execvpe(char *path, char *argv[], char *envp[]){
 	 struct pcb_t *pcb = getCurrentTask();
 
      // Change process name
-     kfree(pcb->name);
+     //char *old_name = pcb->name;
      pcb->name = NULL;
      if(path) {
          pcb->name = (char*)kmalloc(strlen(path) + 1);
@@ -68,12 +70,23 @@ uint64_t sys_execvpe(char *path, char *argv[], char *envp[]){
      }
 
 	 struct mm_struct *old_mm = pcb->mm;
+     uint64_t pml4_phys = 0;
+     if(0 == get_kduplicate_curr_self_ref_PML4(&pml4_phys)) {
+        return -1;
+     }
+
+     uint64_t old_cr3_content = pcb->cr3_content;
+     pcb->cr3_content = pml4_phys;
+     set_cr3(*(struct str_cr3*)(&pml4_phys));
+
 	 pcb->mm = new_mm();
 	 //Load binary
-	 uint64_t rip = load_elf(pcb->mm, path);
+	 uint64_t rip = load_elf(pcb->mm, pcb->name);
 	 if(rip == -1){ /* Loading of elf failed */
 	 	kfree(pcb->mm);//TODO: Deep free?
 	 	pcb->mm = old_mm;
+        pcb->cr3_content = old_cr3_content;
+        set_cr3(*(struct str_cr3*)(&old_cr3_content));
 		return 0;
 	 }
 	 /* Initalize stack only if load went through, otherwise virtual address for
@@ -81,6 +94,11 @@ uint64_t sys_execvpe(char *path, char *argv[], char *envp[]){
 	 pcb->u_stack_base = (uint64_t*)v_alloc_pages_at_virt(1, 
 	 							PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, 
 								0x70000000);
+     struct vm_area_struct *u_stack_vma = find_vma(&(pcb->mm->mmap), (uint64_t)pcb->u_stack_base);
+     // TODO: Check NULL
+     u_stack_vma->vm_flags |= MAP_GROWSDOWN;
+     u_stack_vma->max_size = rlimit_cur[RLIMIT_STACK]/SIZEOF_PAGE;
+
 	 //Get user stack location to jump to
 	 uint64_t rsp = ((uint64_t)pcb->u_stack_base) | 0xfff;
 	 //Copy args into user space

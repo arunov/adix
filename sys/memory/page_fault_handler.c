@@ -40,8 +40,8 @@ static int check_page_prot(struct vm_area_struct *node, uint64_t fault_addr) {
  */
 static void segfault(uint64_t fault_addr) {
 
-  //  printf("Sometimes life hits you in the head with a brick. Don't lose "
-//                                        "faith. Seg fault at %p\n", fault_addr);
+    //printf("Sometimes life hits you in the head with a brick. Don't lose "
+    //                                "faith. Seg fault at %p\n", fault_addr);
     printf("Seg fault at %p\n", fault_addr);
     sys_exit(1);
 }
@@ -231,10 +231,17 @@ int page_fault_handler(uint64_t err_code) {
 
     // Get memory region
     struct vm_area_struct *node = NULL;
+    struct vm_area_struct *prev = NULL, *next = NULL;
 
     list_for_each_entry(node, vma_list_head, vm_list) {
         if(fault_addr >= node->vm_start && fault_addr < node->vm_end) {
             break;
+        }
+        
+        if(fault_addr < node->vm_start && next == NULL) {
+            next = node;
+        } else if(fault_addr >= node->vm_end) {
+            prev = node;
         }
     }
 
@@ -252,6 +259,14 @@ int page_fault_handler(uint64_t err_code) {
             return page_present_read(node, fault_addr, err_code);
 
     } else {
+
+        if(node == NULL && prev && (prev->vm_flags & MAP_GROWSUP)) {
+            node = grow_vma_up(prev, fault_addr, vma_list_head);
+        }
+        
+        if(node == NULL && next && (next->vm_flags & MAP_GROWSDOWN)) {
+            node = grow_vma_down(next, fault_addr, vma_list_head);
+        }
 
         return page_not_present(node, fault_addr);
     }

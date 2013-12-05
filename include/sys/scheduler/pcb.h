@@ -41,6 +41,8 @@ struct pcb_t{
 	struct mm_struct *mm;
 };
 
+int pid_array[ULIMIT];
+
 /* Create a new Task(PCB) and initialize its values.*/
 struct pcb_t* createTask(enum ptype proc_type,
 			uint64_t instruction, 
@@ -64,14 +66,14 @@ uint64_t add_to_process_file_table(
 				struct pcb_t *this,
 				struct process_files_table *pft);
 /* Delete an entry from process file descriptor table */
-uint64_t reset_process_files_table( struct pcb_t *this,
+int64_t reset_process_files_table( struct pcb_t *this,
 				uint64_t fd);
 
 /**
  * Fork system call
  * @return pid of child
  */
-uint64_t sys_fork();
+int64_t sys_fork();
 int has_children();
 void add_child(struct pcb_t *this, struct pcb_t *c_pcb);
 void remove_child(struct pcb_t *c_pcb);

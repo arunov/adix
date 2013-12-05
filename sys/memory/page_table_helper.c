@@ -40,12 +40,37 @@ uint64_t get_duplicate_PML4(uint64_t src, uint64_t *phys_addr) {
     uint64_t pml4_vaddr = get_zeroed_page_trans_obj(&pml4);
 
     if(!pml4_vaddr) {
-        *phys_addr = 0;
+        if(phys_addr) *phys_addr = 0;
         return 0;
     }
 
     memcpy((void*)pml4_vaddr, (void*)src, SIZEOF_PAGE_TRANS);
-    *phys_addr = pml4;
+    if(phys_addr) {
+        *phys_addr = pml4;
+    }
+    return pml4_vaddr;
+}
+
+uint64_t get_kduplicate_curr_self_ref_PML4(uint64_t *phys_addr) {
+
+    uint64_t pml4;
+    uint64_t pml4_vaddr = get_zeroed_page_trans_obj(&pml4);
+
+    if(!pml4_vaddr) {
+        if(phys_addr) *phys_addr = 0;
+        return 0;
+    }
+
+    for(int i = PML4_KERNEL_ENTRY_START; i <= PML4_KERNEL_ENTRY_END; i ++) {
+        ((uint64_t*)pml4_vaddr)[i] = ((uint64_t*)SELF_REF_PML4(0))[i];
+    }
+
+    ((uint64_t*)pml4_vaddr)[SELF_REF_ENTRY] = PAGE_TRANS_NEXT_LEVEL_ADDR(pml4)
+                                | PAGE_TRANS_PRESENT | PAGE_TRANS_READ_WRITE;
+
+    if(phys_addr) {
+        *phys_addr = pml4;
+    }
     return pml4_vaddr;
 }
 

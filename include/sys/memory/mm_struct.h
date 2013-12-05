@@ -102,6 +102,30 @@ struct kernel_mm_struct* get_kernel_mm();
  *                     (@see include/sys/memory/page_table_helper.h).
  * @param flags        MAP_ANONYMOUS - no file backup
  *                     MAP_GROWSDOWN - region can expand towards lower addresses
+ *                     MAP_GROWSUP   - region can expand towards higher
+ *                                     addresses
+ *                     Degault: Fixed size doesn't grow!
+ *                     (@see include/sys/memory/vm_area_struct.h)
+ * @param max_size_a   Maximum size the vma can grow up to (number of pages).
+ *                     0xffffffffffffffff ((uint64_t)-1) for unlimited
+ * @return             OK or ERROR
+ */
+int add_vma_growable(struct list_head *mmap, uint64_t start_addr_a,
+    uint64_t end_addr_a, uint64_t page_prot_a, int flags, uint64_t max_size_a);
+
+/**
+ * Initialize vma - unlimited size
+ * @param mmap         pointer to vma list
+ * @param start_addr_a starting virtual address of section
+ * @param end_addr_a   ending virtual address of section
+ * @param page_prot    page protection. E.g. PAGE_TRANS_READ_WRITE |
+ *                     PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_NX
+ *                     (@see include/sys/memory/page_table_helper.h).
+ * @param flags        MAP_ANONYMOUS - no file backup
+ *                     MAP_GROWSDOWN - region can expand towards lower addresses
+ *                     MAP_GROWSUP   - region can expand towards higher
+ *                                     addresses
+ *                     Degault: Fixed size doesn't grow!
  *                     (@see include/sys/memory/vm_area_struct.h)
  * @return             OK or ERROR
  */
@@ -220,6 +244,26 @@ void print_vmas(struct mm_struct *this);
  *               (@see include/sys/memory/vm_area_struct.h)
  * @param fd     file descriptor of file
  * @param offset offset in file
+ * @param max_sz Maximum size the vma can grow up to (number of pages).
+ *               0xffffffffffffffff ((uint64_t)-1) for unlimited
+ * @return       address that is allocated for memory region
+ */
+uint64_t mmap_growable(struct list_head *mmap, uint64_t addr, uint64_t length,
+            uint64_t prot, int flags, int fd, uint64_t offset, uint64_t max_sz);
+
+/**
+ * Create memory region
+ * @param mmap   pointer to vma list
+ * @param addr   virtual start address of memory region
+ * @param length length of memory region
+ * @param prot   page protection. E.g. PAGE_TRANS_READ_WRITE |
+ *               PAGE_TRANS_USER_SUPERVISOR | PAGE_TRANS_NX
+ *               (@see include/sys/memory/page_table_helper.h).
+ * @param flags  MAP_ANONYMOUS - no file backup
+ *               MAP_GROWSDOWN - region can expand towards lower addresses
+ *               (@see include/sys/memory/vm_area_struct.h)
+ * @param fd     file descriptor of file
+ * @param offset offset in file
  * @return       address that is allocated for memory region
  */
 uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
@@ -252,6 +296,13 @@ struct mm_struct* cow_fork_mm_struct(struct mm_struct *src);
  * @return pointer to new mm_struct object, NULL on ERROR
  */
 struct kernel_mm_struct* cow_fork_kmm_struct();
+
+struct vm_area_struct* grow_vma_up(struct vm_area_struct *prev, uint64_t addr,
+                                            struct list_head *vma_list_head);
+
+struct vm_area_struct* grow_vma_down(struct vm_area_struct *next,
+                                uint64_t addr, struct list_head *vma_list_head);
+
 
 #endif
 
