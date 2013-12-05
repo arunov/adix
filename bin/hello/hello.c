@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <syscall.h>
 int main(int argc, char* argv[], char* envp[]) {
+	printf("Entered main");
 	int counter = 0;
 	int64_t pid_ret;
     int64_t child_pid = fork();
@@ -21,7 +22,7 @@ int main(int argc, char* argv[], char* envp[]) {
     printf("[pid: %p] fork returned: %p\n", get_pid(), child_pid);
 
 	if(child_pid == 0){
-		execvpe("bin/world",NULL,NULL);		
+		execvpe("bin/world",NULL,envp);		
 	}else{
 		pid_ret = wait();
 		printf("Parent exiting with returned PID [%d]\n",pid_ret);
