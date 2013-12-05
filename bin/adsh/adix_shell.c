@@ -42,7 +42,7 @@ void init_shell(){
 	memset(env, 0,sizeof(char*) * NUM_ENV_VARS); 
 	env_names = (char**)malloc(sizeof(char*) * NUM_ENV_VARS);
 	memset(env_names, 0,sizeof(char*) * NUM_ENV_VARS); 
-	char *argv[] = {"bin/adsh", "-f", ".adsh"};
+	char *argv[] = {"bin/adsh", "-f", ".adshrc"};
 	exec_shell_script(3, argv, env); 
 }
 
@@ -85,6 +85,8 @@ int get_env_location(char *key){
 	return i;
 }
 
+/* Creates an entry in the global environment table if key does not exist
+ * already. Replaces an existing entry */
 int update_global_env(char *key, char *value){
 	if(key == NULL || value == NULL){
 		return -1;
@@ -103,7 +105,6 @@ int update_global_env(char *key, char *value){
 }
 
 
-// supports "setenv path value"
 int setenv(int argc, char* argv[]){
 	if(argc!=3){
 		printf("setenv failed");
@@ -115,6 +116,7 @@ int setenv(int argc, char* argv[]){
 	return update_global_env(argv[1],argv[2]);
 }
 
+/* Execute the binary corresonding to the command */
 void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 	int foreground = is_foreground(ecmd_argc, ecmd_argv);
 	int64_t pid = 0;
@@ -128,14 +130,13 @@ void exec_command(int ecmd_argc, char *ecmd_argv[], char *envp[]){
 		char *command = ecmd_argv[0];
 		execvpe(ecmd_argv[0], ecmd_argv, envp);
 
-		for(i = 0; buffer != NULL; i++){
+		for(i = 0; *buffer != NULL; i++){
 			path_token = strtok(buffer,PATH_DELIM);	
 			ecmd_argv[0] = resolve_path(command, path_token);
 			execvpe(ecmd_argv[0], ecmd_argv, envp);
 			len = strlen(path_token);
 			buffer += len+1;
 		}
-		
 		printf("\nCommand %s failed\n",command);
 		exit(0);//If execvpe returned => it failed
 	

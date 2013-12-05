@@ -56,4 +56,4 @@ adsh                    adsh -f script.adsh
 (Shell interpreter)     (Script using our adsh shell interpreter)
                         adsh -f script.echo
                         (Script using dummy echo interpreter)
-
+						rc file: .adshrc

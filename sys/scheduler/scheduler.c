@@ -56,14 +56,6 @@ void sys_yield(){
 	if(nextTask->cr3_content != NULL){
 		set_cr3(*(struct str_cr3*)(&nextTask->cr3_content));
 	}
-    if(nextTask->pid == 1 || nextTask->pid == 3) {
-//    printf("nextTask: pid: %p, stack_base: %p, ", nextTask->pid, nextTask->stack_base);
-//	printf("nextTask: pid %p rsp %p\n",nextTask->pid, get_u_rsp(nextTask));
-    //printf("user_stack: %p, user_stack_phys: %p\n", nextTask->u_stack_base, virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
-    //printf("nextTask: pid: %p, ", nextTask->pid);
-    //printf("user_stack_phys: %p, ", virt2phys_selfref((uint64_t)nextTask->u_stack_base, NULL));
-    //printf("k_stack_ptr: %p\n", nextTask->stack_base[1]);
-    }
 	switchTo(nextTask->stack_base);
 }
 
