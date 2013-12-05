@@ -1,8 +1,18 @@
+@Authors
+
+Arun Olappamanna Vasudevan (aolappamanna)
+Deepa Devaraj (ddevaraj)
+Soujanya Shankaranarayana (soshankarana)
+
+##################  ADIXS Operating System   ################################
 
 Functionality           Sample test file                Source code
 -----------------------------------------------------------------------
 Scheduler, exec,                                        sys/scheduler
 Ring switch
+
+Preemtive scheduler									    sys/timer/timer.c 
+														Time quantum - 10 ms
 
 System-call handler                                     sys/syscall
 
@@ -27,10 +37,10 @@ ELF                     Load user process               sys/parser/parseelf.c
 
 TARFS                   bin/test                        sys/parser/parsetarfs.c
 open, close, read,      bin/ls
-opendir, closedir,      Load user process
-readdir, seek                 
+opendir, closedir,      bin/cat
+readdir, seek           Load user process      
 
-STDIN, STDOUT, STDERR                                   sys/terminal/terminal_driver.c 
+STDIN, STDOUT, STDERR   bin/stdinouterr/stdinouterr.c   sys/terminal/terminal_driver.c 
 
 scanf                   bin/testscanf                   libc/scanf.c
 
@@ -42,8 +52,8 @@ getpid                  bin/hello
 ulimit                  bin/ulimit -h
                         bin/myopenn
 
-adsh                    adsh -f script.echo
+adsh                    adsh -f script.adsh
 (Shell interpreter)     (Script using our adsh shell interpreter)
-                        adsh -f script.adsh
+                        adsh -f script.echo
                         (Script using dummy echo interpreter)
 
