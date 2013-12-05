@@ -59,7 +59,7 @@ void scroll_screen(void)
 *  on the screen under the last character pressed! */
 void move_cursor(void)
 {
-	 //blink_cursor(global_cursor_x, global_cursor_y);
+	 blink_cursor(global_cursor_x, global_cursor_y);
 }
 
 /* Clears the screen */
