@@ -32,7 +32,7 @@ Segv handling           bin/test                        sys/memory/page_fault_ha
 COW fork                The adix shell                  sys/memory/page_table_helper.c
                                                         sys/scheduler/pcb.c
 
-Mmap                    bin/test                        					
+mmap,munmap             bin/test                        					
 
 Page table                                              include/sys/memory/page_table_helper.h
                                                         sys/memory/page_table_helper.c
