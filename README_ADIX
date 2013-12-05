@@ -4,6 +4,8 @@ Arun Olappamanna Vasudevan (aolappamanna)
 Deepa Devaraj (ddevaraj)
 Soujanya Shankaranarayana (soshankarana)
 
+Project points: 60 (Preemptive OS) 
+
 ##################  ADIXS Operating System   ################################
 
 Functionality           Sample test file                Source code
@@ -29,6 +31,8 @@ Segv handling           bin/test                        sys/memory/page_fault_ha
 
 COW fork                The adix shell                  sys/memory/page_table_helper.c
                                                         sys/scheduler/pcb.c
+
+Mmap                    bin/test                        					
 
 Page table                                              include/sys/memory/page_table_helper.h
                                                         sys/memory/page_table_helper.c

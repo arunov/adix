@@ -345,7 +345,7 @@ void process_exec_jobs(int argc, char *argv[], char *envp[]){
 int main(int argc, char* argv[], char* envp[]) {
 	if(argc == 1){
 		clrscr();
-		init_shell(); //TODO: init_shell_with_env
+		init_shell();
 		run_shell();
 	}else {
 		init_shell_env(envp);
