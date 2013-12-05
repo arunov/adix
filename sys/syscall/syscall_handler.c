@@ -91,8 +91,13 @@ void* sys_mmap(void *addr, uint64_t length, uint64_t prot, int flags) {
                 prot | PAGE_TRANS_USER_SUPERVISOR, flags | MAP_ANONYMOUS, 0, 0);
 }
 
-void* sys_munmap(void *addr) {
-    return NULL;
+void sys_munmap(void *addr) {
+    
+    struct pcb_t *pcb = getCurrentTask();
+    if(!pcb)
+        return;
+
+    munmap(&(pcb->mm->mmap), (uint64_t)addr);
 }
 
 sys_call_t *sys_call_table[NUM_SYS_CALLS] = {

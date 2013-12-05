@@ -64,7 +64,7 @@ void free(void *ptr);
 #define MMAP_RW       0x2ULL
 #define MAP_ANONYMOUS 0x00000001U
 void* ummap(void *addr, uint64_t length, uint64_t prot, int flags);
-void* umunmap(void *addr);
+void umunmap(void *addr);
 
 /* Process */
 uint64_t get_pid();

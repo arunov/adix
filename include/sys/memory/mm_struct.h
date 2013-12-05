@@ -269,6 +269,8 @@ uint64_t mmap_growable(struct list_head *mmap, uint64_t addr, uint64_t length,
 uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
                             uint64_t prot, int flags, int fd, uint64_t offset);
 
+void munmap(struct list_head *mmap, uint64_t addr);
+
 /**
  * Create memory region
  * @param mmap   pointer to vma list

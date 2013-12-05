@@ -26,6 +26,6 @@ void _sys_clrscr();
 int64_t _sys_fork();
 void sys_process_snapshot();
 void* sys_mmap(void *addr, uint64_t length, uint64_t prot, int flags);
-void* sys_munmap(void *addr);
+void sys_munmap(void *addr);
 
 #endif

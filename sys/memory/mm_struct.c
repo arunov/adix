@@ -379,6 +379,18 @@ int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
 
 }
 
+void munmap(struct list_head *mmap, uint64_t addr) {
+
+    struct vm_area_struct *vma = find_vma(mmap, addr);
+
+    if(addr >= vma->vm_start && addr < vma->vm_end) {
+        // Remove vma
+        list_del(&vma->vm_list);
+    }
+
+    // TODO: free physical pages
+}
+
 uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
                             uint64_t prot, int flags, int fd, uint64_t offset) {
 

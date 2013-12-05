@@ -129,7 +129,7 @@ void* ummap(void *addr, uint64_t length, uint64_t prot, int flags) {
     return (void*)__syscall4(MMAP, (uint64_t)addr, length, prot, (uint64_t)flags);
 }
 
-void* umunmap(void *addr) {
-    return (void*)__syscall1(MUNMAP, (uint64_t)addr);
+void umunmap(void *addr) {
+    __syscall1(MUNMAP, (uint64_t)addr);
 }
 
