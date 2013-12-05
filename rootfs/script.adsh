@@ -1,11 +1,19 @@
 #!bin/adsh
 
 setenv path bin/
+sleep 1000
 setenv home home/soujanya/
+sleep 1000
 getenv path
+sleep 1000
 getenv home
+sleep 1000
 env
+sleep 1000
 cd home/soujanya/
 ls
+sleep 1000
+ps
+sleep 1000
 
 

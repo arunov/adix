@@ -15,7 +15,6 @@ void exit(int status){
 
 int open(const char* pathname){
 	int ret = __syscall1(OPEN, (uint64_t)pathname);
-//	printf("\nFd returned to syscall %d",ret);
 	return ret;
 }
 
