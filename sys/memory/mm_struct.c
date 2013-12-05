@@ -388,7 +388,18 @@ void munmap(struct list_head *mmap, uint64_t addr) {
         list_del(&vma->vm_list);
     }
 
-    // TODO: free physical pages
+    uint64_t start_addr = (vma->vm_start + 0xfff) & PAGE_ALIGN;
+    uint64_t end_addr = (vma->vm_end) & PAGE_ALIGN;
+
+    uint64_t page, phys;
+
+    for(page = start_addr; page < end_addr; page += PAGE_ALIGN) {
+        phys = virt2phys_selfref(page, NULL);
+        update_curr_page_table(0, page, 0);
+        free_phys_page(phys);
+    }
+
+    kfree(vma);
 }
 
 uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,

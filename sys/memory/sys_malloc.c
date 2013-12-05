@@ -21,6 +21,15 @@ void* sys_malloc(uint64_t size) {
 }
 
 void sys_free(void *ptr) {
-    // TODO:do something
+    struct list_head *vma_list_head;
+
+    struct pcb_t *currTask = getCurrentTask();
+    if(!currTask) {
+        vma_list_head = &(get_kernel_mm()->mmap);
+    } else {
+        vma_list_head = &(currTask->mm->mmap);
+    }
+
+    munmap(vma_list_head, (uint64_t)ptr);
 }
 
