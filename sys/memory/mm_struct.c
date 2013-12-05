@@ -331,7 +331,7 @@ int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
                                                 uint64_t len, uint64_t prot) {
 
     // Number of physical pages
-    int num_pages = len/PG_SZ + 1;
+    int num_pages = len/SIZEOF_PAGE + 1;
 
     // Virtual address
     uint64_t v_addr = mmap(map, addr, len, prot, 0, file, offset);
@@ -349,14 +349,17 @@ int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
         uint64_t phys = alloc_phys_pages(1);
 
         // Add to page table
-        update_curr_page_table(phys, v_addr, prot);
+        update_curr_page_table(phys, v_addr, prot | PAGE_TRANS_READ_WRITE);
 
         // Load page with file contents
         sys_lseek(file, offset, SEEK_SET);
         uint64_t bytes_read = sys_read(file, (void*)v_addr,
                                     (bytes > SIZEOF_PAGE)? SIZEOF_PAGE : bytes);
 
+        update_curr_page_table(0, v_addr, prot | PAGE_TRANS_PRESENT);
+
         bytes -= bytes_read;
+        offset += SIZEOF_PAGE;
         v_addr += SIZEOF_PAGE;
 
     }
