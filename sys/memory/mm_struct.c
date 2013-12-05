@@ -53,13 +53,14 @@ int init_data_vma(struct mm_struct *this, uint64_t start_data_a,
 }
 
 static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
-            uint64_t page_prot_a, int flags, struct vm_area_struct *add_before,
-                                            struct vm_area_struct *add_after) {
+                        uint64_t page_prot_a, int flags, uint64_t max_size_a,
+        struct vm_area_struct *add_before, struct vm_area_struct *add_after) {
 
     if(!add_before && !add_after) {
         return -1;
     }
 
+#if 0
     // Check if existing vma's can be extended
     int extend_vma = 0;
 
@@ -92,6 +93,7 @@ static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
     if(extend_vma) {
         return 0;
     }
+#endif
 
     // Existing vma not expanded. Create new
     struct vm_area_struct *p_vma = new_vma();
@@ -104,6 +106,7 @@ static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
     p_vma->vm_end = end_addr_a;
     p_vma->vm_page_prot = page_prot_a;
     p_vma->vm_flags = flags;
+    p_vma->max_size = max_size_a;
 
     if(add_before) {
 
@@ -126,6 +129,12 @@ static int insert_vma_in_list(uint64_t start_addr_a, uint64_t end_addr_a,
 
 int add_vma(struct list_head *mmap, uint64_t start_addr_a,
                         uint64_t end_addr_a, uint64_t page_prot_a, int flags) {
+    return add_vma_growable(mmap, start_addr_a, end_addr_a, page_prot_a, flags,
+                                                                 (uint64_t)-1);
+}
+
+int add_vma_growable(struct list_head *mmap, uint64_t start_addr_a,
+    uint64_t end_addr_a, uint64_t page_prot_a, int flags, uint64_t max_size_a) {
 
     // start addr < end addr
     if(start_addr_a >= end_addr_a) {
@@ -153,6 +162,7 @@ int add_vma(struct list_head *mmap, uint64_t start_addr_a,
         p_vma->vm_end = end_addr_a;
         p_vma->vm_page_prot = page_prot_a;
         p_vma->vm_flags = flags;
+        p_vma->max_size = max_size_a;
 
         list_add_tail(&p_vma->vm_list, mmap);
         
@@ -169,20 +179,20 @@ int add_vma(struct list_head *mmap, uint64_t start_addr_a,
 
     list_for_each_entry(node, mmap, vm_list) {
 
-        // First node
+        // Before first node
         if((node->vm_list).prev == mmap) {
             if(end_addr_a <= node->vm_start) {
                 ret = insert_vma_in_list(start_addr_a, end_addr_a, page_prot_a,
-                                                            flags, node, NULL);
+                                                flags, max_size_a, node, NULL);
                 break;
             }
         }
 
-        // Last node
+        // After last node
         if((node->vm_list).next == mmap) {
             if(start_addr_a >= node->vm_end) {
                 ret = insert_vma_in_list(start_addr_a, end_addr_a, page_prot_a,
-                                                            flags, NULL, node);
+                                                flags, max_size_a, NULL, node);
                 break;
             }
         }
@@ -195,7 +205,7 @@ int add_vma(struct list_head *mmap, uint64_t start_addr_a,
             (end_addr_a <= node->vm_start)) {
 
             ret = insert_vma_in_list(start_addr_a, end_addr_a, page_prot_a,
-                                                        flags, node, prev_node);
+                                            flags, max_size_a, node, prev_node);
             break;
         }
 
@@ -317,6 +327,7 @@ void print_vmas(struct mm_struct *this) {
         printf("->vm_end: %p,", node->vm_end);
         printf("->vm_page_prot: %p,", node->vm_page_prot);
         printf("->vm_flags: %p,", node->vm_flags);
+        printf("->max_size: %p,", node->max_size);
         printf("&( ->vm_list): %p,", &(node->vm_list));
         printf("( ->vm_list).next: %p,", (node->vm_list).next);
         printf("( ->vm_list).prev: %p,", (node->vm_list).prev);
@@ -371,10 +382,18 @@ int do_mmap(struct list_head *map, int file, uint64_t offset, uint64_t addr,
 uint64_t mmap(struct list_head *mmap, uint64_t addr, uint64_t length,
                             uint64_t prot, int flags, int fd, uint64_t offset) {
 
+    return mmap_growable(mmap, addr, length, prot, flags, fd, offset,
+                                                                (uint64_t)(-1));
+}
+
+uint64_t mmap_growable(struct list_head *mmap, uint64_t addr, uint64_t length,
+    uint64_t prot, int flags, int fd, uint64_t offset, uint64_t max_size_a) {
+
     // TODO: Check return value
     uint64_t start_addr = get_unmapped_area(mmap, addr, length);
 
-    if(-1 == add_vma(mmap, start_addr, start_addr + length, prot, flags)) {
+    if(-1 == add_vma_growable(mmap, start_addr, start_addr + length, prot,
+                                                        flags, max_size_a)) {
         return -1;
     }
 
@@ -458,5 +477,73 @@ struct mm_struct* cow_fork_mm_struct(struct mm_struct *src) {
     }
 
     return dest;
+}
+
+struct vm_area_struct* grow_vma_up(struct vm_area_struct *prev, uint64_t addr,
+                                            struct list_head *vma_list_head) {
+
+    if(!(prev->vm_flags & MAP_GROWSUP)) {
+        return NULL;
+    }
+
+    if(addr >= prev->vm_start && addr < prev->vm_end) {
+        return prev;
+    }
+
+    if(addr < prev->vm_end) {
+        return NULL;
+    }
+
+    if(addr - prev->vm_end >= SIZEOF_PAGE) {
+        return NULL;
+    }
+
+    if((prev->max_size != (uint64_t)(-1))
+                   && (addr - prev->vm_start >= prev->max_size * SIZEOF_PAGE)) {
+        return NULL;
+    }
+
+    if(find_vma_intersection(vma_list_head, prev->vm_end,
+                                                prev->vm_end + SIZEOF_PAGE)) {
+        return NULL;
+    }
+
+    prev->vm_end += SIZEOF_PAGE;
+
+    return prev;
+}
+
+struct vm_area_struct* grow_vma_down(struct vm_area_struct *next,
+                            uint64_t addr, struct list_head *vma_list_head) {
+
+    if(!(next->vm_flags & MAP_GROWSDOWN)) {
+        return NULL;
+    }
+
+    if(addr >= next->vm_start && addr < next->vm_end) {
+        return next;
+    }
+
+    if(addr >= next->vm_start) {
+        return NULL;
+    }
+
+    if(next->vm_start - addr > SIZEOF_PAGE) {
+        return NULL;
+    }
+
+    if((next->max_size != (uint64_t)(-1))
+                    && (next->vm_end - addr >= next->max_size * SIZEOF_PAGE)) {
+        return NULL;
+    }
+
+    if(find_vma_intersection(vma_list_head, next->vm_start - SIZEOF_PAGE,
+                                                            next->vm_start)) {
+        return NULL;
+    }
+
+    next->vm_start -= SIZEOF_PAGE;
+
+    return next;
 }
 

@@ -195,6 +195,14 @@ uint64_t get_selfref_PML4(uint64_t *phys_addr);
 uint64_t get_duplicate_PML4(uint64_t src, uint64_t *phys_addr);
 
 /**
+ * Get duplicate PML4 object of current PML4 with kernel entries copied; with
+ * self referencing
+ * @param phys_addr physical address of PML4 is output here
+ * @return          duplicated PML4 object, NULL on error
+ */
+uint64_t get_kduplicate_curr_self_ref_PML4(uint64_t *phys_addr);
+
+/**
  * Map physical address to virtual address with required permissions in PML4.
  * Assumes identity mapping!
  * @param pml4        physical address of PML4 in which mapping is to be done

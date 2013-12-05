@@ -2,7 +2,7 @@
 
 #define RLIMIT_NPROC_MAX 1024
 #define RLIMIT_NOFILE_MAX 1024
-#define RLIMIT_STACK_MAX 8192
+#define RLIMIT_STACK_MAX 16384
 
 /* Resource hard limits */
 const uint64_t RLIMIT_MAX[RLIMIT_NORES] = {

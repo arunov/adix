@@ -118,6 +118,10 @@ struct pcb_t* createTask(enum ptype proc_type,
 		pcb->tss = (struct tss_t*)kmalloc(sizeof(struct tss_t));
 		pcb->stack_base = (uint64_t*)v_alloc_pages(1, PAGE_TRANS_READ_WRITE);
 		pcb->u_stack_base = (uint64_t*)v_alloc_pages_at_virt(1, PAGE_TRANS_READ_WRITE | PAGE_TRANS_USER_SUPERVISOR, 0x70000000);
+        struct vm_area_struct *u_stack_vma = find_vma(&(pcb->mm->mmap), (uint64_t)pcb->u_stack_base);
+        // TODO: Check NULL
+        u_stack_vma->vm_flags |= MAP_GROWSDOWN;
+        u_stack_vma->max_size = rlimit_cur[RLIMIT_STACK]/SIZEOF_PAGE;
 		printf("##########stack alocated for user process: %p",pcb->u_stack_base);
 		prepareInitialStack(pcb->stack_base,(uint64_t)&jump_to_ring3);
 		prepareInitialStack(pcb->u_stack_base, instruction_address);
