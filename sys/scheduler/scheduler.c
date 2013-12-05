@@ -167,6 +167,7 @@ void cleanupTerminated(){
 	struct pcb_t *terminated_task = getTerminatedTask();	
 	if(terminated_task != NULL){
 		list_del(&terminated_task->lister);
+		pid_array[terminated_task->pid]=0;
 		//printf("\nContents of PCB after cleanup..");	
 		printPcbRunQueue();
 		deep_free_task(terminated_task);

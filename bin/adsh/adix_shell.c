@@ -62,6 +62,7 @@ int setenv(int argc, char* argv[], char* envp[]){
 	}	
 }
 
+//used with "export" or "export ..."
 void display_env_var(){
 	printf("PATH: %s\n",path);
 }

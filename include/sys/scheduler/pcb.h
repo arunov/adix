@@ -41,6 +41,8 @@ struct pcb_t{
 	struct mm_struct *mm;
 };
 
+int pid_array[ULIMIT];
+
 /* Create a new Task(PCB) and initialize its values.*/
 struct pcb_t* createTask(enum ptype proc_type,
 			uint64_t instruction, 

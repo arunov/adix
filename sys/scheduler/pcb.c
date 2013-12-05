@@ -16,12 +16,23 @@
 #include <sys/scheduler/scheduler.h>
 
 extern char physbase;
-static uint64_t next_pid = 1;
+//static uint64_t next_pid = 1;
 
 /* Get next available value for process id. This method should be used
    within this class only.*/
 static uint64_t getNextPid(){ 
-	return next_pid++;
+//	return next_pid++;
+	uint64_t i = 1;
+	for(uint64_t i = 1;i<ULIMIT;i++){
+		if(pid_array[i] == 0){
+			pid_array[i] = 1;
+			return i;
+		}
+	}
+	if(i == ULIMIT){
+		printf("ULIMIT reached. Cannot have more processes\n");
+	}
+	return -1;
 }
 
 uint64_t get_u_rsp(struct pcb_t *this){
