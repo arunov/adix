@@ -77,6 +77,10 @@ struct pcb_t* createTask(enum ptype proc_type,
 					NULL,
 					0,
 					get_terminal_ops());
+	pcb->open_files[STDERR] = get_new_process_files_table(
+					NULL,
+					0,
+					get_terminal_ops());
     pcb->mm = new_mm();
 	pcb->children = init_children_list();
     pcb->name = NULL;
