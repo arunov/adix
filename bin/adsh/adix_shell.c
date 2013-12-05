@@ -4,7 +4,7 @@
 #define BUF_SIZE 1024
 #define NUM_ARGS 10
 #define DELIM " "
-#define PATH_DELIM "."
+#define PATH_DELIM ":"
 #define BG_SYMBOL "bg"
 
 char *self = "bin/adsh";

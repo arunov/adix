@@ -146,6 +146,7 @@ void keyboard_handler()
         {
             // Single key pressed
             c2 = kbdus[scancode];
+
         } else {
             uint64_t shift_pressed = ((gKbKeyState.keys[key_scancode/64] >> 42) & 0x1UL);
             uint64_t control_pressed = ((gKbKeyState.keys[key_scancode/64] >> 29) & 0x1UL);
@@ -164,7 +165,10 @@ void keyboard_handler()
                 c2 = shift_kbdus[scancode];
             }
         }
-	terminal_enqueue(c2);
+	int int_scancode = (int)scancode;
+	if(int_scancode != 42 && int_scancode !=54){
+		terminal_enqueue(c2);
+	}
         if(c2 != '\n' && c2 != '\t')
         {
             *(video_buf-20) = c1;
